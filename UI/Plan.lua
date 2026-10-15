@@ -27,12 +27,12 @@ function UI.BuildPlan(selected, materials, purchase)
     local colRecipe = UI.Label(selected, "GameFontDisableSmall", "Recipe")
     colRecipe:SetPoint("TOPLEFT", 10, -28)
     local colFavor = UI.Label(selected, "GameFontDisableSmall", "Favor")
-    colFavor:SetPoint("TOPLEFT", 230, -28)
-    colFavor:SetWidth(40)
+    colFavor:SetPoint("TOPLEFT", 196, -28)
+    colFavor:SetWidth(48)
     colFavor:SetJustifyH("CENTER")
     local favorTip = CreateFrame("Button", nil, selected)
-    favorTip:SetPoint("TOPLEFT", 230, -26)
-    favorTip:SetSize(44, 16)
+    favorTip:SetPoint("TOPLEFT", 196, -26)
+    favorTip:SetSize(48, 16)
     favorTip:SetScript("OnEnter", function(self)
         UI.ShowTip(self, "Merchant's Favor", "Cost to buy this recipe once.")
     end)
@@ -60,10 +60,10 @@ function UI.BuildPlan(selected, materials, purchase)
         row.iconHit:SetScript("OnLeave", UI.HideTip)
         row.name = UI.Label(row, "GameFontHighlight")
         row.name:SetPoint("LEFT", 26, 0)
-        row.name:SetWidth(190)
+        row.name:SetWidth(160)
         row.favor = UI.Label(row, "GameFontHighlight")
-        row.favor:SetPoint("LEFT", 210, 0)
-        row.favor:SetWidth(44)
+        row.favor:SetPoint("LEFT", 188, 0)
+        row.favor:SetWidth(48)
         row.favor:SetJustifyH("CENTER")
         row.favor:SetTextColor(1, 0.82, 0.35)
         row.remove = CreateFrame("Button", nil, row)
@@ -89,7 +89,12 @@ function UI.BuildPlan(selected, materials, purchase)
     end
     local total = UI.Label(selected, "GameFontNormalSmall")
     total:SetPoint("BOTTOMLEFT", 12, 36)
-    total:SetWidth(310)
+    total:SetWidth(170)
+    local totalFavor = UI.Label(selected, "GameFontNormalSmall")
+    totalFavor:SetPoint("BOTTOMLEFT", 196, 36)
+    totalFavor:SetWidth(48)
+    totalFavor:SetJustifyH("CENTER")
+    totalFavor:SetTextColor(1, 0.82, 0.35)
 
     local clearBtn = UI.Button(selected, "Clear Selection", 140, 22)
     clearBtn:SetPoint("BOTTOMLEFT", 8, 8)
@@ -98,7 +103,7 @@ function UI.BuildPlan(selected, materials, purchase)
 
     local matTitle = UI.Label(materials, "GameFontNormal", "Material Summary (all selected)")
     matTitle:SetPoint("TOPLEFT", 10, -8)
-    matTitle:SetWidth(190)
+    matTitle:SetWidth(320)
     local function matHead(text, x, width)
         local s = UI.Label(materials, "GameFontDisableSmall", text)
         s:SetPoint("TOPLEFT", x, -28)
@@ -108,20 +113,7 @@ function UI.BuildPlan(selected, materials, purchase)
     end
     matHead("Material", 18, 160)
     matHead("Needed", 190, 64)
-    local inBagsHead = matHead("In Bags", 258, 70)
-    local bagWarn = UI.Label(materials, "GameFontDisableSmall", "Please open your bags.")
-    bagWarn:SetPoint("TOPRIGHT", -8, -8)
-    bagWarn:SetWidth(140)
-    bagWarn:SetJustifyH("RIGHT")
-    bagWarn:SetTextColor(1, 0.72, 0.28)
-    bagWarn:Hide()
-    local bagTip = CreateFrame("Button", nil, materials)
-    bagTip:SetSize(70, 16)
-    bagTip:SetPoint("TOPLEFT", inBagsHead, "TOPLEFT", 0, 0)
-    bagTip:SetScript("OnEnter", function(self)
-        UI.ShowTip(self, "In Bags", "Open your bags frequently to scan the inventory.")
-    end)
-    bagTip:SetScript("OnLeave", UI.HideTip)
+    matHead("In Bags", 258, 70)
     local matScroll, matChild = attachScroll(materials, -46, 8)
     local matRows = {}
     local function makeMatRow()
@@ -211,7 +203,7 @@ function UI.BuildPlan(selected, materials, purchase)
                 row:ClearAllPoints()
                 row:SetPoint("TOPLEFT", 0, -((i - 1) * 24))
                 UI.SetIcon(row.icon, RRP.RecipeTexture(recipe))
-                UI.Trim(row.name, recipe.name, 180)
+                UI.Trim(row.name, recipe.name, 150)
                 local learned = RRP.LearnState and RRP.LearnState(recipe) == "learned"
                 local favor = RRP.PlanFavor and RRP.PlanFavor(recipe) or recipe.favor
                 if learned then
@@ -231,7 +223,8 @@ function UI.BuildPlan(selected, materials, purchase)
         if (selectedScroll:GetVerticalScroll() or 0) > selectedRange then
             selectedScroll:SetVerticalScroll(selectedRange)
         end
-        total:SetText("Total    " .. selectedCount .. " selected recipes    " .. favorSum .. (unknownFavor and "+" or "") .. " Favor")
+        total:SetText(selectedCount .. " selected recipes")
+        totalFavor:SetText(tostring(favorSum) .. (unknownFavor and "+" or ""))
 
         local calc = RRP.Calculate()
         local mats = {}
@@ -257,20 +250,16 @@ function UI.BuildPlan(selected, materials, purchase)
                 row:SetPoint("TOPLEFT", 0, -((i - 1) * 22))
                 UI.SetIcon(row.icon, RRP.ItemTexture(item.id))
                 UI.Trim(row.name, RRP.ItemLabel(item.id), 150)
-                local needR, needG, needB = 0.95, 0.92, 0.84
-                if item.owned ~= nil then
-                    if item.owned >= item.amount then needR, needG, needB = 0.3, 0.9, 0.35
-                    else needR, needG, needB = 0.95, 0.25, 0.2 end
-                end
+                row.name:SetTextColor(0.85, 0.82, 0.75)
+                local needR, needG, needB = RRP.NeedColor(item.amount, item.owned)
                 row.needed:SetText(RRP.Colorize(item.amount, needR, needG, needB))
                 row.needed:SetTextColor(needR, needG, needB)
-                if item.owned == nil then
-                    row.owned:SetText("-")
-                    row.owned:SetTextColor(0.7, 0.65, 0.5)
+                if item.owned and item.owned > 0 then
+                    row.owned:SetText(tostring(item.owned))
                 else
-                    row.owned:SetText(RRP.Colorize(item.owned, needR, needG, needB))
-                    row.owned:SetTextColor(needR, needG, needB)
+                    row.owned:SetText("–")
                 end
+                row.owned:SetTextColor(1, 1, 1)
             else
                 row:Hide()
             end
@@ -280,7 +269,6 @@ function UI.BuildPlan(selected, materials, purchase)
         if (matScroll:GetVerticalScroll() or 0) > matRange then
             matScroll:SetVerticalScroll(matRange)
         end
-        if RRP.BagsStale and RRP.BagsStale() then bagWarn:Show() else bagWarn:Hide() end
 
         favorAmount:SetText(tostring(calc.favor) .. (calc.unknownFavor and "+" or ""))
         favorAmount:SetTextColor(1, 0.82, 0.35)

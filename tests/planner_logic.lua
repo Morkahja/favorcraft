@@ -17,6 +17,10 @@ end
 
 local uiFiles = {
     "Catalog.lua", "Schematics.lua", "Faction.lua", "Core.lua",
+    "AlchemyComparisons.lua", "BlacksmithingComparisons.lua", "CookingComparisons.lua",
+    "favorcraft_enchanting/EnchantingComparisons.lua",
+    "favorcraft_engineering/EngineeringComparisons.lua",
+    "LeatherworkingComparisons.lua", "LeatherworkingSourceAudit.lua", "TailoringComparisons.lua", "Comparisons.lua",
     "UI/Widgets.lua", "UI/Nav.lua", "UI/Browser.lua", "UI/Details.lua",
     "UI/Plan.lua", "UI/Settings.lua", "UI/Shopping.lua", "UI/Main.lua",
 }
@@ -334,16 +338,114 @@ check("a scan does not replace database reagents", RRP.Schematic(belt.key) == da
 check("a scan does not replace the crafted item", RRP.OutputRef(belt).itemID == database.outputItemID)
 check("the open profession records that recipe", RRP.LearnState(belt) == "learned")
 
-check("bags are stale before they are opened", RRP.BagsStale())
-GetContainerNumSlots = function(bag) return bag == 0 and 1 or 0 end
-GetContainerItemInfo = function()
-    return "tex", 4, nil, nil, nil, nil, "|Hitem:3356::::::::60:::::|h[Kingsblood]|h|r"
+GetItemCount = function(id)
+    if tonumber(id) == 3356 then return 4 end
+    return 0
 end
-RRP.NoteBagOpen()
-check("opening bags records the scan", not RRP.BagsStale())
-check("a bag scan counts the item", RRP.BagCount(3356) == 4, RRP.BagCount(3356))
-profile.bagScanAt = (os.time() - 4000)
-check("a bag scan older than an hour is stale", RRP.BagsStale())
+check("bag counts come from the inventory", RRP.BagCount(3356) == 4, RRP.BagCount(3356))
+profile.professionRanks.Blacksmithing = "89/150"
+GetTradeSkillLine = function() return "Blacksmithing", 75, 150 end
+GetNumSkillLines = function() return 1 end
+GetSkillLineInfo = function() return "Blacksmithing", false, true, 75, 103, 150 end
+check("the shown profession skill is kept", RRP.ProfessionRank("Blacksmithing") == 103, RRP.ProfessionRank("Blacksmithing"))
+check("skill 95 is green at 103", select(2, RRP.SkillTone("Blacksmithing", 95)) > 0.8)
+check("skill 85 is green at 103", select(2, RRP.SkillTone("Blacksmithing", 85)) > 0.8)
+check("skill 110 is red at 103", select(1, RRP.SkillTone("Blacksmithing", 110)) > 0.8)
+GetTradeSkillLine = function() return "Blacksmithing", 90, 150 end
+GetSkillLineInfo = function() return "Blacksmithing", false, true, 90, 0, 13, 150 end
+profile.professionRanks.Blacksmithing = nil
+check("a skill bonus counts in the shown rank", RRP.ProfessionRank("Blacksmithing") == 103, RRP.ProfessionRank("Blacksmithing"))
+
+loadChunk("AlchemyComparisons.lua")
+loadChunk("BlacksmithingComparisons.lua")
+loadChunk("CookingComparisons.lua")
+loadChunk("favorcraft_enchanting/EnchantingComparisons.lua")
+loadChunk("favorcraft_engineering/EngineeringComparisons.lua")
+loadChunk("LeatherworkingComparisons.lua")
+loadChunk("LeatherworkingSourceAudit.lua")
+loadChunk("TailoringComparisons.lua")
+loadChunk("Comparisons.lua")
+
+local function entryNamed(view, name)
+    for i = 1, #view.entries do
+        if view.entries[i].name == name then return view.entries[i] end
+    end
+end
+local intellect = RRP.ComparisonsFor(RRP.GetByKey("Alchemy|Elixir of Lesser Intellect"))
+local wisdom = entryNamed(intellect, "Elixir of Wisdom")
+check("all seven comparison modules are indexed", RRP.ComparisonByKey["Cooking|Venomous Smoothie"]
+    and RRP.ComparisonByKey["Blacksmithing|Guard's Chain Belt"]
+    and RRP.ComparisonByKey["Enchanting|Enchant Necklace - Agility"]
+    and RRP.ComparisonByKey["Engineering|Dented Goggles"]
+    and RRP.ComparisonByKey["Leatherworking|Brawler's Leather Hood"]
+    and RRP.ComparisonByKey["Tailoring|Flame Boots"])
+check("wisdom is an alternative from the catalog note", wisdom and wisdom.tier == "alternative", wisdom and wisdom.tier)
+check("wisdom acquisition is the profession trainer", wisdom and wisdom.acquisition == "Profession trainer")
+check("a weaker intellect elixir stays unverified", entryNamed(intellect, "Elixir of Intellect").tier == "possible")
+check("merchant spell id comes from the schematic", intellect.merchantSpellID == RRP.Schematics["Alchemy|Elixir of Lesser Intellect"].spellID)
+local belt = RRP.ComparisonsFor(RRP.GetByKey("Blacksmithing|Guard's Chain Belt"))
+check("same-slot armor stays unverified", belt.status == "possible" and entryNamed(belt, "Runed Copper Belt").tier == "possible")
+local venom = RRP.ComparisonsFor(RRP.GetByKey("Cooking|Venomous Smoothie"))
+local peace = entryNamed(venom, "Peace Tea")
+local slimy = entryNamed(venom, "Slimy Smoothie")
+check("a cooking recipe has several alternatives", #venom.entries >= 2)
+check("peace tea is a verified alternative", peace and peace.tier == "alternative" and peace.acquisitionVerified)
+check("another favor smoothie uses its real item id", slimy and slimy.itemID == RRP.Schematics["Cooking|Slimy Smoothie"].outputItemID)
+check("peace tea has no invented item id", peace and peace.itemID == nil)
+local calcified = RRP.ComparisonsFor(RRP.GetByKey("Cooking|Calcified Smoothie"))
+local triage = nil
+for i = 1, #calcified.entries do
+    if calcified.entries[i].name == "Triage Tea" then triage = calcified.entries[i] end
+end
+check("an unverified tea stays unverified", triage and triage.tier == "possible", triage and triage.tier)
+local hood = RRP.ComparisonsFor(RRP.GetByKey("Leatherworking|Brawler's Leather Hood"))
+local hoodSource = hood.sources and hood.sources[1]
+local hoodSchematic = RRP.Schematics["Leatherworking|Brawler's Leather Hood"]
+check("a same-name pattern is not a confirmed duplicate", hood.status == "reported" and hood.status ~= "duplicate")
+check("the hood keeps the schematic spell", hoodSchematic.spellID == 1255109 and hood.merchantSpellID == 1255109)
+check("the hood scroll is not the crafted item", hood.merchantScrollID == 252798 and hood.merchantItemID == 252504 and hood.merchantScrollID ~= hood.merchantItemID)
+check("the hood drop is reported, not verified", hoodSource and hoodSource.kind == "source" and hoodSource.scrollItemID == 252798 and not hoodSource.acquisitionVerified)
+check("the hood names Lady Sarevess", hoodSource.lines[2] and hoodSource.lines[2]:find("Lady Sarevess", 1, true) and hoodSource.lines[2]:find("Blackfathom Deeps", 1, true))
+local gloves = RRP.ComparisonsFor(RRP.GetByKey("Leatherworking|Brawler's Leather Gloves"))
+local gloveText = table.concat(gloves.sources[1].lines, " ")
+check("Gilnid is a reported sale, not a drop", gloveText:find("Reported sale: Gilnid", 1, true) and not gloveText:find("Reported drop: Gilnid", 1, true))
+check("the glove scroll stays 252777", gloves.merchantScrollID == 252777 and gloves.merchantSpellID == 1255130)
+local leggings = RRP.ComparisonsFor(RRP.GetByKey("Leatherworking|Totemic Leather Leggings"))
+local leggingText = table.concat(leggings.sources[1].lines, " ")
+check("Kelris and the world drop stay in conflict", leggingText:find("Twilight Lord Kelris", 1, true) and leggingText:find("world drop", 1, true))
+check("a blank research spell does not erase the schematic", leggings.merchantSpellID == 1255084 and leggings.merchantItemID == 252458)
+local hoodCount = 0
+for i = 1, #RRP.Catalog do
+    if RRP.Catalog[i].key == "Leatherworking|Brawler's Leather Hood" then hoodCount = hoodCount + 1 end
+end
+check("the hood is not duplicated in the catalog", hoodCount == 1)
+local seenSpell = {}
+local spellClash = false
+for key, audit in pairs(RRP.SourceAudits) do
+    local sch = RRP.Schematics[key]
+    if sch.scrollItemID == sch.outputItemID or sch.spellID == sch.scrollItemID then spellClash = true end
+    if seenSpell[sch.spellID] then spellClash = true end
+    seenSpell[sch.spellID] = true
+    if audit.researchSpellID and audit.researchSpellID ~= sch.spellID then spellClash = true end
+    if audit.researchScrollID and audit.researchScrollID ~= sch.scrollItemID then spellClash = true end
+    if audit.researchOutputID and audit.researchOutputID ~= sch.outputItemID then spellClash = true end
+end
+check("researched leatherworking ids match the schematic", not spellClash)
+check("wisdom is still an alchemy alternative", wisdom and wisdom.tier == "alternative")
+check("flame boots has no verified comparison", RRP.ComparisonsFor(RRP.GetByKey("Tailoring|Flame Boots")).status == "none")
+local goggles = RRP.ComparisonsFor(RRP.GetByKey("Engineering|Dented Goggles"))
+check("dented goggles compare with the spyglass", entryNamed(goggles, "Ornate Spyglass").tier == "alternative")
+local parachute = entryNamed(RRP.ComparisonsFor(RRP.GetByKey("Engineering|SAF-T Disposable Parachute")), "Parachute Cloak")
+check("parachute cloak has no invented item id", parachute and parachute.itemID == nil and parachute.tier == "alternative")
+check("enchant absorption stays unverified", RRP.ComparisonsFor(RRP.GetByKey("Enchanting|Enchant Chest - Absorption")).status == "possible")
+check("elixir of sages uses the catalog name", RRP.ComparisonByKey["Alchemy|Elixir of Sages"] ~= nil)
+local gown = RRP.ComparisonsFor(RRP.GetByKey("Tailoring|Pristine Gown"))
+check("pristine gown keeps several unverified alternatives", #gown.entries >= 3 and gown.status == "possible")
+local missing = RRP.ComparisonsFor({key = "Alchemy|Not A Recipe", name = "Not A Recipe", profession = "Alchemy"})
+check("a missing comparison does not error", missing.status == "none" and missing.missingRecord)
+local before = profile.plan["Alchemy|Elixir of Lesser Intellect"]
+RRP.ComparisonsFor(RRP.GetByKey("Alchemy|Elixir of Lesser Intellect"))
+check("reading a comparison leaves the plan alone", profile.plan["Alchemy|Elixir of Lesser Intellect"] == before)
 
 if failures > 0 then
     print(failures .. " failed")

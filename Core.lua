@@ -358,17 +358,139 @@ function RRP.Colorize(text, r, g, b)
 end
 
 function RRP.SkillTone(profession, required)
-    local p = RRP.GetProfile()
-    if not p or type(required) ~= "number" then return 0.75, 0.7, 0.6 end
-    local text = p.professionRanks and p.professionRanks[profession]
-    local rank = type(text) == "number" and text or nil
-    if not rank and type(text) == "string" then rank = tonumber(text:match("(%d+)")) end
-    if not rank then
-        if p.professions and p.professions[profession] then return 0.75, 0.7, 0.6 end
-        if p.professions and next(p.professions) then return 0.95, 0.25, 0.2 end
-        return 0.75, 0.7, 0.6
-    end
+    required = tonumber(required)
+    if not required then return 0.75, 0.7, 0.6 end
+    local rank = RRP.ProfessionRank(profession)
+    if not rank then return 0.95, 0.25, 0.2 end
     if rank >= required then return 0.3, 0.9, 0.35 end
+    return 0.95, 0.25, 0.2
+end
+
+local function isSkillCap(n)
+    return n == 75 or n == 150 or n == 225 or n == 300 or n == 375
+end
+
+local function rankFromText(text)
+    if type(text) ~= "string" then return nil end
+    return tonumber(text:match("(%d+)%s*/%s*%d+"))
+end
+
+local function skillNumber(value)
+    local n = tonumber(value)
+    if n and n > 0 and n <= 375 then return n end
+end
+
+-- The character sheet shows skillRank + skillModifier. Clients also put the
+-- full number in a later return, so keep whichever reading is higher.
+local function rankFromSkillValues(values)
+    local nums = {}
+    for i = 4, #values do
+        local n = skillNumber(values[i])
+        if n then nums[#nums + 1] = n end
+    end
+    local cap = 0
+    for i = 1, #nums do
+        if isSkillCap(nums[i]) and nums[i] > cap then cap = nums[i] end
+    end
+    local best
+    for i = 1, #nums do
+        local n = nums[i]
+        if not isSkillCap(n) and (cap == 0 or n <= cap) then
+            if not best or n > best then best = n end
+        end
+    end
+    local rank = skillNumber(values[4])
+    local fifth = skillNumber(values[5])
+    local sixth = skillNumber(values[6])
+    local function addBonus(total)
+        if not total or total > 375 then return end
+        if cap > 0 and total > cap then return end
+        if not best or total > best then best = total end
+    end
+    if rank and sixth and not isSkillCap(sixth) and sixth < 40 then
+        addBonus(rank + sixth)
+    end
+    if rank and fifth and sixth and isSkillCap(sixth) and not isSkillCap(fifth) and fifth < 40 then
+        addBonus(rank + fifth)
+    end
+    if best then return best end
+    local caps = {}
+    for i = 1, #nums do
+        if isSkillCap(nums[i]) then caps[#caps + 1] = nums[i] end
+    end
+    table.sort(caps)
+    if #caps >= 2 then return caps[1] end
+    return caps[1]
+end
+
+local function considerRank(best, rank)
+    rank = tonumber(rank)
+    if rank and (not best or rank > best) then return rank end
+    return best
+end
+
+function RRP.ProfessionRank(profession)
+    if not profession or profession == "" then return nil end
+    local best
+    if type(GetTradeSkillLine) == "function" then
+        local name, rank = GetTradeSkillLine()
+        if name == profession then best = considerRank(best, rank) end
+    end
+    local title = _G and _G.TradeSkillFrameTitleText
+    local shown = _G and _G.TradeSkillRankFrameSkillRank
+    local bar = _G and _G.TradeSkillRankFrame
+    if title and title.GetText and (title:GetText() or ""):find(profession, 1, true) then
+        if shown and shown.GetText then
+            best = considerRank(best, rankFromText(shown:GetText()))
+        end
+        if bar and bar.GetValue then best = considerRank(best, bar:GetValue()) end
+    end
+    if _G then
+        for i = 1, 20 do
+            local nameFS = _G["SkillRankFrame" .. i .. "SkillName"]
+            local rankFS = _G["SkillRankFrame" .. i .. "SkillRank"]
+            if nameFS and rankFS and nameFS.GetText and rankFS.GetText and nameFS:GetText() == profession then
+                best = considerRank(best, rankFromText(rankFS:GetText()))
+            end
+        end
+    end
+    if type(GetProfessions) == "function" and type(GetProfessionInfo) == "function" then
+        local ids = {GetProfessions()}
+        for i = 1, #ids do
+            if ids[i] then
+                local name, _, level, _, _, _, _, modifier = GetProfessionInfo(ids[i])
+                level = tonumber(level)
+                modifier = tonumber(modifier)
+                if name == profession and level then
+                    if modifier and modifier > 0 and modifier < 40 and level + modifier <= 375 then
+                        level = level + modifier
+                    end
+                    best = considerRank(best, level)
+                end
+            end
+        end
+    end
+    if type(GetNumSkillLines) == "function" and type(GetSkillLineInfo) == "function" then
+        local n = GetNumSkillLines() or 0
+        for i = 1, n do
+            local values = {GetSkillLineInfo(i)}
+            if not values[2] and values[1] == profession then
+                best = considerRank(best, rankFromSkillValues(values))
+            end
+        end
+    end
+    local p = RRP.GetProfile()
+    local text = p and p.professionRanks and p.professionRanks[profession]
+    local saved = type(text) == "number" and text or nil
+    if not saved and type(text) == "string" then saved = tonumber(text:match("(%d+)")) end
+    best = considerRank(best, saved)
+    if p and best then p.professionRanks[profession] = tostring(best) end
+    return best
+end
+
+function RRP.NeedColor(amount, owned)
+    amount = tonumber(amount) or 0
+    if type(owned) == "number" and owned >= amount then return 0.3, 0.9, 0.35 end
     return 0.95, 0.25, 0.2
 end
 
@@ -737,11 +859,7 @@ function RRP.GetTrainerStatus(r)
     return "Trainer: not verified"
 end
 
-local function nowSeconds()
-    if type(time) == "function" then return time() end
-    if os and os.time then return os.time() end
-    return 0
-end
+local slotCounts
 
 local function bagSlotCount(bag)
     if C_Container and type(C_Container.GetContainerNumSlots) == "function" then
@@ -760,6 +878,11 @@ local function bagSlotItem(bag, slot)
             return tonumber(info.itemID), tonumber(info.stackCount) or 1
         end
     end
+    if type(GetContainerItemInfo) == "function" then
+        local _, count, _, _, _, _, link, _, _, id = GetContainerItemInfo(bag, slot)
+        id = tonumber(id) or itemIdFromLink(link)
+        if id then return id, tonumber(count) or 1 end
+    end
     if type(GetContainerItemID) == "function" then
         local id = tonumber(GetContainerItemID(bag, slot))
         local count = 1
@@ -769,13 +892,9 @@ local function bagSlotItem(bag, slot)
         end
         return id, count
     end
-    if type(GetContainerItemInfo) == "function" then
-        local _, count, _, _, _, _, link = GetContainerItemInfo(bag, slot)
-        return itemIdFromLink(link), tonumber(count) or 1
-    end
 end
 
-function RRP.ReadBagSlots()
+local function readSlotCounts()
     local counts, saw = {}, false
     for bag = 0, 4 do
         local slots = bagSlotCount(bag)
@@ -787,64 +906,35 @@ function RRP.ReadBagSlots()
             end
         end
     end
-    return counts, saw
+    if saw then slotCounts = counts end
+    return saw
 end
 
-function RRP.RefreshBagCounts(opened)
-    local p = RRP.GetProfile()
-    if not p then return end
-    local counts, saw = RRP.ReadBagSlots()
-    if saw then p.bagCounts = counts end
-    if opened then p.bagScanAt = nowSeconds() end
-end
-
-function RRP.NoteBagOpen()
-    RRP.RefreshBagCounts(true)
-    if RRP.QueueRefresh then RRP.QueueRefresh()
-    elseif RRP.Refresh then RRP.Refresh() end
-end
-
-function RRP.HookBagFrames()
-    local names = {"BackpackFrame", "ContainerFrameCombinedBags"}
-    for i = 1, 6 do names[#names + 1] = "ContainerFrame" .. i end
-    for _, name in ipairs(names) do
-        local frame = _G[name]
-        if frame and not frame.fcBagHook then
-            frame.fcBagHook = true
-            if frame.HookScript then
-                pcall(frame.HookScript, frame, "OnShow", function()
-                    if RRP.NoteBagOpen then RRP.NoteBagOpen() end
-                end)
-            end
-            if frame.IsShown and frame:IsShown() then RRP.NoteBagOpen() end
-        end
-    end
-end
-
-function RRP.BagsStale()
-    local p = RRP.GetProfile()
-    local at = p and tonumber(p.bagScanAt)
-    if not at then return true end
-    return nowSeconds() - at > 3600
+function RRP.InvalidateBagCache()
+    slotCounts = nil
 end
 
 function RRP.BagsReadable()
     if type(GetItemCount) == "function" then return true end
-    local p = RRP.GetProfile()
-    return type(p and p.bagCounts) == "table"
+    if C_Item and type(C_Item.GetItemCount) == "function" then return true end
+    if slotCounts then return true end
+    return readSlotCounts()
 end
 local function bagCount(id)
     id = tonumber(id)
     if not id then return 0 end
-    local p = RRP.GetProfile()
-    if p and type(p.bagCounts) == "table" and p.bagScanAt then
-        return p.bagCounts[id] or 0
-    end
     if type(GetItemCount) == "function" then
         local owned = safeCall(GetItemCount, id, false)
+        if type(owned) ~= "number" then owned = safeCall(GetItemCount, id) end
         if type(owned) == "number" then return owned end
     end
-    if p and type(p.bagCounts) == "table" then return p.bagCounts[id] or 0 end
+    if C_Item and type(C_Item.GetItemCount) == "function" then
+        local owned = safeCall(C_Item.GetItemCount, id, false)
+        if type(owned) ~= "number" then owned = safeCall(C_Item.GetItemCount, id) end
+        if type(owned) == "number" then return owned end
+    end
+    if not slotCounts then readSlotCounts() end
+    if slotCounts then return slotCounts[id] or 0 end
     return 0
 end
 RRP.BagCount = bagCount
@@ -1363,12 +1453,12 @@ function RRP.SyncProfessions()
         local found, ranks = {}, {}
         local n = GetNumSkillLines() or 0
         for i = 1, n do
-            local skillName, isHeader, _, skillRank, _, skillModifier, skillMaxRank = GetSkillLineInfo(i)
+            local values = {GetSkillLineInfo(i)}
+            local skillName, isHeader = values[1], values[2]
             if not isHeader and RRP.ProfessionsSet[skillName or ""] then
                 found[skillName] = true
-                local rank = (tonumber(skillRank) or 0) + (tonumber(skillModifier) or 0)
-                local maxRank = tonumber(skillMaxRank) or 0
-                if maxRank > 0 then ranks[skillName] = rank .. "/" .. maxRank end
+                local shown = RRP.ProfessionRank(skillName)
+                if shown then ranks[skillName] = tostring(shown) end
             end
         end
         return found, ranks
@@ -1517,7 +1607,6 @@ eventFrame:SetScript("OnEvent", function(_, event, arg)
         if p and p.expandIntermediate == nil then p.expandIntermediate = true end
         RRP.SyncProfessions()
         if RRP.UI and RRP.UI.RestoreLayout then RRP.UI.RestoreLayout() end
-        if RRP.HookBagFrames then RRP.HookBagFrames() end
         say("Ready. /fc opens FavorCraft.")
     elseif event == "SKILL_LINES_CHANGED" then
         RRP.SyncProfessions()
@@ -1533,11 +1622,8 @@ eventFrame:SetScript("OnEvent", function(_, event, arg)
         local now = (GetTime and GetTime()) or 0
         if RRP.ready and (now - lastAutoAt) > 1 then autoScanQueued = true end
     elseif event == "BAG_UPDATE" or event == "BAG_UPDATE_DELAYED" then
-        if RRP.ready then
-            if RRP.HookBagFrames then RRP.HookBagFrames() end
-            if RRP.RefreshBagCounts then RRP.RefreshBagCounts(false) end
-            RRP.QueueRefresh()
-        end
+        if RRP.InvalidateBagCache then RRP.InvalidateBagCache() end
+        if RRP.ready then RRP.QueueRefresh() end
     elseif event == "GET_ITEM_INFO_RECEIVED" then
         local id = tonumber(arg)
         if id and type(GetItemInfo) == "function" then

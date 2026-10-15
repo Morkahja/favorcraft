@@ -3,7 +3,7 @@ local UI = RRP.UI
 
 function UI.BuildSettings(parent, gear)
     local panel = CreateFrame("Frame", nil, parent, "BackdropTemplate")
-    panel:SetSize(280, 390)
+    panel:SetSize(280, 448)
     panel:SetPoint("TOPRIGHT", gear, "BOTTOMRIGHT", 0, -4)
     panel:SetFrameLevel(parent:GetFrameLevel() + 30)
     UI.Paint(panel)
@@ -11,16 +11,21 @@ function UI.BuildSettings(parent, gear)
     panel:Hide()
     UI.settings = panel
 
-    local title = UI.Label(panel, "GameFontNormal", "Settings")
-    title:SetPoint("TOPLEFT", 12, -10)
-    local about = UI.Label(panel, "GameFontHighlightSmall")
-    about:SetPoint("TOPLEFT", 12, -30)
-    about:SetSize(256, 64)
-    about:SetJustifyV("TOP")
-    about:SetText("Merchant's Favor planner for WoW Forever. Both factions use the same recipe list. Paladin plate stays hidden unless Paladin is selected. Reagents and crafted items are Forever client data published by AHledger (ahledger.com).")
+    local function note(parentFrame, y, height, text)
+        local label = UI.Label(parentFrame, "GameFontDisableSmall", text)
+        label:SetPoint("TOPLEFT", 12, y)
+        label:SetSize(256, height)
+        label:SetJustifyV("TOP")
+        label:SetTextColor(0.65, 0.6, 0.5)
+        return label
+    end
 
-    local reset = UI.Button(panel, "Reset position", 256, 22)
-    reset:SetPoint("TOPLEFT", 12, -102)
+    local title = UI.Label(panel, "GameFontNormal", "Settings")
+    title:SetPoint("TOPLEFT", 12, -12)
+    note(panel, -34, 42, "Plan Merchant's Favor purchases, explore profession recipes, and track crafting materials across Azeroth.")
+
+    local reset = UI.Button(panel, "Reset window position", 256, 22)
+    reset:SetPoint("TOPLEFT", 12, -82)
     reset:SetScript("OnClick", function()
         local frame = RRP.Window
         if not frame then return end
@@ -30,37 +35,47 @@ function UI.BuildSettings(parent, gear)
         if UI.SyncScaledFrames then UI.SyncScaledFrames() end
         UI.SaveWindow(frame, "main")
     end)
+    note(panel, -108, 16, "Restore the default window position and scale.")
 
-    local expand = UI.Check(panel, "Use crafted materials in bags", 250)
-    expand:SetPoint("TOPLEFT", 12, -134)
-    expand.tip = "Crafted materials"
-    expand.tipLine = "If you already have an item this plan can craft, those bags are used before its reagents are added."
+    local expand = UI.Check(panel, "Expand intermediate crafts", 250)
+    expand:SetPoint("TOPLEFT", 12, -132)
+    expand.tip = "Expand intermediate crafts"
+    expand.tipLine = "Use materials already in your bags. If a required material can be crafted with a known FavorCraft recipe, calculate the ingredients needed to make the remainder."
     expand.onToggle = function(on)
         local profile = RRP.GetProfile()
         if not profile then return end
         profile.expandIntermediate = on and true or false
         RRP.Refresh()
     end
-    local help = UI.Label(panel, "GameFontDisableSmall")
-    help:SetPoint("TOPLEFT", 12, -164)
-    help:SetSize(256, 60)
-    help:SetJustifyV("TOP")
-    help:SetText("/fc opens this window. /favorcraft does too. With FavorCraft open, opening Blacksmithing, Cooking, or another supported profession scans it and confirms in chat. /fc scan reads the profession that is open.")
+    note(panel, -154, 62, "Use materials already in your bags. If a required material can be crafted with a known FavorCraft recipe, calculate the ingredients needed to make the remainder.")
 
-    local authorCaption = UI.Label(panel, "GameFontDisableSmall", "Author")
-    authorCaption:SetPoint("TOPLEFT", 12, -230)
-    local authorName = UI.Label(panel, "GameFontHighlight", "Babunigaming")
-    authorName:SetPoint("TOPLEFT", 12, -246)
-    local moreInfo = UI.Button(panel, "More info", 110, 20)
-    moreInfo:SetPoint("TOPLEFT", 12, -266)
-    local coauthor = UI.Label(panel, "GameFontHighlightSmall", "Co-author Danoozy. Danoozy came up with the idea, and that is what led to the hours spent sitting with FavorCraft, thinking it through, and polishing it.")
-    coauthor:SetPoint("TOPLEFT", 12, -292)
-    coauthor:SetSize(256, 56)
-    coauthor:SetJustifyV("TOP")
+    UI.Divider(panel, -224)
+    local credits = UI.Label(panel, "GameFontNormal", "Credits")
+    credits:SetPoint("TOPLEFT", 12, -234)
+    local authorLine = UI.Label(panel, "GameFontHighlightSmall", "Author: Babunigaming")
+    authorLine:SetPoint("TOPLEFT", 12, -256)
+    if authorLine.SetWordWrap then authorLine:SetWordWrap(false) end
+    authorLine:SetTextColor(0.9, 0.86, 0.75)
+    local moreInfo = UI.Button(panel, "More info", 88, 18)
+    moreInfo:SetPoint("LEFT", authorLine, "RIGHT", 8, 0)
+    local coauthor = UI.Label(panel, "GameFontHighlightSmall", "Co-author & Original Concept: Danoozy")
+    coauthor:SetPoint("TOPLEFT", 12, -278)
+    coauthor:SetWidth(256)
+    coauthor:SetHeight(16)
+    if coauthor.SetWordWrap then coauthor:SetWordWrap(false) end
+    coauthor:SetTextColor(0.9, 0.86, 0.75)
+
+    local dataTitle = UI.Label(panel, "GameFontNormal", "Data Attribution")
+    dataTitle:SetPoint("TOPLEFT", 12, -306)
+    local dataLine = UI.Label(panel, "GameFontHighlightSmall", "Recipe and reagent data: AHledger")
+    dataLine:SetPoint("TOPLEFT", 12, -328)
+    dataLine:SetTextColor(0.9, 0.86, 0.75)
+    note(panel, -346, 14, "ahledger.com")
+    note(panel, -362, 16, "WoW Forever client data, build 1.60.1.")
 
     local social = CreateFrame("Frame", nil, panel, "BackdropTemplate")
     social:SetSize(248, 176)
-    social:SetPoint("TOPRIGHT", panel, "TOPLEFT", -8, -220)
+    social:SetPoint("TOPRIGHT", moreInfo, "TOPLEFT", -8, 8)
     social:SetFrameLevel(panel:GetFrameLevel() + 5)
     UI.Paint(social)
     social:EnableMouse(true)

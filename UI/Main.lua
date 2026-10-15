@@ -36,13 +36,13 @@ title:SetWidth(360)
 title:SetJustifyH("CENTER")
 title:SetTextColor(1, 0.82, 0)
 local subtitle = UI.Label(f, "GameFontNormal", "Merchant's Favor & Profession Planner")
-subtitle:SetPoint("TOP", 0, -22)
+subtitle:SetPoint("TOP", 0, -30)
 subtitle:SetWidth(980)
 subtitle:SetJustifyH("CENTER")
 UI.subtitle = subtitle
 local factionBar = f:CreateTexture(nil, "ARTWORK")
-factionBar:SetPoint("TOPLEFT", 28, -44)
-factionBar:SetPoint("TOPRIGHT", -28, -44)
+factionBar:SetPoint("TOPLEFT", 28, -48)
+factionBar:SetPoint("TOPRIGHT", -28, -48)
 factionBar:SetHeight(2)
 factionBar:SetTexture("Interface\\Tooltips\\UI-Tooltip-Background")
 factionBar:SetVertexColor(0.75, 0.6, 0.22, 0.9)
@@ -311,7 +311,6 @@ end)
 
 f:SetScript("OnShow", function()
     RRP.scanPromptHidden = nil
-    if RRP.HookBagFrames then RRP.HookBagFrames() end
     if RRP.SyncProfessions then RRP.SyncProfessions() end
     if RRP.QueueProfessionScan then RRP.QueueProfessionScan(true) end
     RRP.Refresh()

@@ -145,6 +145,27 @@ function UI.ShowNativeTip(tip, owner, recipe, anchor)
     return false
 end
 
+function UI.ShowSpellTip(owner, spellID, title)
+    if not GameTooltip or not owner or not spellID then return end
+    if C_Spell and type(C_Spell.RequestLoadSpellData) == "function" then
+        pcall(C_Spell.RequestLoadSpellData, spellID)
+    end
+    local owned = pcall(GameTooltip.SetOwner, GameTooltip, owner, "ANCHOR_RIGHT")
+    if not owned then return end
+    local shown = GameTooltip.SetSpellByID and pcall(GameTooltip.SetSpellByID, GameTooltip, spellID)
+    if not shown then
+        shown = pcall(GameTooltip.SetHyperlink, GameTooltip, "spell:" .. spellID)
+    end
+    if shown then
+        GameTooltip:Show()
+        return
+    end
+    GameTooltip:ClearLines()
+    GameTooltip:SetText(title or "Spell", 1, 0.82, 0)
+    GameTooltip:AddLine("Spell data is still loading.", 1, 0.82, 0.4, true)
+    GameTooltip:Show()
+end
+
 function UI.ShowItemTip(owner, itemID)
     if not GameTooltip or not owner or not itemID then return end
     if RRP.RequestItem then RRP.RequestItem(itemID) end

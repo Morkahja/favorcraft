@@ -47,7 +47,7 @@ function UI.BuildShopping()
     summary:SetJustifyV("MIDDLE")
 
     local copyBtn = UI.Button(shop, "Copy List", 110, 22)
-    copyBtn:SetPoint("TOPRIGHT", -40, -36)
+    copyBtn:SetPoint("RIGHT", close, "LEFT", -6, 0)
     copyBtn.tip = "Copy List"
     copyBtn.tipLine = "Opens the materials and how many you need, one item per line."
 
@@ -60,20 +60,7 @@ function UI.BuildShopping()
     end
     columnHead("Material", 40, 330, "LEFT")
     columnHead("Needed", 390, 80, "CENTER")
-    local inBagsHead = columnHead("In Bags", 478, 90, "CENTER")
-    local bagWarn = UI.Label(shop, "GameFontDisableSmall", "Please open your bags.")
-    bagWarn:SetPoint("BOTTOM", inBagsHead, "TOP", 0, 1)
-    bagWarn:SetWidth(170)
-    bagWarn:SetJustifyH("CENTER")
-    bagWarn:SetTextColor(1, 0.72, 0.28)
-    bagWarn:Hide()
-    local bagTip = CreateFrame("Button", nil, shop)
-    bagTip:SetSize(90, 16)
-    bagTip:SetPoint("TOPLEFT", inBagsHead, "TOPLEFT", 0, 0)
-    bagTip:SetScript("OnEnter", function(self)
-        UI.ShowTip(self, "In Bags", "Open your bags frequently to scan the inventory.")
-    end)
-    bagTip:SetScript("OnLeave", UI.HideTip)
+    columnHead("In Bags", 478, 90, "CENTER")
 
     local rows = {}
     for i = 1, ROW_COUNT do
@@ -265,28 +252,23 @@ function UI.BuildShopping()
                     UI.Trim(row.name, entry.unknown .. "  - ingredients unknown", 330)
                     row.name:SetTextColor(1, 0.7, 0.35)
                     row.needed:SetText("-")
-                    row.owned:SetText("-")
-                    row.owned:SetTextColor(1, 0.7, 0.35)
+                    row.owned:SetText("–")
+                    row.owned:SetTextColor(1, 1, 1)
                 else
                     row.itemID = entry.id
                     row.icon:Show()
                     UI.SetIcon(row.icon, RRP.ItemTexture(entry.id))
                     UI.Trim(row.name, RRP.ItemLabel(entry.id), 330)
-                    row.name:SetTextColor(0.95, 0.92, 0.84)
-                    local needR, needG, needB = 0.95, 0.92, 0.84
-                    if entry.owned ~= nil then
-                        if entry.owned >= entry.amount then needR, needG, needB = 0.3, 0.9, 0.35
-                        else needR, needG, needB = 0.95, 0.25, 0.2 end
-                    end
+                    row.name:SetTextColor(0.85, 0.82, 0.75)
+                    local needR, needG, needB = RRP.NeedColor(entry.amount, entry.owned)
                     row.needed:SetText(RRP.Colorize(entry.amount, needR, needG, needB))
                     row.needed:SetTextColor(needR, needG, needB)
-                    if entry.owned == nil then
-                        row.owned:SetText("-")
-                        row.owned:SetTextColor(0.7, 0.65, 0.5)
+                    if entry.owned and entry.owned > 0 then
+                        row.owned:SetText(tostring(entry.owned))
                     else
-                        row.owned:SetText(RRP.Colorize(entry.owned, needR, needG, needB))
-                        row.owned:SetTextColor(needR, needG, needB)
+                        row.owned:SetText("–")
                     end
+                    row.owned:SetTextColor(1, 1, 1)
                 end
             end
         end
@@ -295,7 +277,6 @@ function UI.BuildShopping()
         nextB:SetAlpha(page < pages and 1 or 0.35)
         summary:SetText(calc.selected .. " selected. Favor: " .. calc.favor ..
             (calc.unknownFavor and "+" or ""))
-        if RRP.BagsStale and RRP.BagsStale() then bagWarn:Show() else bagWarn:Hide() end
     end
 
     function RRP.ToggleShopping()
