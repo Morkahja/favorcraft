@@ -2,7 +2,7 @@ local addonName, RRP = ...
 local UI = RRP.UI
 
 local W, H = 1080, 728
-local f = CreateFrame("Frame", "FavorcraftFrame", UIParent, "BackdropTemplate")
+local f = CreateFrame("Frame", "FavorCraftFrame", UIParent, "BackdropTemplate")
 f:SetSize(W, H)
 f:SetPoint("CENTER")
 f:SetFrameStrata("DIALOG")
@@ -30,7 +30,7 @@ local banner = f:CreateTexture(nil, "OVERLAY")
 banner:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Header")
 banner:SetSize(420, 64)
 banner:SetPoint("TOP", 0, 12)
-local title = UI.Label(f, "GameFontNormalLarge", "Favorcraft")
+local title = UI.Label(f, "GameFontNormalLarge", "FavorCraft")
 title:SetPoint("TOP", 0, -2)
 title:SetWidth(360)
 title:SetJustifyH("CENTER")
@@ -57,7 +57,7 @@ titleHit:SetScript("OnDragStop", function()
     UI.SaveWindow(f, "main")
 end)
 titleHit:SetScript("OnEnter", function(self)
-    UI.ShowTip(self, "Favorcraft", "Merchant's Favor & Profession Planner\nWorld of Warcraft Forever | Alliance & Horde")
+    UI.ShowTip(self, "FavorCraft", "Merchant's Favor & Profession Planner\nWorld of Warcraft Forever | Alliance & Horde")
 end)
 titleHit:SetScript("OnLeave", UI.HideTip)
 
@@ -283,7 +283,7 @@ grip:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Highlight"
 grip:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
 grip:RegisterForDrag("LeftButton")
 grip:SetScript("OnEnter", function(self)
-    UI.ShowTip(self, "Scale", "Drag to make Favorcraft larger or smaller.")
+    UI.ShowTip(self, "Scale", "Drag to make FavorCraft larger or smaller.")
 end)
 grip:SetScript("OnLeave", UI.HideTip)
 grip:SetScript("OnDragStart", function(self)
@@ -311,6 +311,7 @@ end)
 
 f:SetScript("OnShow", function()
     RRP.scanPromptHidden = nil
+    if RRP.HookBagFrames then RRP.HookBagFrames() end
     if RRP.SyncProfessions then RRP.SyncProfessions() end
     if RRP.QueueProfessionScan then RRP.QueueProfessionScan(true) end
     RRP.Refresh()

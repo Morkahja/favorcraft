@@ -98,6 +98,7 @@ function UI.BuildPlan(selected, materials, purchase)
 
     local matTitle = UI.Label(materials, "GameFontNormal", "Material Summary (all selected)")
     matTitle:SetPoint("TOPLEFT", 10, -8)
+    matTitle:SetWidth(190)
     local function matHead(text, x, width)
         local s = UI.Label(materials, "GameFontDisableSmall", text)
         s:SetPoint("TOPLEFT", x, -28)
@@ -107,7 +108,20 @@ function UI.BuildPlan(selected, materials, purchase)
     end
     matHead("Material", 18, 160)
     matHead("Needed", 190, 64)
-    matHead("In Bags", 258, 70)
+    local inBagsHead = matHead("In Bags", 258, 70)
+    local bagWarn = UI.Label(materials, "GameFontDisableSmall", "Please open your bags.")
+    bagWarn:SetPoint("TOPRIGHT", -8, -8)
+    bagWarn:SetWidth(140)
+    bagWarn:SetJustifyH("RIGHT")
+    bagWarn:SetTextColor(1, 0.72, 0.28)
+    bagWarn:Hide()
+    local bagTip = CreateFrame("Button", nil, materials)
+    bagTip:SetSize(70, 16)
+    bagTip:SetPoint("TOPLEFT", inBagsHead, "TOPLEFT", 0, 0)
+    bagTip:SetScript("OnEnter", function(self)
+        UI.ShowTip(self, "In Bags", "Open your bags frequently to scan the inventory.")
+    end)
+    bagTip:SetScript("OnLeave", UI.HideTip)
     local matScroll, matChild = attachScroll(materials, -46, 8)
     local matRows = {}
     local function makeMatRow()
@@ -250,7 +264,13 @@ function UI.BuildPlan(selected, materials, purchase)
                 end
                 row.needed:SetText(RRP.Colorize(item.amount, needR, needG, needB))
                 row.needed:SetTextColor(needR, needG, needB)
-                row.owned:SetText(item.owned == nil and "-" or tostring(item.owned))
+                if item.owned == nil then
+                    row.owned:SetText("-")
+                    row.owned:SetTextColor(0.7, 0.65, 0.5)
+                else
+                    row.owned:SetText(RRP.Colorize(item.owned, needR, needG, needB))
+                    row.owned:SetTextColor(needR, needG, needB)
+                end
             else
                 row:Hide()
             end
@@ -260,6 +280,7 @@ function UI.BuildPlan(selected, materials, purchase)
         if (matScroll:GetVerticalScroll() or 0) > matRange then
             matScroll:SetVerticalScroll(matRange)
         end
+        if RRP.BagsStale and RRP.BagsStale() then bagWarn:Show() else bagWarn:Hide() end
 
         favorAmount:SetText(tostring(calc.favor) .. (calc.unknownFavor and "+" or ""))
         favorAmount:SetTextColor(1, 0.82, 0.35)

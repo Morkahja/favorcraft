@@ -1,6 +1,6 @@
 local addonName, RRP = ...
 local function say(message)
-    print("|cffdca75fFavorcraft|r: " .. tostring(message))
+    print("|cffdca75fFavorCraft|r: " .. tostring(message))
 end
 RRP.Say = say
 
@@ -737,14 +737,115 @@ function RRP.GetTrainerStatus(r)
     return "Trainer: not verified"
 end
 
+local function nowSeconds()
+    if type(time) == "function" then return time() end
+    if os and os.time then return os.time() end
+    return 0
+end
+
+local function bagSlotCount(bag)
+    if C_Container and type(C_Container.GetContainerNumSlots) == "function" then
+        return tonumber(C_Container.GetContainerNumSlots(bag)) or 0
+    end
+    if type(GetContainerNumSlots) == "function" then
+        return tonumber(GetContainerNumSlots(bag)) or 0
+    end
+    return 0
+end
+
+local function bagSlotItem(bag, slot)
+    if C_Container and type(C_Container.GetContainerItemInfo) == "function" then
+        local info = C_Container.GetContainerItemInfo(bag, slot)
+        if type(info) == "table" then
+            return tonumber(info.itemID), tonumber(info.stackCount) or 1
+        end
+    end
+    if type(GetContainerItemID) == "function" then
+        local id = tonumber(GetContainerItemID(bag, slot))
+        local count = 1
+        if type(GetContainerItemInfo) == "function" then
+            local _, n = GetContainerItemInfo(bag, slot)
+            count = tonumber(n) or 1
+        end
+        return id, count
+    end
+    if type(GetContainerItemInfo) == "function" then
+        local _, count, _, _, _, _, link = GetContainerItemInfo(bag, slot)
+        return itemIdFromLink(link), tonumber(count) or 1
+    end
+end
+
+function RRP.ReadBagSlots()
+    local counts, saw = {}, false
+    for bag = 0, 4 do
+        local slots = bagSlotCount(bag)
+        if slots > 0 then saw = true end
+        for slot = 1, slots do
+            local id, count = bagSlotItem(bag, slot)
+            if id and count and count > 0 then
+                counts[id] = (counts[id] or 0) + count
+            end
+        end
+    end
+    return counts, saw
+end
+
+function RRP.RefreshBagCounts(opened)
+    local p = RRP.GetProfile()
+    if not p then return end
+    local counts, saw = RRP.ReadBagSlots()
+    if saw then p.bagCounts = counts end
+    if opened then p.bagScanAt = nowSeconds() end
+end
+
+function RRP.NoteBagOpen()
+    RRP.RefreshBagCounts(true)
+    if RRP.QueueRefresh then RRP.QueueRefresh()
+    elseif RRP.Refresh then RRP.Refresh() end
+end
+
+function RRP.HookBagFrames()
+    local names = {"BackpackFrame", "ContainerFrameCombinedBags"}
+    for i = 1, 6 do names[#names + 1] = "ContainerFrame" .. i end
+    for _, name in ipairs(names) do
+        local frame = _G[name]
+        if frame and not frame.fcBagHook then
+            frame.fcBagHook = true
+            if frame.HookScript then
+                pcall(frame.HookScript, frame, "OnShow", function()
+                    if RRP.NoteBagOpen then RRP.NoteBagOpen() end
+                end)
+            end
+            if frame.IsShown and frame:IsShown() then RRP.NoteBagOpen() end
+        end
+    end
+end
+
+function RRP.BagsStale()
+    local p = RRP.GetProfile()
+    local at = p and tonumber(p.bagScanAt)
+    if not at then return true end
+    return nowSeconds() - at > 3600
+end
+
 function RRP.BagsReadable()
-    return type(GetItemCount) == "function"
+    if type(GetItemCount) == "function" then return true end
+    local p = RRP.GetProfile()
+    return type(p and p.bagCounts) == "table"
 end
 local function bagCount(id)
-    if not RRP.BagsReadable() then return 0 end
-    local owned = safeCall(GetItemCount, id, false)
-    if type(owned) ~= "number" then return 0 end
-    return owned
+    id = tonumber(id)
+    if not id then return 0 end
+    local p = RRP.GetProfile()
+    if p and type(p.bagCounts) == "table" and p.bagScanAt then
+        return p.bagCounts[id] or 0
+    end
+    if type(GetItemCount) == "function" then
+        local owned = safeCall(GetItemCount, id, false)
+        if type(owned) == "number" then return owned end
+    end
+    if p and type(p.bagCounts) == "table" then return p.bagCounts[id] or 0 end
+    return 0
 end
 RRP.BagCount = bagCount
 
@@ -1330,8 +1431,8 @@ SLASH_FAVORCRAFT3 = "/rrp"
 SLASH_FAVORCRAFT4 = "/redridge"
 SlashCmdList["FAVORCRAFT"] = slash
 
--- The addon folder stays RedridgeRecipePlanner so the existing saved-variables
--- file still loads. FavorcraftDB is the same table as RRPDB. Missing keys are
+-- The addon folder is FavorCraft. FavorcraftDB is the saved-table name from
+-- the earlier file, and it is the same table as RRPDB. Missing keys are
 -- copied across. Nothing already saved is deleted.
 function RRP.MigrateSaved()
     local function blank(db)
@@ -1366,7 +1467,7 @@ function RRP.MigrateSaved()
     end
     blank(FavorcraftDB)
     RRPDB = FavorcraftDB
-    FavorcraftDB.addonId = "RedridgeRecipePlanner"
+    FavorcraftDB.addonId = "FavorCraft"
     if type(FavorcraftDB.characters) == "table" then
         for _, character in pairs(FavorcraftDB.characters) do
             if type(character) == "table" and type(character.plan) == "table" then
@@ -1416,7 +1517,8 @@ eventFrame:SetScript("OnEvent", function(_, event, arg)
         if p and p.expandIntermediate == nil then p.expandIntermediate = true end
         RRP.SyncProfessions()
         if RRP.UI and RRP.UI.RestoreLayout then RRP.UI.RestoreLayout() end
-        say("Ready. /fc opens Favorcraft.")
+        if RRP.HookBagFrames then RRP.HookBagFrames() end
+        say("Ready. /fc opens FavorCraft.")
     elseif event == "SKILL_LINES_CHANGED" then
         RRP.SyncProfessions()
     elseif event == "TRADE_SKILL_SHOW" or event == "NEW_RECIPE_LEARNED" then
@@ -1431,7 +1533,11 @@ eventFrame:SetScript("OnEvent", function(_, event, arg)
         local now = (GetTime and GetTime()) or 0
         if RRP.ready and (now - lastAutoAt) > 1 then autoScanQueued = true end
     elseif event == "BAG_UPDATE" or event == "BAG_UPDATE_DELAYED" then
-        if RRP.ready then RRP.QueueRefresh() end
+        if RRP.ready then
+            if RRP.HookBagFrames then RRP.HookBagFrames() end
+            if RRP.RefreshBagCounts then RRP.RefreshBagCounts(false) end
+            RRP.QueueRefresh()
+        end
     elseif event == "GET_ITEM_INFO_RECEIVED" then
         local id = tonumber(arg)
         if id and type(GetItemInfo) == "function" then

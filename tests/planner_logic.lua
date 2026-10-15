@@ -56,7 +56,7 @@ local RRP = {}
 local function loadChunk(file)
     local chunk, err = loadfile(root .. "/" .. file)
     if not chunk then error(err) end
-    chunk("RedridgeRecipePlanner", RRP)
+    chunk("FavorCraft", RRP)
 end
 loadChunk("Catalog.lua")
 loadChunk("Schematics.lua")
@@ -329,10 +329,21 @@ printed = {}
 print = function(message) printed[#printed + 1] = tostring(message) end
 RRP.ScanProfession({quiet = true, announce = true})
 print = realPrint
-check("an open Favorcraft window confirms the scan", printed[1] and printed[1]:find("Blacksmithing", 1, true) and true or false, printed[1])
+check("an open FavorCraft window confirms the scan", printed[1] and printed[1]:find("Blacksmithing", 1, true) and true or false, printed[1])
 check("a scan does not replace database reagents", RRP.Schematic(belt.key) == database)
 check("a scan does not replace the crafted item", RRP.OutputRef(belt).itemID == database.outputItemID)
 check("the open profession records that recipe", RRP.LearnState(belt) == "learned")
+
+check("bags are stale before they are opened", RRP.BagsStale())
+GetContainerNumSlots = function(bag) return bag == 0 and 1 or 0 end
+GetContainerItemInfo = function()
+    return "tex", 4, nil, nil, nil, nil, "|Hitem:3356::::::::60:::::|h[Kingsblood]|h|r"
+end
+RRP.NoteBagOpen()
+check("opening bags records the scan", not RRP.BagsStale())
+check("a bag scan counts the item", RRP.BagCount(3356) == 4, RRP.BagCount(3356))
+profile.bagScanAt = (os.time() - 4000)
+check("a bag scan older than an hour is stale", RRP.BagsStale())
 
 if failures > 0 then
     print(failures .. " failed")

@@ -4,7 +4,7 @@ local ROW_COUNT = 18
 local ROW_H = 20
 
 function UI.BuildShopping()
-    local shop = CreateFrame("Frame", "FavorcraftShoppingListFrame", UIParent, "BackdropTemplate")
+    local shop = CreateFrame("Frame", "FavorCraftShoppingListFrame", UIParent, "BackdropTemplate")
     shop:SetSize(600, 470)
     shop:SetPoint("CENTER")
     shop:SetFrameStrata("FULLSCREEN_DIALOG")
@@ -58,10 +58,22 @@ function UI.BuildShopping()
         s:SetJustifyH(justify or "CENTER")
         return s
     end
-    columnHead("Material", 40, 260, "LEFT")
-    columnHead("Needed", 328, 70, "CENTER")
-    columnHead("In Bags", 402, 70, "CENTER")
-    columnHead("Missing", 476, 90, "CENTER")
+    columnHead("Material", 40, 330, "LEFT")
+    columnHead("Needed", 390, 80, "CENTER")
+    local inBagsHead = columnHead("In Bags", 478, 90, "CENTER")
+    local bagWarn = UI.Label(shop, "GameFontDisableSmall", "Please open your bags.")
+    bagWarn:SetPoint("BOTTOM", inBagsHead, "TOP", 0, 1)
+    bagWarn:SetWidth(170)
+    bagWarn:SetJustifyH("CENTER")
+    bagWarn:SetTextColor(1, 0.72, 0.28)
+    bagWarn:Hide()
+    local bagTip = CreateFrame("Button", nil, shop)
+    bagTip:SetSize(90, 16)
+    bagTip:SetPoint("TOPLEFT", inBagsHead, "TOPLEFT", 0, 0)
+    bagTip:SetScript("OnEnter", function(self)
+        UI.ShowTip(self, "In Bags", "Open your bags frequently to scan the inventory.")
+    end)
+    bagTip:SetScript("OnLeave", UI.HideTip)
 
     local rows = {}
     for i = 1, ROW_COUNT do
@@ -78,19 +90,15 @@ function UI.BuildShopping()
         row.icon:SetPoint("LEFT", 2, 0)
         row.name = UI.Label(row, "GameFontHighlightSmall")
         row.name:SetPoint("LEFT", 22, 0)
-        row.name:SetWidth(280)
+        row.name:SetWidth(340)
         row.needed = UI.Label(row, "GameFontHighlightSmall")
-        row.needed:SetPoint("LEFT", 310, 0)
-        row.needed:SetWidth(70)
+        row.needed:SetPoint("LEFT", 372, 0)
+        row.needed:SetWidth(80)
         row.needed:SetJustifyH("CENTER")
         row.owned = UI.Label(row, "GameFontHighlightSmall")
-        row.owned:SetPoint("LEFT", 384, 0)
-        row.owned:SetWidth(70)
+        row.owned:SetPoint("LEFT", 460, 0)
+        row.owned:SetWidth(90)
         row.owned:SetJustifyH("CENTER")
-        row.missing = UI.Label(row, "GameFontHighlightSmall")
-        row.missing:SetPoint("LEFT", 458, 0)
-        row.missing:SetWidth(90)
-        row.missing:SetJustifyH("CENTER")
         row.hit = CreateFrame("Button", nil, row)
         row.hit:SetAllPoints()
         row.hit:SetScript("OnEnter", function(self)
@@ -149,7 +157,7 @@ function UI.BuildShopping()
     local copyTitle = UI.Label(copy, "GameFontNormal", "Copy Shopping List")
     copyTitle:SetPoint("TOPLEFT", 16, -12)
     copyTitle:SetWidth(360)
-    local copyNote = UI.Label(copy, "GameFontDisableSmall", "Ctrl+A, then Ctrl+C. Each line is the item and how many you need.")
+    local copyNote = UI.Label(copy, "GameFontDisableSmall", "Ctrl+A, then Ctrl+C.")
     copyNote:SetPoint("TOPRIGHT", -40, -14)
     copyNote:SetWidth(280)
     copyNote:SetJustifyH("RIGHT")
@@ -251,32 +259,33 @@ function UI.BuildShopping()
                     row.name:SetTextColor(0.7, 0.65, 0.5)
                     row.needed:SetText("")
                     row.owned:SetText("")
-                    row.missing:SetText("")
                 elseif entry.unknown then
                     UI.SetIcon(row.icon, "Interface\\Icons\\INV_Misc_QuestionMark")
                     row.icon:Show()
-                    UI.Trim(row.name, entry.unknown .. "  - ingredients unknown", 270)
+                    UI.Trim(row.name, entry.unknown .. "  - ingredients unknown", 330)
                     row.name:SetTextColor(1, 0.7, 0.35)
                     row.needed:SetText("-")
                     row.owned:SetText("-")
-                    row.missing:SetText("Unknown")
-                    row.missing:SetTextColor(1, 0.7, 0.35)
+                    row.owned:SetTextColor(1, 0.7, 0.35)
                 else
                     row.itemID = entry.id
                     row.icon:Show()
                     UI.SetIcon(row.icon, RRP.ItemTexture(entry.id))
-                    UI.Trim(row.name, RRP.ItemLabel(entry.id), 270)
+                    UI.Trim(row.name, RRP.ItemLabel(entry.id), 330)
                     row.name:SetTextColor(0.95, 0.92, 0.84)
-                    row.needed:SetText(tostring(entry.amount))
+                    local needR, needG, needB = 0.95, 0.92, 0.84
+                    if entry.owned ~= nil then
+                        if entry.owned >= entry.amount then needR, needG, needB = 0.3, 0.9, 0.35
+                        else needR, needG, needB = 0.95, 0.25, 0.2 end
+                    end
+                    row.needed:SetText(RRP.Colorize(entry.amount, needR, needG, needB))
+                    row.needed:SetTextColor(needR, needG, needB)
                     if entry.owned == nil then
                         row.owned:SetText("-")
-                        row.missing:SetText("-")
-                        row.missing:SetTextColor(0.7, 0.65, 0.5)
+                        row.owned:SetTextColor(0.7, 0.65, 0.5)
                     else
-                        row.owned:SetText(tostring(entry.owned))
-                        row.missing:SetText(entry.missing > 0 and tostring(entry.missing) or "0")
-                        if entry.missing > 0 then row.missing:SetTextColor(1, 0.28, 0.22)
-                        else row.missing:SetTextColor(0.45, 0.85, 0.45) end
+                        row.owned:SetText(RRP.Colorize(entry.owned, needR, needG, needB))
+                        row.owned:SetTextColor(needR, needG, needB)
                     end
                 end
             end
@@ -286,6 +295,7 @@ function UI.BuildShopping()
         nextB:SetAlpha(page < pages and 1 or 0.35)
         summary:SetText(calc.selected .. " selected. Favor: " .. calc.favor ..
             (calc.unknownFavor and "+" or ""))
+        if RRP.BagsStale and RRP.BagsStale() then bagWarn:Show() else bagWarn:Hide() end
     end
 
     function RRP.ToggleShopping()

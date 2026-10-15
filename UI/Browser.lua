@@ -13,7 +13,7 @@ function UI.BuildBrowser(panel)
         RRP.Refresh()
     end)
 
-    local search = CreateFrame("EditBox", "FavorcraftSearch", panel, "InputBoxTemplate")
+    local search = CreateFrame("EditBox", "FavorCraftSearch", panel, "InputBoxTemplate")
     search:SetSize(210, 20)
     search:SetPoint("TOPLEFT", 12, -10)
     search:SetAutoFocus(false)

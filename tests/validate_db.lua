@@ -13,7 +13,7 @@ local function loadChunk(file)
         print("failed to load " .. file .. ": " .. tostring(err))
         os.exit(1)
     end
-    chunk("RedridgeRecipePlanner", RRP)
+    chunk("FavorCraft", RRP)
 end
 loadChunk("Catalog.lua")
 loadChunk("Schematics.lua")
@@ -63,7 +63,7 @@ for _, recipe in ipairs(RRP.Catalog) do
 end
 
 local provenance = RRP.DataProvenance or {}
-print("Favorcraft database check")
+print("FavorCraft database check")
 print("Source: " .. tostring(provenance.source or "missing"))
 print("Client build: " .. tostring(provenance.clientBuild or "missing"))
 print("Imported: " .. tostring(provenance.imported or "missing"))

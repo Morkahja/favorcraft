@@ -1,24 +1,22 @@
-# Favorcraft
+# FavorCraft
 
 Merchant's Favor & Profession Planner  
 World of Warcraft Forever | Alliance & Horde
 
-Favorcraft plans Merchant's Favor recipe purchases and the materials those crafts need. Alliance characters buy from the Azeroth Commerce Authority at Three Corners in Redridge Mountains. Horde characters buy from Durotar Supply and Logistics outside the Crossroads in the Northern Barrens. Both factions use the same recipe list. Paladins and shamans exist on both factions, so those recipes follow the class filter.
+Babunigaming built FavorCraft. Danoozy is the co-author who came up with the idea, and that idea is what led to the hours spent sitting with it, thinking it through, and polishing it.
+
+FavorCraft plans Merchant's Favor recipe purchases and the materials those crafts need. Alliance characters buy from the Azeroth Commerce Authority at Three Corners in Redridge Mountains. Horde characters buy from Durotar Supply and Logistics outside the Crossroads in the Northern Barrens. Both factions use the same recipe list. Paladins and shamans exist on both factions, so those recipes follow the class filter.
 
 ## Commands
 
 - `/fc` opens the window.
 - `/favorcraft` opens the window.
-- `/rrp` and `/redridge` still open it.
+- `/rrp` and `/redridge` still open it from the earlier name.
 - `/fc scan` reads the profession window that is already open. Opening Blacksmithing, Alchemy, Cooking, Enchanting, Engineering, Leatherworking, or Tailoring does this on its own.
 
 ## Saved plans
 
-The addon folder and TOC file are still named `RedridgeRecipePlanner`. That is deliberate. WoW loads saved variables from a file named after the addon, and renaming the folder would leave existing plans behind.
-
-`RRPDB` and `FavorcraftDB` are kept as the same data. Loading copies any missing plans, quantities, class and build choices, known recipes, scanned materials, trainer notes, and window settings across. It does not delete saved data.
-
-Do not rename this folder, and do not rename the remote repository, until that migration has been checked in game. A later rename needs the old addon enabled for one login so the old saved file is still read.
+The addon folder and TOC file are named `FavorCraft`. WoW loads saved variables from a file with that same name. `FavorcraftDB` stays as the saved table name so an older file still fills in plans, known recipes, scanned materials, and window settings. `RRPDB` is the same table. Loading copies any missing keys across and does not delete saved data.
 
 ## Recipe list
 
@@ -31,3 +29,11 @@ The recipe list, reagents, and crafted item IDs come with the addon. You do not 
 Spell IDs, crafted item IDs, and reagent quantities are World of Warcraft: Forever client data published by [AHledger](https://ahledger.com), client build 1.60.1, imported 15 October 2026. Auction prices are not stored. Lesser Arcane Elixir uses the camp scroll that requires Alchemy 120 and takes 4 Kingsblood and 1 Leaded Vial. Recipe scrolls were not found for Sentinel's Wristguards, Officer's Wristguards, Prefect's Wristguards, or Warder's Wristguards. Icons and item tooltips are loaded by the game from the item IDs, and this repository cannot confirm them without the client. Run `luajit tests/validate_db.lua` for the current counts. The only verified trainer comparison in the catalog is Elixir of Wisdom against Elixir of Lesser Intellect.
 
 Tank, DPS, Healer, and Other limit the list to recipes for the checked builds and your class. Paladin-only plate stays off other classes. Show All Recipes removes those limits.
+
+## Credits
+
+- Author: [Babunigaming](https://www.curseforge.com/members/babunigaming)
+- Co-author: Danoozy, who came up with the idea and is the reason those hours went into sitting with FavorCraft, thinking it through, and polishing it
+- CurseForge: [Babunigaming](https://www.curseforge.com/members/babunigaming)
+- Instagram: [babunigaming](https://www.instagram.com/babunigaming/)
+- YouTube: [BABUNI GAMING](https://www.youtube.com/@babunigaming)
