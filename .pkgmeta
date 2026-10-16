@@ -1,0 +1,9 @@
+package-as: FavorCraft
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
+ignore:
+  - tests
+  - README.md
+  - PUBLISHING.md
+  - .github

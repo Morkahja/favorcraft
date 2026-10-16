@@ -1,5 +1,9 @@
 # FavorCraft — Changelog
 
+## 0.4.9-beta — 2026-10-16
+
+- Cooking, Enchanting, and Engineering check All specs when you open them. The spec you saved stays underneath.
+
 ## 0.4.8-beta — 2026-10-16
 
 - Cooking, Enchanting, and Engineering check All specs when you open them. The spec you saved stays underneath.
