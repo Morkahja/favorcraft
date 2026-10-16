@@ -1,0 +1,756 @@
+{
+  "schemaVersion": 1,
+  "project": "FavorCraft",
+  "game": "World of Warcraft: Forever",
+  "profession": "Alchemy",
+  "date": "2026-10-16",
+  "purpose": "Beta comparison catalog: native tooltips use outputItemID; scroll IDs remain distinct.",
+  "sourceFiles": [
+    "AlchemyComparisons.lua",
+    "Schematics.lua"
+  ],
+  "dataPolicy": "Client-derived and Forever-specific item IDs are trusted beta reference data; update when corrected. Showing a comparison does not claim identical effects or guaranteed server drop.",
+  "coverage": {
+    "merchantRecipes": 29,
+    "alternativeOccurrences": 51,
+    "distinctAlternativeItems": 35,
+    "missingAlternativeOutputItemIDs": 0
+  },
+  "nameNotes": [
+    {
+      "researchName": "Elixir of the Sages",
+      "correctMerchantName": "Elixir of Sages",
+      "merchantOutputItemID": 250338,
+      "important": "Classic Elixir of the Sages is a different item, ID 13447, and does not provide the Merchant's Favor +25 Spirit/+2% crit effect."
+    },
+    {
+      "researchName": "Elixir of Ogre's Strength",
+      "foreverName": "Elixir of Ogre Strength",
+      "outputItemID": 3391
+    },
+    {
+      "foreverName": "Elixir of Defense",
+      "outputItemID": 8951,
+      "important": "Item 3389 is Elixir of Lesser Defense in Forever."
+    },
+    {
+      "foreverName": "Troll's Blood Elixir",
+      "outputItemID": 3826,
+      "important": "Items 3382 and 3388 are Minor and Lesser tiers."
+    }
+  ],
+  "itemIndex": {
+    "Arcane Elixir": 9155,
+    "Cleric's Elixir": 250332,
+    "Elixir of Cunning": 250328,
+    "Elixir of Defense": 8951,
+    "Elixir of Greater Agility": 9187,
+    "Elixir of Greater Fortitude": 250335,
+    "Elixir of Greater Intellect": 9179,
+    "Elixir of Greater Strength": 9206,
+    "Elixir of Intellect": 250354,
+    "Elixir of Lesser Fortitude": 3825,
+    "Elixir of Lesser Spirit": 250345,
+    "Elixir of Minor Fortitude": 2458,
+    "Elixir of Minor Spirit": 250344,
+    "Elixir of Ogre Strength": 3391,
+    "Elixir of Sages": 250338,
+    "Elixir of Spirit": 250346,
+    "Elixir of the Whale": 250348,
+    "Elixir of Wisdom": 3383,
+    "Frenzy Potion": 250940,
+    "Greater Arcane Elixir": 13454,
+    "Greater Frenzy Potion": 250941,
+    "Greater Mender's Potion": 250947,
+    "Greater Spellblasting Potion": 250935,
+    "Greater Stoneshield Potion": 13455,
+    "Lesser Cleric's Elixir": 250331,
+    "Lesser Mageblood Elixir": 250340,
+    "Mageblood Elixir": 20007,
+    "Mender's Potion": 250946,
+    "Minor Cleric's Elixir": 250330,
+    "Minor Frenzy Potion": 250938,
+    "Minor Mageblood Elixir": 250339,
+    "Minor Mender's Potion": 250944,
+    "Minor Spellblasting Potion": 250932,
+    "Spellblasting Potion": 250934,
+    "Troll's Blood Elixir": 3826
+  },
+  "recipes": [
+    {
+      "merchantRecipeName": "Elixir of Lesser Spirit",
+      "merchantKey": "Alchemy|Elixir of Lesser Spirit",
+      "merchantSpellID": 1250794,
+      "merchantScrollItemID": 250381,
+      "merchantOutputItemID": 250345,
+      "effectReported": "+6 Spirit, 30 min",
+      "summary": "Spirit bonus; compare potency, duration and cost.",
+      "alternatives": [
+        {
+          "name": "Elixir of Minor Spirit",
+          "outputItemID": 250344,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://foreverchanges.pro/item/250344"
+        },
+        {
+          "name": "Elixir of Spirit",
+          "outputItemID": 250346,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://thewowdb.com/wow-forever/item/elixir-of-spirit-250346/"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Lesser Mageblood Elixir",
+      "merchantKey": "Alchemy|Lesser Mageblood Elixir",
+      "merchantSpellID": 1250789,
+      "merchantScrollItemID": 250376,
+      "merchantOutputItemID": 250340,
+      "effectReported": "+6 mana / 5 sec, 30 min",
+      "summary": "Mana regeneration over time; tier and duration may differ.",
+      "alternatives": [
+        {
+          "name": "Minor Mageblood Elixir",
+          "outputItemID": 250339,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://forevercompass.com/items/250339"
+        },
+        {
+          "name": "Mageblood Elixir",
+          "outputItemID": 20007,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://hyjal.cc/updates/1.60.1.70170"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Mender's Potion",
+      "merchantKey": "Alchemy|Mender's Potion",
+      "merchantSpellID": 1251743,
+      "merchantScrollItemID": 250990,
+      "merchantOutputItemID": 250946,
+      "effectReported": "+28 healing, 30 sec",
+      "summary": "Short-duration healing power enhancement; different magnitude.",
+      "alternatives": [
+        {
+          "name": "Minor Mender's Potion",
+          "outputItemID": 250944,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://foreverdb.net/es/item/250944"
+        },
+        {
+          "name": "Greater Mender's Potion",
+          "outputItemID": 250947,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://foreverdb.net/item/250947"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Spellblasting Potion",
+      "merchantKey": "Alchemy|Spellblasting Potion",
+      "merchantSpellID": 1251731,
+      "merchantScrollItemID": 250978,
+      "merchantOutputItemID": 250934,
+      "effectReported": "+14 spell damage, 30 sec",
+      "summary": "Short-duration spell damage enhancement; different magnitude.",
+      "alternatives": [
+        {
+          "name": "Minor Spellblasting Potion",
+          "outputItemID": 250932,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://www.60.tools/items/250932-minor-spellblasting-potion"
+        },
+        {
+          "name": "Greater Spellblasting Potion",
+          "outputItemID": 250935,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://foreverdb.net/item/250935"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Frenzy Potion",
+      "merchantKey": "Alchemy|Frenzy Potion",
+      "merchantSpellID": 1251737,
+      "merchantScrollItemID": 250984,
+      "merchantOutputItemID": 250940,
+      "effectReported": "+14 attack power, 30 sec",
+      "summary": "Short-duration attack power enhancement; different magnitude.",
+      "alternatives": [
+        {
+          "name": "Minor Frenzy Potion",
+          "outputItemID": 250938,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://foreverdb.net/es/item/250938"
+        },
+        {
+          "name": "Greater Frenzy Potion",
+          "outputItemID": 250941,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://forever.rexas.tools/item/250941/use-greater-frenzy-potion"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Disorienting Smog Potion",
+      "merchantKey": "Alchemy|Disorienting Smog Potion",
+      "merchantSpellID": 1251750,
+      "merchantScrollItemID": 250996,
+      "merchantOutputItemID": 250952,
+      "effectReported": "Ground-targeted -15% hit chance, 8 sec",
+      "summary": "Ground-area hit-chance debuff; no verified close conventional counterpart.",
+      "alternatives": []
+    },
+    {
+      "merchantRecipeName": "Dragonfire Potion",
+      "merchantKey": "Alchemy|Dragonfire Potion",
+      "merchantSpellID": 1251751,
+      "merchantScrollItemID": 250997,
+      "merchantOutputItemID": 250953,
+      "effectReported": "Fire cone damage and burning effect",
+      "summary": "Fire cone/direct damage-over-time; no verified close conventional counterpart.",
+      "alternatives": []
+    },
+    {
+      "merchantRecipeName": "Caustic Smog Potion",
+      "merchantKey": "Alchemy|Caustic Smog Potion",
+      "merchantSpellID": 1251749,
+      "merchantScrollItemID": 250995,
+      "merchantOutputItemID": 250951,
+      "effectReported": "Ground-targeted Nature damage over time",
+      "summary": "Ground-area nature damage; no verified close conventional counterpart.",
+      "alternatives": []
+    },
+    {
+      "merchantRecipeName": "Potion of Venomous Blood",
+      "merchantKey": "Alchemy|Potion of Venomous Blood",
+      "merchantSpellID": 1251748,
+      "merchantScrollItemID": 250994,
+      "merchantOutputItemID": 250950,
+      "effectReported": "Reactive Nature damage against bleed effects",
+      "summary": "Reactive bleed-triggered nature damage; no verified close conventional counterpart.",
+      "alternatives": []
+    },
+    {
+      "merchantRecipeName": "Major Mender's Potion",
+      "merchantKey": "Alchemy|Major Mender's Potion",
+      "merchantSpellID": 1251747,
+      "merchantScrollItemID": 250993,
+      "merchantOutputItemID": 250949,
+      "effectReported": "+75 healing, 30 sec",
+      "summary": "Same short healing-power buff family; stronger tier.",
+      "alternatives": [
+        {
+          "name": "Greater Mender's Potion",
+          "outputItemID": 250947,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://foreverdb.net/item/250947"
+        },
+        {
+          "name": "Mender's Potion",
+          "outputItemID": 250946,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://github.com/Morkahja/favorcraft/blob/main/Schematics.lua"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Potion of Elemental Purging",
+      "merchantKey": "Alchemy|Potion of Elemental Purging",
+      "merchantSpellID": 1251752,
+      "merchantScrollItemID": 250998,
+      "merchantOutputItemID": 250954,
+      "effectReported": "Bonus spell damage versus Elementals (value/duration disputed)",
+      "summary": "Spell damage against elementals only; unlike broad spell-damage buffs.",
+      "alternatives": [
+        {
+          "name": "Arcane Elixir",
+          "outputItemID": 9155,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://ahledger.com/items/9155-arcane-elixir"
+        },
+        {
+          "name": "Greater Arcane Elixir",
+          "outputItemID": 13454,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://foreverdb.net/item/13454"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Major Spellblasting Potion",
+      "merchantKey": "Alchemy|Major Spellblasting Potion",
+      "merchantSpellID": 1251734,
+      "merchantScrollItemID": 250981,
+      "merchantOutputItemID": 250937,
+      "effectReported": "+40 spell damage, 30 sec",
+      "summary": "Same short spell-damage buff family; stronger tier.",
+      "alternatives": [
+        {
+          "name": "Greater Spellblasting Potion",
+          "outputItemID": 250935,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://foreverdb.net/item/250935"
+        },
+        {
+          "name": "Spellblasting Potion",
+          "outputItemID": 250934,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://github.com/Morkahja/favorcraft/blob/main/Schematics.lua"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Major Frenzy Potion",
+      "merchantKey": "Alchemy|Major Frenzy Potion",
+      "merchantSpellID": 1251740,
+      "merchantScrollItemID": 250987,
+      "merchantOutputItemID": 250943,
+      "effectReported": "+40 attack power, 30 sec",
+      "summary": "Same short attack-power buff family; stronger tier.",
+      "alternatives": [
+        {
+          "name": "Greater Frenzy Potion",
+          "outputItemID": 250941,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://forever.rexas.tools/item/250941/use-greater-frenzy-potion"
+        },
+        {
+          "name": "Frenzy Potion",
+          "outputItemID": 250940,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://github.com/Morkahja/favorcraft/blob/main/Schematics.lua"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Elixir of Lesser Intellect",
+      "merchantKey": "Alchemy|Elixir of Lesser Intellect",
+      "merchantSpellID": 1250801,
+      "merchantScrollItemID": 250388,
+      "merchantOutputItemID": 250353,
+      "effectReported": "+6 Intellect, 30 min",
+      "summary": "Wisdom shares +6 Intellect; 60 minutes versus Favor 30 minutes. Intellect is a related tier.",
+      "alternatives": [
+        {
+          "name": "Elixir of Wisdom",
+          "outputItemID": 3383,
+          "relation": "equivalent",
+          "acquisition": "unverified",
+          "sourceURL": "https://thewowdb.com/wow-forever/item/elixir-of-wisdom-3383/"
+        },
+        {
+          "name": "Elixir of Intellect",
+          "outputItemID": 250354,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://www.60.tools/items/250354-elixir-of-intellect"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Lesser Cleric's Elixir",
+      "merchantKey": "Alchemy|Lesser Cleric's Elixir",
+      "merchantSpellID": 1250780,
+      "merchantScrollItemID": 250367,
+      "merchantOutputItemID": 250331,
+      "effectReported": "+20 healing, 30 min",
+      "summary": "Same healing power family; different strength.",
+      "alternatives": [
+        {
+          "name": "Minor Cleric's Elixir",
+          "outputItemID": 250330,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://www.60.tools/items/250330-minor-clerics-elixir"
+        },
+        {
+          "name": "Cleric's Elixir",
+          "outputItemID": 250332,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://foreverdb.net/item/250332"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Lesser Arcane Elixir",
+      "merchantKey": "Alchemy|Lesser Arcane Elixir",
+      "merchantSpellID": 1250791,
+      "merchantScrollItemID": 217399,
+      "merchantOutputItemID": 250342,
+      "effectReported": "+15 spell damage, 30 min",
+      "summary": "+15 versus +20 versus +35 spell damage; different requirements and duration.",
+      "alternatives": [
+        {
+          "name": "Arcane Elixir",
+          "outputItemID": 9155,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://ahledger.com/items/9155-arcane-elixir"
+        },
+        {
+          "name": "Greater Arcane Elixir",
+          "outputItemID": 13454,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://foreverdb.net/item/13454"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Elixir of Greater Spirit",
+      "merchantKey": "Alchemy|Elixir of Greater Spirit",
+      "merchantSpellID": 1250796,
+      "merchantScrollItemID": 250383,
+      "merchantOutputItemID": 250347,
+      "effectReported": "+18 Spirit, 30 min",
+      "summary": "+18 Spirit for 30 minutes; other Spirit tiers differ.",
+      "alternatives": [
+        {
+          "name": "Elixir of Spirit",
+          "outputItemID": 250346,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://thewowdb.com/wow-forever/item/elixir-of-spirit-250346/"
+        },
+        {
+          "name": "Elixir of Lesser Spirit",
+          "outputItemID": 250345,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://github.com/Morkahja/favorcraft/blob/main/Schematics.lua"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Greater Mageblood Elixir",
+      "merchantKey": "Alchemy|Greater Mageblood Elixir",
+      "merchantSpellID": 1250790,
+      "merchantScrollItemID": 250377,
+      "merchantOutputItemID": 250341,
+      "effectReported": "+20 mana / 5 sec, 30 min",
+      "summary": "Mana regeneration family; different regeneration amount.",
+      "alternatives": [
+        {
+          "name": "Mageblood Elixir",
+          "outputItemID": 20007,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://hyjal.cc/updates/1.60.1.70170"
+        },
+        {
+          "name": "Lesser Mageblood Elixir",
+          "outputItemID": 250340,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://github.com/Morkahja/favorcraft/blob/main/Schematics.lua"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Greater Cleric's Elixir",
+      "merchantKey": "Alchemy|Greater Cleric's Elixir",
+      "merchantSpellID": 1250782,
+      "merchantScrollItemID": 250369,
+      "merchantOutputItemID": 250333,
+      "effectReported": "+40 healing, 30 min",
+      "summary": "Healing power family; +40 versus Lesser +20.",
+      "alternatives": [
+        {
+          "name": "Cleric's Elixir",
+          "outputItemID": 250332,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://foreverdb.net/item/250332"
+        },
+        {
+          "name": "Lesser Cleric's Elixir",
+          "outputItemID": 250331,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://github.com/Morkahja/favorcraft/blob/main/Schematics.lua"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Elixir of Greater Fortitude",
+      "merchantKey": "Alchemy|Elixir of Greater Fortitude",
+      "merchantSpellID": 1250784,
+      "merchantScrollItemID": 250371,
+      "merchantOutputItemID": 250335,
+      "effectReported": "+400 health, 30 min",
+      "summary": "Maximum health bonus family; Favor +400 health.",
+      "alternatives": [
+        {
+          "name": "Elixir of Minor Fortitude",
+          "outputItemID": 2458,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://foreverdb.net/item/2458"
+        },
+        {
+          "name": "Elixir of Lesser Fortitude",
+          "outputItemID": 3825,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://forevercompass.com/items/3825"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Elixir of the Phalanx",
+      "merchantKey": "Alchemy|Elixir of the Phalanx",
+      "merchantSpellID": 1250778,
+      "merchantScrollItemID": 250365,
+      "merchantOutputItemID": 250329,
+      "effectReported": "+400 health, +500 armor, 30 min",
+      "summary": "Favor combines +400 health and +500 armor; alternatives cover parts of the outcome.",
+      "alternatives": [
+        {
+          "name": "Elixir of Greater Fortitude",
+          "outputItemID": 250335,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://github.com/Morkahja/favorcraft/blob/main/Schematics.lua"
+        },
+        {
+          "name": "Elixir of Defense",
+          "outputItemID": 8951,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://foreverdb.net/item/8951"
+        },
+        {
+          "name": "Greater Stoneshield Potion",
+          "outputItemID": 13455,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://wowclassicdatabase.com/item/greater-stoneshield-potion"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Elixir of Cunning",
+      "merchantKey": "Alchemy|Elixir of Cunning",
+      "merchantSpellID": 1250777,
+      "merchantScrollItemID": 250364,
+      "merchantOutputItemID": 250328,
+      "effectReported": "+25 Agility and Intellect, 30 min",
+      "summary": "Favor combines +25 Agility and +25 Intellect; conventional elixirs focus on one stat.",
+      "alternatives": [
+        {
+          "name": "Elixir of Greater Agility",
+          "outputItemID": 9187,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://foreverdb.net/item/9187"
+        },
+        {
+          "name": "Elixir of Greater Intellect",
+          "outputItemID": 9179,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://foreverdb.net/item/9179"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Elixir of Ferocity",
+      "merchantKey": "Alchemy|Elixir of Ferocity",
+      "merchantSpellID": 1250799,
+      "merchantScrollItemID": 250386,
+      "merchantOutputItemID": 250350,
+      "effectReported": "+18 Strength and Agility, 30 min",
+      "summary": "Favor combines +18 Strength and +18 Agility; alternatives target single attributes.",
+      "alternatives": [
+        {
+          "name": "Elixir of Ogre Strength",
+          "outputItemID": 3391,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://wow-forever.gg/db/items/3391-elixir-of-ogre-strength/",
+          "previousResearchName": "Elixir of Ogre's Strength"
+        },
+        {
+          "name": "Elixir of Greater Agility",
+          "outputItemID": 9187,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://foreverdb.net/item/9187"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Elixir of Sages",
+      "merchantKey": "Alchemy|Elixir of Sages",
+      "merchantSpellID": 1250787,
+      "merchantScrollItemID": 250374,
+      "merchantOutputItemID": 250338,
+      "effectReported": "+25 Spirit, +2% critical chance, 30 min",
+      "summary": "Whale has the same listed +25 Spirit and +2% crit for 30 minutes; Spirit elixir only overlaps in Spirit.",
+      "alternatives": [
+        {
+          "name": "Elixir of the Whale",
+          "outputItemID": 250348,
+          "relation": "equivalent",
+          "acquisition": "unverified",
+          "sourceURL": "https://github.com/Morkahja/favorcraft/blob/main/Schematics.lua"
+        },
+        {
+          "name": "Elixir of Spirit",
+          "outputItemID": 250346,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://thewowdb.com/wow-forever/item/elixir-of-spirit-250346/"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Elixir of the Whale",
+      "merchantKey": "Alchemy|Elixir of the Whale",
+      "merchantSpellID": 1250797,
+      "merchantScrollItemID": 250384,
+      "merchantOutputItemID": 250348,
+      "effectReported": "+25 Spirit, +2% critical chance, 30 min",
+      "summary": "Sages has the same listed +25 Spirit and +2% crit for 30 minutes; Spirit elixir only overlaps in Spirit.",
+      "alternatives": [
+        {
+          "name": "Elixir of Sages",
+          "outputItemID": 250338,
+          "relation": "equivalent",
+          "acquisition": "unverified",
+          "sourceURL": "https://github.com/Morkahja/favorcraft/blob/main/Schematics.lua",
+          "previousResearchName": "Elixir of the Sages"
+        },
+        {
+          "name": "Elixir of Spirit",
+          "outputItemID": 250346,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://thewowdb.com/wow-forever/item/elixir-of-spirit-250346/"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Elixir of the Owl",
+      "merchantKey": "Alchemy|Elixir of the Owl",
+      "merchantSpellID": 1250786,
+      "merchantScrollItemID": 250373,
+      "merchantOutputItemID": 250337,
+      "effectReported": "+25 Intellect, +2% critical chance, 30 min",
+      "summary": "Favor combines +25 Intellect and +2% critical chance; different secondary benefits.",
+      "alternatives": [
+        {
+          "name": "Elixir of Greater Intellect",
+          "outputItemID": 9179,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://foreverdb.net/item/9179"
+        },
+        {
+          "name": "Elixir of Cunning",
+          "outputItemID": 250328,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://github.com/Morkahja/favorcraft/blob/main/Schematics.lua"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Elixir of Nature Power",
+      "merchantKey": "Alchemy|Elixir of Nature Power",
+      "merchantSpellID": 1250792,
+      "merchantScrollItemID": 250379,
+      "merchantOutputItemID": 250343,
+      "effectReported": "+40 Nature spell damage, 30 min",
+      "summary": "+40 Nature-specific spell damage; broader spell-damage alternatives differ.",
+      "alternatives": [
+        {
+          "name": "Arcane Elixir",
+          "outputItemID": 9155,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://ahledger.com/items/9155-arcane-elixir"
+        },
+        {
+          "name": "Greater Arcane Elixir",
+          "outputItemID": 13454,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://foreverdb.net/item/13454"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Elixir of Wicked Regeneration",
+      "merchantKey": "Alchemy|Elixir of Wicked Regeneration",
+      "merchantSpellID": 1250785,
+      "merchantScrollItemID": 250372,
+      "merchantOutputItemID": 250336,
+      "effectReported": "+9 health and +10 mana / 5 sec, 30 min",
+      "summary": "Favor combines health and mana regeneration; alternatives cover one resource.",
+      "alternatives": [
+        {
+          "name": "Troll's Blood Elixir",
+          "outputItemID": 3826,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://forevercompass.com/items/3826"
+        },
+        {
+          "name": "Mageblood Elixir",
+          "outputItemID": 20007,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://hyjal.cc/updates/1.60.1.70170"
+        }
+      ]
+    },
+    {
+      "merchantRecipeName": "Elixir of the Grizzly",
+      "merchantKey": "Alchemy|Elixir of the Grizzly",
+      "merchantSpellID": 1250800,
+      "merchantScrollItemID": 250387,
+      "merchantOutputItemID": 250351,
+      "effectReported": "+25 Strength, +2% critical chance, 30 min",
+      "summary": "Favor +25 Strength and +2% crit; conventional Strength elixirs differ.",
+      "alternatives": [
+        {
+          "name": "Elixir of Ogre Strength",
+          "outputItemID": 3391,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://wow-forever.gg/db/items/3391-elixir-of-ogre-strength/",
+          "previousResearchName": "Elixir of Ogre's Strength"
+        },
+        {
+          "name": "Elixir of Greater Strength",
+          "outputItemID": 9206,
+          "relation": "alternative",
+          "acquisition": "unverified",
+          "sourceURL": "https://forevercompass.com/items/9206"
+        }
+      ]
+    }
+  ]
+}
