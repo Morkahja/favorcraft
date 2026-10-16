@@ -202,7 +202,7 @@ end
 local function headerFor(raw)
     local bits = {}
     if type(raw.effect_reported) == "string" and raw.effect_reported ~= "" then
-        bits[#bits + 1] = "Reported effect: " .. raw.effect_reported .. "."
+        bits[#bits + 1] = "Effect (research): " .. raw.effect_reported .. "."
     end
     local summary = raw.summary or raw.comparison_summary or raw.note
     if type(summary) == "string" and summary ~= "" then bits[#bits + 1] = summary end
@@ -256,7 +256,7 @@ local function buildView(profession, name, raw)
         end
         entries[#entries + 1] = {
             tier = tier,
-            label = LABEL[tier] or LABEL.possible,
+            label = LABEL[tier] or LABEL.related,
             name = matchName,
             acquisition = where,
             acquisitionVerified = verified,
@@ -286,7 +286,7 @@ local function buildView(profession, name, raw)
         note = "No comparison has been recorded for this recipe yet."
     end
     local sources = buildAcquisition(key, name, raw, catalog, merchant)
-    local header = headerFor(raw)
+    local header = (#entries > 0 or sources) and headerFor(raw) or nil
     if sources and sources[1] and sources[1].idCheck then
         header = "Same recipe pattern; additional source listings from Forever databases appear below."
     end
