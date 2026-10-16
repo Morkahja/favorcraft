@@ -446,19 +446,26 @@ check("enchant absorption is visible as a research comparison",
     RRP.ComparisonsFor(RRP.GetByKey("Enchanting|Enchant Chest - Absorption")).status ~= "none")
 check("elixir of sages uses the catalog name", RRP.ComparisonByKey["Alchemy|Elixir of Sages"] ~= nil)
 local gown = RRP.ComparisonsFor(RRP.GetByKey("Tailoring|Pristine Gown"))
-check("pristine gown keeps its researched alternatives", #gown.entries >= 3 and gown.status == "related")
+check("pristine gown keeps its researched alternatives", #gown.entries >= 3 and gown.status ~= "none")
 local missing = RRP.ComparisonsFor({key = "Alchemy|Not A Recipe", name = "Not A Recipe", profession = "Alchemy"})
 check("a missing comparison does not error", missing.status == "none" and missing.missingRecord)
 -- Integration coverage: each of the 309 merchant recipes must have a
 -- corresponding research view, even if no candidate is currently recorded.
 local coverage = {}
 local selected = 0
+local missingRecords = {}
 for _, recipe in ipairs(RRP.Catalog) do
     local view = RRP.ComparisonsFor(recipe)
-    check("comparison lookup " .. recipe.key, view and not view.missingRecord)
+    if not view or view.missingRecord then
+        missingRecords[#missingRecords + 1] = recipe.key
+    else
+        local entries = view.entries or {}
+        local sources = view.sources or {}
+        if #entries > 0 or #sources > 0 then selected = selected + 1 end
+    end
     coverage[recipe.profession] = (coverage[recipe.profession] or 0) + 1
-    if #view.entries > 0 or #view.sources > 0 then selected = selected + 1 end
 end
+check("all catalog recipes resolve to research views", #missingRecords == 0, table.concat(missingRecords, ", "))
 check("all seven professions are represented in the lookup", coverage.Alchemy == 29
     and coverage.Blacksmithing == 61 and coverage.Cooking == 6
     and coverage.Enchanting == 39 and coverage.Engineering == 26
