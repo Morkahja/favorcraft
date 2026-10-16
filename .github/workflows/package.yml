@@ -1,0 +1,65 @@
+name: Check and package FavorCraft
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install LuaJIT
+        run: sudo apt-get update && sudo apt-get install -y luajit
+
+      - name: Validate recipe data and planner
+        run: |
+          luajit tests/validate_db.lua
+          luajit tests/planner_logic.lua
+
+      - name: Verify manifests and build installable ZIP
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile, ZIP_DEFLATED
+          import re
+
+          toc_files = sorted(Path('.').glob('FavorCraft*.toc'))
+          assert toc_files, 'Missing FavorCraft TOC'
+          package_files = set(toc_files)
+          version = None
+          for toc in toc_files:
+              source = toc.read_text(encoding='utf-8')
+              match = re.search(r'^## Version:\s*(\S+)', source, flags=re.M)
+              assert match, f'{toc}: missing Version'
+              if version is None:
+                  version = match.group(1)
+              assert match.group(1) == version, f'{toc}: version mismatch'
+              for line in source.splitlines():
+                  line = line.strip()
+                  if not line or line.startswith('#'):
+                      continue
+                  path = Path(line.replace('\\', '/'))
+                  assert not path.is_absolute() and '..' not in path.parts
+                  assert path.is_file(), f'{toc}: missing file {path}'
+                  package_files.add(path)
+          Path('dist').mkdir(exist_ok=True)
+          zip_path = Path('dist') / f'FavorCraft-{version}.zip'
+          with ZipFile(zip_path, 'w', ZIP_DEFLATED, compresslevel=9) as z:
+              for path in sorted(package_files):
+                  z.write(path, arcname=str(Path('FavorCraft') / path))
+          print(f'Created {zip_path} with {len(package_files)} addon files')
+          PY
+
+      - name: Upload installable ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: FavorCraft-installable-zip
+          path: dist/FavorCraft-*.zip
+          if-no-files-found: error
