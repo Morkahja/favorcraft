@@ -18,8 +18,7 @@ end
 local uiFiles = {
     "Catalog.lua", "Schematics.lua", "Faction.lua", "Core.lua",
     "AlchemyComparisons.lua", "BlacksmithingComparisons.lua", "CookingComparisons.lua",
-    "favorcraft_enchanting/EnchantingComparisons.lua",
-    "favorcraft_engineering/EngineeringComparisons.lua",
+    "EnchantingComparisons.lua", "EngineeringComparisons.lua",
     "LeatherworkingComparisons.lua", "LeatherworkingSourceAudit.lua", "TailoringComparisons.lua", "Comparisons.lua",
     "UI/Widgets.lua", "UI/Nav.lua", "UI/Browser.lua", "UI/Details.lua",
     "UI/Plan.lua", "UI/Settings.lua", "UI/Shopping.lua", "UI/Main.lua",
@@ -69,6 +68,8 @@ loadChunk("Core.lua")
 
 RRPDB = {characters = {}, materials = {}, discovered = {}, scrollItems = {}}
 local profile = RRP.GetProfile()
+check("a new window starts with every spec", profile.roles.Tank and profile.roles.Healer and profile.roles.Melee)
+check("a new window shows every class", profile.allClasses == true)
 profile.showAll = true
 profile.plan["Alchemy|Elixir of Lesser Intellect"] = 3
 profile.plan["Alchemy|Mender's Potion"] = 5
@@ -114,6 +115,7 @@ check("favor sort is descending", favorOrder)
 check("plan stays a selection", profile.plan["Alchemy|Elixir of Lesser Intellect"] == true)
 
 profile.showAll = false
+profile.allClasses = false
 profile.previewClass = nil
 profile.roles.Healer = false
 profile.roles.Paladin = false
@@ -140,6 +142,48 @@ end
 check("tank filter shows warrior tank gear", sawTank)
 check("tank filter hides a melee weapon", not sawMace)
 check("tank filter hides paladin plate from a warrior", not sawPlate)
+local utility = RRP.GetByKey("Alchemy|Dragonfire Potion")
+local healerPotion = RRP.GetByKey("Alchemy|Mender's Potion")
+check("tank filter includes utility recipes", utility and RRP.BuildMatch(utility))
+check("tank filter hides a healer recipe", healerPotion and not RRP.BuildMatch(healerPotion))
+profile.roles.Tank = false
+profile.roles.Healer = true
+check("healer filter includes utility recipes", RRP.BuildMatch(utility))
+profile.roles.Healer = false
+profile.roles.Melee = true
+check("dps filter includes utility recipes", RRP.BuildMatch(utility))
+RRP.EnableAllSpecs()
+check("opening the window turns all specs on", profile.specMode == "all" and profile.roles.Tank and profile.roles.Healer and RRP.BuildOn("DPS"))
+check("all specs shows a healer recipe", RRP.BuildMatch(healerPotion))
+RRP.ShowAllSpecs()
+check("the spec button moves to your spec", profile.specMode == "yours" and profile.roles.Tank and RRP.BuildOn("DPS") and not profile.roles.Healer)
+RRP.SetBuild("DPS", false)
+check("your spec saves tank", profile.specMode == "yours" and profile.yourSpec.Tank and not profile.yourSpec.DPS and not profile.yourSpec.Healer)
+RRP.ShowAllSpecs()
+check("the spec button returns to all specs", profile.specMode == "all" and profile.roles.Tank and profile.roles.Healer and RRP.BuildOn("DPS"))
+RRP.ShowAllSpecs()
+check("your spec restores tank only", profile.roles.Tank and not RRP.BuildOn("DPS") and not profile.roles.Healer)
+check("all specs keeps paladin plate off a warrior", not RRP.IsRelevant(acolyte))
+RRP.EnableAllSpecs()
+RRP.SetBuild("Tank", false)
+check("a spec can be turned off after all specs", not profile.roles.Tank and profile.roles.Healer)
+profile.allClasses = true
+profile.showAll = false
+profile.previewClass = nil
+profile.roles.Tank = false
+profile.roles.Healer = false
+profile.roles.Hunter = false
+profile.roles.Caster = false
+profile.roles.Melee = true
+local casterPotion = RRP.GetByKey("Alchemy|Spellblasting Potion")
+check("dps for every class includes caster recipes", casterPotion and RRP.IsRelevant(casterPotion) and RRP.BuildMatch(casterPotion))
+check("all classes shows paladin plate", RRP.IsRelevant(acolyte))
+RRP.ToggleAllClasses()
+check("your class stays saved", profile.allClasses == false)
+check("your class hides paladin plate", not RRP.IsRelevant(acolyte))
+check("your class dps skips caster recipes", not RRP.BuildMatch(casterPotion))
+profile.roles.Tank = true
+profile.roles.Healer = true
 profile.roles.Melee = true
 profile.roles.Utility = true
 profile.profession = "All"
@@ -284,13 +328,25 @@ end
 profile.known = {}
 profile.learnScan = {}
 profile.scanSig = {}
-check("an unscanned recipe is unknown", RRP.LearnState(cooking[1]) == "unknown")
+check("an unscanned recipe is not learned", RRP.LearnState(cooking[1]) == "unlearned")
+check("the scan button stays until a profession is scanned", not RRP.HasScannedProfession())
 RRP.RecordLearnScan("Cooking", {[cooking[1].key] = true}, false, 1)
 check("a partial scan confirms the recipe it listed", RRP.LearnState(cooking[1]) == "learned")
-check("a partial scan leaves the rest unknown", RRP.LearnState(cooking[2]) == "unknown")
+check("a partial scan leaves the rest not learned", RRP.LearnState(cooking[2]) == "unlearned")
 RRP.RecordLearnScan("Cooking", {[cooking[1].key] = true}, true, 1)
 check("a complete scan marks a missing recipe unlearned", RRP.LearnState(cooking[2]) == "unlearned")
 check("a complete scan keeps the listed recipe learned", RRP.LearnState(cooking[1]) == "learned")
+check("a scanned profession retires the scan button", RRP.HasScannedProfession())
+local learnedSpell = RRP.Schematics[cooking[2].key].spellID
+RRP.MarkLearnedSpell(learnedSpell)
+check("learning the recipe spell marks it learned", RRP.LearnState(cooking[2]) == "learned", RRP.LearnState(cooking[2]))
+RRP.RecordLearnScan("Cooking", {[cooking[1].key] = true}, true, 1)
+check("a stale scan keeps the recipe just learned", RRP.LearnState(cooking[2]) == "learned", RRP.LearnState(cooking[2]))
+IsSpellKnown = function(id) return tonumber(id) == tonumber(RRP.Schematics[cooking[3].key].spellID) end
+profile.known[cooking[3].key] = nil
+RRP.SyncKnownSpells()
+check("a known profession spell marks the recipe learned", RRP.LearnState(cooking[3]) == "learned", RRP.LearnState(cooking[3]))
+IsSpellKnown = nil
 
 local printed = {}
 local realPrint = print
@@ -359,8 +415,8 @@ check("a skill bonus counts in the shown rank", RRP.ProfessionRank("Blacksmithin
 loadChunk("AlchemyComparisons.lua")
 loadChunk("BlacksmithingComparisons.lua")
 loadChunk("CookingComparisons.lua")
-loadChunk("favorcraft_enchanting/EnchantingComparisons.lua")
-loadChunk("favorcraft_engineering/EngineeringComparisons.lua")
+loadChunk("EnchantingComparisons.lua")
+loadChunk("EngineeringComparisons.lua")
 loadChunk("LeatherworkingComparisons.lua")
 loadChunk("LeatherworkingSourceAudit.lua")
 loadChunk("TailoringComparisons.lua")
@@ -380,6 +436,9 @@ check("all seven comparison modules are indexed", RRP.ComparisonByKey["Cooking|V
     and RRP.ComparisonByKey["Leatherworking|Brawler's Leather Hood"]
     and RRP.ComparisonByKey["Tailoring|Flame Boots"])
 check("wisdom is an alternative from the catalog note", wisdom and wisdom.tier == "alternative", wisdom and wisdom.tier)
+check("wisdom is labeled almost identical", wisdom and wisdom.label == "Almost Identical Item")
+check("wisdom is listed before the comparable intellect elixir",
+    intellect.entries[1].name == "Elixir of Wisdom" and intellect.entries[#intellect.entries].name == "Elixir of Intellect")
 check("wisdom acquisition is the profession trainer", wisdom and wisdom.acquisition == "Profession trainer")
 check("a researched intellect alternative is visible", entryNamed(intellect, "Elixir of Intellect").tier == "alternative")
 check("merchant spell id comes from the schematic", intellect.merchantSpellID == RRP.Schematics["Alchemy|Elixir of Lesser Intellect"].spellID)
@@ -450,10 +509,83 @@ check("Forever elixir name changes use their current item IDs",
     and entryNamed(RRP.ComparisonsFor(RRP.GetByKey("Alchemy|Elixir of the Whale")), "Elixir of Sages").itemID == 250338)
 check("Alchemy item links are independent of recipe-scroll IDs",
     entryNamed(RRP.ComparisonsFor(RRP.GetByKey("Alchemy|Elixir of Lesser Spirit")), "Elixir of Minor Spirit").itemID == 250344)
+local lesserSpirit = RRP.ComparisonsFor(RRP.GetByKey("Alchemy|Elixir of Lesser Spirit"))
+local minorSpirit = entryNamed(lesserSpirit, "Elixir of Minor Spirit")
+check("a comparable alchemy item omits the research note", lesserSpirit.header == nil and minorSpirit.label == "Comparable Item")
+check("a comparable alchemy item keeps its output id", minorSpirit.itemID == 250344)
 
 local belt = RRP.ComparisonsFor(RRP.GetByKey("Blacksmithing|Guard's Chain Belt"))
 check("same-slot gear is labeled by slot rather than promised equivalent",
     belt.status == "slot" and entryNamed(belt, "Runed Copper Belt").tier == "slot")
+local expectedSmithIds = {
+    ["Bronze Greatsword"] = 7957,
+    ["Bronze Warhammer"] = 7956,
+    ["Gemmed Copper Gauntlets"] = 3474,
+    ["Golden Scale Bracers"] = 6040,
+    ["Green Iron Helm"] = 3836,
+    ["Green Iron Leggings"] = 3842,
+    ["Heavy Mithril Boots"] = 7933,
+    ["Heavy Mithril Breastplate"] = 7930,
+    ["Heavy Mithril Gauntlet"] = 7919,
+    ["Heavy Mithril Shoulder"] = 7918,
+    ["Mithril Claws"] = 250609,
+    ["Mithril Plate Pants"] = 7920,
+    ["Rough Bronze Boots"] = 6350,
+    ["Runed Copper Belt"] = 2857,
+    ["Steel Breastplate"] = 7963,
+    ["Steel Plate Helm"] = 7922,
+}
+local smithMatches, smithUnique, smithMismatch = 0, {}, {}
+for _, recipe in ipairs(RRP.Catalog) do
+    if recipe.profession == "Blacksmithing" then
+        local view = RRP.ComparisonsFor(recipe)
+        for _, entry in ipairs(view.entries or {}) do
+            smithMatches = smithMatches + 1
+            smithUnique[entry.name] = entry.itemID
+            if entry.itemID ~= expectedSmithIds[entry.name] then
+                smithMismatch[#smithMismatch + 1] = (entry.name or "?") .. "=" .. tostring(entry.itemID)
+            end
+            if type(entry.acquisition) == "string" and entry.acquisition:find("http", 1, true) then
+                smithMismatch[#smithMismatch + 1] = entry.name .. " shows a source link"
+            end
+        end
+    end
+end
+local uniqueCount = 0
+for _ in pairs(smithUnique) do uniqueCount = uniqueCount + 1 end
+check("blacksmithing alternatives use the researched output ids",
+    smithMatches == 61 and uniqueCount == 16 and #smithMismatch == 0,
+    smithMatches .. " matches, " .. uniqueCount .. " items, " .. table.concat(smithMismatch, ", "))
+check("the merchant belt stays separate from the trainer belt",
+    belt.merchantItemID == 250514 and entryNamed(belt, "Runed Copper Belt").itemID == 2857)
+check("mithril claws are the crafted weapon, not the plans",
+    entryNamed(RRP.ComparisonsFor(RRP.GetByKey("Blacksmithing|Thorium Cestus")), "Mithril Claws").itemID == 250609)
+local gauntlets = entryNamed(RRP.ComparisonsFor(RRP.GetByKey("Blacksmithing|Guard's Gloves")), "Gemmed Copper Gauntlets")
+check("gemmed copper gauntlets are the crafted gloves, not the plans", gauntlets and gauntlets.itemID == 3474)
+check("an unlocated plan is learned from a recipe", gauntlets and gauntlets.acquisition == "Learned from a recipe")
+local copper = entryNamed(belt, "Runed Copper Belt")
+check("a trainer comparison names the profession trainer",
+    copper and copper.acquisition == "Profession trainer" and not copper.acquisition:find("database", 1, true))
+check("same equipment slot stays without an unfinished stat note",
+    copper and copper.similarities and copper.similarities[1] == "Same equipment slot."
+    and (not copper.differences or #copper.differences == 0))
+local minorSpirit = entryNamed(RRP.ComparisonsFor(RRP.GetByKey("Alchemy|Elixir of Lesser Spirit")), "Elixir of Minor Spirit")
+local spiritText = minorSpirit and table.concat(minorSpirit.similarities or {}, " ") or ""
+check("alchemy keeps the spirit comparison", spiritText:find("Spirit bonus", 1, true) and not spiritText:lower():find("compare", 1, true))
+local unfinishedNote
+for _, recipe in ipairs(RRP.Catalog) do
+    if recipe.profession == "Alchemy" or recipe.profession == "Blacksmithing" or recipe.profession == "Cooking" then
+        local view = RRP.ComparisonsFor(recipe)
+        for _, entry in ipairs(view.entries or {}) do
+            local text = (table.concat(entry.similarities or {}, " ") .. " " .. table.concat(entry.differences or {}, " ")):lower()
+            if text:find("not yet", 1, true) or text:find("not compared", 1, true)
+                or text:find("must be compared", 1, true) or text:find("must be verified", 1, true) then
+                unfinishedNote = recipe.name .. ": " .. (entry.name or "")
+            end
+        end
+    end
+end
+check("comparison text does not list unfinished work", unfinishedNote == nil, unfinishedNote)
 local venom = RRP.ComparisonsFor(RRP.GetByKey("Cooking|Venomous Smoothie"))
 local peace = entryNamed(venom, "Peace Tea")
 local slimy = entryNamed(venom, "Slimy Smoothie")
@@ -461,7 +593,38 @@ check("a cooking recipe has several alternatives", #venom.entries >= 2)
 check("peace tea's documented alternative and source are visible",
     peace and peace.tier == "alternative" and peace.acquisition:find("World drop", 1, true))
 check("another favor smoothie uses its real item id", slimy and slimy.itemID == RRP.Schematics["Cooking|Slimy Smoothie"].outputItemID)
-check("peace tea has no invented item id", peace and peace.itemID == nil)
+check("peace tea uses the researched drink, not a recipe scroll", peace and peace.itemID == 249865)
+local expectedTeaIds = {
+    ["Peace Tea"] = 249865,
+    ["Royal Tea"] = 249866,
+    ["Root Tea"] = 249867,
+    ["Triage Tea"] = 249868,
+    ["Sunny Tea"] = 249869,
+    ["Sage's Tea"] = 249870,
+}
+local teaSeen, teaMismatch = 0, {}
+for _, recipe in ipairs(RRP.Catalog) do
+    if recipe.profession == "Cooking" then
+        local view = RRP.ComparisonsFor(recipe)
+        if view.merchantItemID ~= RRP.Schematics[recipe.key].outputItemID then
+            teaMismatch[#teaMismatch + 1] = recipe.name .. " merchant " .. tostring(view.merchantItemID)
+        end
+        for _, entry in ipairs(view.entries or {}) do
+            local expected = expectedTeaIds[entry.name]
+            if expected then
+                teaSeen = teaSeen + 1
+                if entry.itemID ~= expected or entry.itemID == 249880 then
+                    teaMismatch[#teaMismatch + 1] = entry.name .. "=" .. tostring(entry.itemID)
+                end
+            end
+            if type(entry.acquisition) == "string" and entry.acquisition:find("http", 1, true) then
+                teaMismatch[#teaMismatch + 1] = entry.name .. " shows a source link"
+            end
+        end
+    end
+end
+check("cooking teas use the researched drink ids", teaSeen == 6 and #teaMismatch == 0,
+    teaSeen .. " teas, " .. table.concat(teaMismatch, ", "))
 local calcified = RRP.ComparisonsFor(RRP.GetByKey("Cooking|Calcified Smoothie"))
 local triage = nil
 for i = 1, #calcified.entries do
@@ -539,13 +702,151 @@ check("all seven professions are represented in the lookup", coverage.Alchemy ==
     and coverage.Enchanting == 39 and coverage.Engineering == 26
     and coverage.Leatherworking == 81 and coverage.Tailoring == 67)
 check("beta comparison records are shown for the researched recipes", selected >= 150, selected)
-check("published research does not imply source IDs",
-    peace and peace.itemID == nil and parachute and parachute.itemID == nil)
+check("an unresearched alternative still has no item id", parachute and parachute.itemID == nil)
 check("no blanket unverified label on ordinary comparisons",
     belt.entries[1].label == "Same-slot Gear" and hoodSource.label == "Additional Recipe Source")
 local before = profile.plan["Alchemy|Elixir of Lesser Intellect"]
 RRP.ComparisonsFor(RRP.GetByKey("Alchemy|Elixir of Lesser Intellect"))
 check("reading a comparison leaves the plan alone", profile.plan["Alchemy|Elixir of Lesser Intellect"] == before)
+
+local function applyClassSpec(class)
+    profile.allClasses = false
+    profile.showAll = false
+    profile.hideLearned = false
+    profile.profession = "Alchemy"
+    profile.search = nil
+    profile.previewClass = class
+    profile.roles.Tank = false
+    profile.roles.Healer = false
+    profile.roles.Melee = false
+    profile.roles.Hunter = false
+    profile.roles.Caster = false
+    profile.roles.Paladin = false
+    profile.roles.Utility = true
+    if class == "WARRIOR" then
+        profile.roles.Tank = true
+    elseif class == "PALADIN" or class == "DRUID" or class == "SHAMAN" then
+        profile.roles.Tank = true
+        profile.roles.Healer = true
+        if class == "PALADIN" then profile.roles.Paladin = true end
+    elseif class == "PRIEST" then
+        profile.roles.Healer = true
+    end
+    for _, role in ipairs(RRP.DPSRolesFor(class)) do
+        profile.roles[role] = true
+    end
+end
+local function alchemyCount()
+    local n = 0
+    for _, recipe in ipairs(RRP.VisibleRecipes()) do
+        if recipe.profession == "Alchemy" then n = n + 1 end
+    end
+    return n
+end
+local function visibleKey(key)
+    for _, recipe in ipairs(RRP.VisibleRecipes()) do
+        if recipe.key == key then return true end
+    end
+    return false
+end
+
+applyClassSpec("HUNTER")
+local hunterRoles = RRP.DPSRolesFor("HUNTER")
+check("hunter gear dps stays hunter and melee", hunterRoles[1] == "Hunter" and hunterRoles[2] == "Melee" and #hunterRoles == 2)
+check("hunter profile does not store caster", profile.roles.Caster ~= true)
+check("hunter dps includes lesser arcane elixir", visibleKey("Alchemy|Lesser Arcane Elixir"))
+check("hunter dps includes lesser spirit", visibleKey("Alchemy|Elixir of Lesser Spirit"))
+check("hunter dps includes lesser intellect", visibleKey("Alchemy|Elixir of Lesser Intellect"))
+check("hunter dps includes lesser mageblood", visibleKey("Alchemy|Lesser Mageblood Elixir"))
+check("hunter dps includes greater spirit", visibleKey("Alchemy|Elixir of Greater Spirit"))
+check("hunter dps includes greater mageblood", visibleKey("Alchemy|Greater Mageblood Elixir"))
+check("hunter dps includes elixir of the owl", visibleKey("Alchemy|Elixir of the Owl"))
+check("hunter alchemy count is 22", alchemyCount() == 22, alchemyCount())
+check("hunter dps skips caster enchants", not RRP.BuildMatch(RRP.GetByKey("Enchanting|Enchant Necklace - Spell Power")))
+check("hunter dps skips caster cooking", not RRP.BuildMatch(RRP.GetByKey("Cooking|Venomous Smoothie")))
+check("hunter dps skips caster mail", not RRP.BuildMatch(RRP.GetByKey("Leatherworking|Skycaller's Mail Shoulder")))
+profile.roles.Healer = true
+RRP.SetBuild("DPS", false)
+check("turning dps off hides lesser arcane", not visibleKey("Alchemy|Lesser Arcane Elixir"))
+check("a healer filter still shows lesser spirit", visibleKey("Alchemy|Elixir of Lesser Spirit"))
+
+applyClassSpec("PALADIN")
+local paladinRoles = RRP.DPSRolesFor("PALADIN")
+check("paladin gear dps stays melee", paladinRoles[1] == "Melee" and #paladinRoles == 1)
+check("paladin dps includes caster alchemy", visibleKey("Alchemy|Lesser Arcane Elixir") and visibleKey("Alchemy|Elixir of the Owl"))
+check("paladin alchemy count is 29", alchemyCount() == 29, alchemyCount())
+RRP.SetBuild("DPS", false)
+check("paladin without dps hides caster-only alchemy", not visibleKey("Alchemy|Spellblasting Potion") and not visibleKey("Alchemy|Lesser Arcane Elixir"))
+check("paladin healer still shows mender's potion", visibleKey("Alchemy|Mender's Potion"))
+
+applyClassSpec("SHAMAN")
+check("shaman alchemy count stays 29", alchemyCount() == 29, alchemyCount())
+applyClassSpec("DRUID")
+check("druid alchemy count stays 29", alchemyCount() == 29, alchemyCount())
+applyClassSpec("MAGE")
+check("mage alchemy count stays 18", alchemyCount() == 18, alchemyCount())
+applyClassSpec("PRIEST")
+check("priest alchemy count stays 22", alchemyCount() == 22, alchemyCount())
+applyClassSpec("WARLOCK")
+check("warlock alchemy count stays 18", alchemyCount() == 18, alchemyCount())
+applyClassSpec("WARRIOR")
+check("warrior alchemy count stays 10", alchemyCount() == 10, alchemyCount())
+check("warrior dps skips lesser arcane", not visibleKey("Alchemy|Lesser Arcane Elixir"))
+applyClassSpec("ROGUE")
+check("rogue alchemy count stays 7", alchemyCount() == 7, alchemyCount())
+check("rogue dps skips lesser arcane", not visibleKey("Alchemy|Lesser Arcane Elixir"))
+
+applyClassSpec("WARRIOR")
+profile.showAll = true
+check("show all recipes still lists every alchemy recipe", alchemyCount() == 29, alchemyCount())
+
+applyClassSpec("HUNTER")
+profile.known["Alchemy|Lesser Arcane Elixir"] = true
+RRP.SetPreviewClass("MAGE")
+check("switching preview class keeps the learned flag", profile.known["Alchemy|Lesser Arcane Elixir"] == true)
+check("lesser arcane stays learned for a mage preview", RRP.LearnState(RRP.GetByKey("Alchemy|Lesser Arcane Elixir")) == "learned")
+RRP.SetPreviewClass("HUNTER")
+check("lesser arcane stays learned for a hunter preview", RRP.LearnState(RRP.GetByKey("Alchemy|Lesser Arcane Elixir")) == "learned")
+profile.hideLearned = true
+check("hide learned still removes lesser arcane", not visibleKey("Alchemy|Lesser Arcane Elixir"))
+profile.hideLearned = false
+local savedPlan = profile.plan["Alchemy|Elixir of Lesser Intellect"]
+profile.roles.Caster = false
+profile.specMode = "none"
+profile.specsDefaulted = true
+local migrated = RRP.GetProfile()
+check("an older spec mode still loads", migrated.specMode == "all")
+check("a saved learned flag survives", migrated.known["Alchemy|Lesser Arcane Elixir"] == true)
+check("a saved plan survives", migrated.plan["Alchemy|Elixir of Lesser Intellect"] == savedPlan)
+check("a saved profile does not gain a caster role", migrated.roles.Caster ~= true)
+
+profile.allClasses = false
+RRP.SetProfession("Blacksmithing")
+check("blacksmithing leaves my class selected", profile.allClasses == false)
+RRP.SetProfession("Leatherworking")
+check("leatherworking leaves my class selected", profile.allClasses == false)
+RRP.SetProfession("Tailoring")
+check("tailoring leaves my class selected", profile.allClasses == false)
+RRP.SetProfession("All")
+check("every profession leaves my class selected", profile.allClasses == false)
+profile.allClasses = false
+RRP.SetProfession("Alchemy")
+check("alchemy switches to all classes", profile.allClasses == true)
+profile.allClasses = false
+RRP.SetProfession("Enchanting")
+check("enchanting switches to all classes", profile.allClasses == true)
+profile.allClasses = false
+RRP.SetProfession("Engineering")
+check("engineering switches to all classes", profile.allClasses == true)
+profile.allClasses = false
+RRP.SetProfession("Cooking")
+check("cooking switches to all classes", profile.allClasses == true)
+local groups = RRP.ProfessionGroups
+check("armor crafts lead the profession list", groups
+    and groups[1][1] == "Blacksmithing" and groups[1][2] == "Leatherworking" and groups[1][3] == "Tailoring")
+check("enchanting engineering and alchemy are grouped together", groups
+    and groups[2][1] == "Enchanting" and groups[2][2] == "Engineering" and groups[2][3] == "Alchemy")
+check("cooking is the last profession group", groups and groups[3][1] == "Cooking" and #groups == 3)
 
 if failures > 0 then
     print(failures .. " failed")

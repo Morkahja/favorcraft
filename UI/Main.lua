@@ -92,13 +92,10 @@ for _, class in ipairs(RRP.ClassOrder) do
 end
 classDrop:SetChoices(classChoices)
 
-local buildsLabel = UI.Label(filter, "GameFontNormalSmall", "Builds")
-buildsLabel:SetPoint("LEFT", 236, 0)
-buildsLabel:SetWidth(46)
-local buildNames = {"Tank", "DPS", "Healer", "Other"}
+local buildNames = {"Tank", "DPS", "Healer"}
 local buildChecks = {}
-local buildX = 286
-local buildW = {58, 52, 68, 62}
+local buildX = 232
+local buildW = {58, 52, 68}
 for i, name in ipairs(buildNames) do
     local check = UI.Check(filter, name, buildW[i])
     check:SetPoint("LEFT", buildX, 0)
@@ -106,10 +103,21 @@ for i, name in ipairs(buildNames) do
     check.onToggle = function(on) RRP.SetBuild(name, on) end
     buildChecks[name] = check
 end
-buildChecks.Tank.tipLine = "Show tank recipes for the selected class. Other builds stay hidden while this is the only one checked."
-buildChecks.DPS.tipLine = "Show damage recipes for the selected class. Mage, warlock, and priest use caster recipes. Hunter uses hunter and melee."
-buildChecks.Healer.tipLine = "Show healing recipes for the selected class."
-buildChecks.Other.tipLine = "Show utility recipes, such as bags and special tools."
+buildChecks.Tank.tipLine = "Show tank recipes for the selected class, plus utility recipes such as bags and tools."
+buildChecks.DPS.tipLine = "Show damage recipes for the selected class, plus utility recipes. Mage, warlock, and priest use caster recipes. Hunter uses hunter and melee."
+buildChecks.Healer.tipLine = "Show healing recipes for the selected class, plus utility recipes such as bags and tools."
+
+local allSpecs = UI.Button(filter, "All specs", 100, 22)
+allSpecs:SetPoint("LEFT", buildChecks.Healer, "RIGHT", 8, 0)
+allSpecs.tip = "Specs"
+allSpecs.tipLine = "Switch between all specs and my spec. Boxes you set while it says My spec are saved."
+allSpecs:SetScript("OnClick", function() RRP.ShowAllSpecs() end)
+
+local allClasses = UI.Button(filter, "All classes", 108, 22)
+allClasses:SetPoint("LEFT", allSpecs, "RIGHT", 8, 0)
+allClasses.tip = "All classes"
+allClasses.tipLine = "Show every class. Click again for my class only. This choice is saved. Alchemy, Cooking, Enchanting, and Engineering return to all classes. Tank, DPS, and Healer still apply."
+allClasses:SetScript("OnClick", function() RRP.ToggleAllClasses() end)
 
 local showAll = UI.Button(filter, "Show All Recipes", 148, 22)
 showAll:SetPoint("RIGHT", 0, 0)
@@ -184,12 +192,35 @@ dismissPrompt:SetScript("OnClick", function()
     scanPrompt:Hide()
 end)
 
+local scanHelp = CreateFrame("Frame", nil, f, "BackdropTemplate")
+scanHelp:SetSize(480, 128)
+scanHelp:SetPoint("CENTER", 0, 20)
+scanHelp:SetFrameLevel(f:GetFrameLevel() + 50)
+UI.Paint(scanHelp)
+scanHelp:EnableMouse(true)
+scanHelp:Hide()
+local scanHelpText = UI.Label(scanHelp, "GameFontHighlight")
+scanHelpText:SetPoint("TOPLEFT", 16, -16)
+scanHelpText:SetSize(448, 64)
+scanHelpText:SetJustifyV("TOP")
+scanHelpText:SetText("Open a profession window, such as Alchemy or Engineering. FavorCraft scans the recipe list while that window is open.")
+local closeScanHelp = UI.Button(scanHelp, "Close", 80, 24)
+closeScanHelp:SetPoint("BOTTOMRIGHT", -16, 14)
+closeScanHelp:SetScript("OnClick", function() scanHelp:Hide() end)
+
+function UI.ShowScanHelp()
+    scanHelp:Show()
+end
+
 function UI.RefreshScanPrompt()
     if RRP.scanPromptHidden or not f:IsShown() then
         scanPrompt:Hide()
         return
     end
     local missing = RRP.UnscannedProfessions and RRP.UnscannedProfessions() or {}
+    if RRP.HasScannedProfession and RRP.HasScannedProfession() then
+        scanHelp:Hide()
+    end
     if #missing == 0 then
         scanPrompt:Hide()
         return
@@ -242,6 +273,12 @@ function UI.RefreshHeader()
     end
     showAll:SetText(profile.showAll and "Showing All Recipes" or "Show All Recipes")
     showAll:SetStyle(profile.showAll and "armed" or "dark")
+    local specMode = profile.specMode == "yours" and "yours" or "all"
+    allSpecs:SetText(specMode == "yours" and "My spec" or "All specs")
+    allSpecs:SetStyle("armed")
+    local everyClass = profile.allClasses ~= false
+    allClasses:SetText(everyClass and "All classes" or "My class")
+    allClasses:SetStyle(everyClass and "armed" or "dark")
     if UI.RefreshSettings then UI.RefreshSettings() end
 end
 
@@ -311,6 +348,7 @@ end)
 
 f:SetScript("OnShow", function()
     RRP.scanPromptHidden = nil
+    if RRP.EnableAllSpecs then RRP.EnableAllSpecs() end
     if RRP.SyncProfessions then RRP.SyncProfessions() end
     if RRP.QueueProfessionScan then RRP.QueueProfessionScan(true) end
     RRP.Refresh()

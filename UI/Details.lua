@@ -226,6 +226,23 @@ function UI.BuildDetails(panel)
         if tier == "related" or tier == "slot" or tier == "reported" then return 0.95, 0.72, 0.28 end
         return 0.7, 0.66, 0.58
     end
+    local function textWidth()
+        local w = scroll.GetWidth and scroll:GetWidth() or 0
+        if type(w) ~= "number" or w < 120 then
+            w = panel.GetWidth and panel:GetWidth() or 0
+            if type(w) == "number" and w > 40 then w = w - 20 end
+        end
+        if type(w) ~= "number" or w < 120 then w = 360 end
+        return math.floor(w - 36)
+    end
+    local function wrapLabel(label, y, width)
+        label:ClearAllPoints()
+        label:SetPoint("TOPLEFT", 24, y)
+        label:SetWidth(width)
+        if label.SetWordWrap then label:SetWordWrap(true) end
+        label:SetJustifyH("LEFT")
+        label:SetJustifyV("TOP")
+    end
     local function fitHeight(label, minimum)
         label:SetHeight(900)
         local h = type(label.GetStringHeight) == "function" and label:GetStringHeight() or 0
@@ -234,11 +251,14 @@ function UI.BuildDetails(panel)
         label:SetHeight(h)
         return h
     end
-    local function sourceDomain(entry)
-        local refs = entry and entry.references
-        local url = refs and refs[1]
-        if type(url) ~= "string" then return nil end
-        return url:match("^https?://([^/]+)")
+    local function sentences(parts)
+        local bits = {}
+        for i = 1, #parts do
+            local part = tostring(parts[i] or "")
+            part = part:gsub("%.+$", "")
+            if part ~= "" then bits[#bits + 1] = part .. "." end
+        end
+        return table.concat(bits, " ")
     end
     local function showComparisons(recipe)
         if not recipe or not RRP.ComparisonsFor then
@@ -252,20 +272,35 @@ function UI.BuildDetails(panel)
         comparisonTitle:Show()
         comparisonNote:Hide()
         scroll:Show()
-        scroll:ClearAllPoints()
-        scroll:SetPoint("TOPLEFT", 8, -254)
-        scroll:SetPoint("BOTTOMRIGHT", -8, alert:IsShown() and 78 or 36)
         if compareKey ~= recipe.key then
             scroll:SetVerticalScroll(0)
             compareKey = recipe.key
+        end
+
+        local function placeComparisons(contentH)
+            local bottom = alert:IsShown() and 78 or 36
+            local panelH = panel.GetHeight and panel:GetHeight() or 0
+            local maxH = 180
+            if type(panelH) == "number" and panelH > 300 then
+                maxH = panelH - 248 - bottom
+            end
+            if maxH < 36 then maxH = 36 end
+            local scrollH = contentH
+            if scrollH > maxH then scrollH = maxH end
+            if scrollH < 28 then scrollH = 28 end
+            scroll:ClearAllPoints()
+            scroll:SetPoint("BOTTOMLEFT", 8, bottom)
+            scroll:SetPoint("BOTTOMRIGHT", -8, bottom)
+            scroll:SetHeight(scrollH)
+            comparisonTitle:ClearAllPoints()
+            comparisonTitle:SetPoint("BOTTOMLEFT", scroll, "TOPLEFT", 4, 4)
         end
 
         local offset = 0
         if type(view.header) == "string" and view.header ~= "" then
             intro:SetText(view.header)
             intro:Show()
-            intro:ClearAllPoints()
-            intro:SetPoint("TOPLEFT", 24, 0)
+            wrapLabel(intro, 0, textWidth())
             offset = fitHeight(intro, 20) + 12
         else
             intro:Hide()
@@ -285,19 +320,22 @@ function UI.BuildDetails(panel)
             row.title:SetTextColor(0.7, 0.66, 0.58)
             row.status:SetText("")
             row.acq:SetText("")
+            row.acq:Hide()
             row.body:SetText(view.note or "No comparison has been recorded for this recipe yet.")
-            row.body:ClearAllPoints()
-            row.body:SetPoint("TOPLEFT", 24, -26)
+            wrapLabel(row.body, -26, textWidth())
             local rowH = 28 + fitHeight(row.body, 24) + 8
             row:ClearAllPoints()
             row:SetPoint("TOPLEFT", 0, -offset)
             row:SetHeight(rowH)
             for i = 2, #compareRows do compareRows[i]:Hide() end
             child:SetHeight(offset + rowH)
+            placeComparisons(offset + rowH)
             return
         end
 
         local shown = math.min(#entries, #compareRows)
+        local width = textWidth()
+        child:SetWidth(width + 32)
         for i = 1, #compareRows do
             local row = compareRows[i]
             local entry = entries[i]
@@ -325,34 +363,48 @@ function UI.BuildDetails(panel)
                 local sourceText
                 if entry.kind == "source" then
                     sourceText = "Other sources listed for this same recipe pattern"
-                else
-                    sourceText = "Acquisition: " .. (entry.acquisition or "Source not recorded.")
+                elseif type(entry.acquisition) == "string" and entry.acquisition ~= ""
+                    and entry.acquisition ~= "Acquisition source not recorded." then
+                    sourceText = entry.acquisition
                 end
-                row.acq:SetText(sourceText)
-                row.acq:ClearAllPoints()
-                row.acq:SetPoint("TOPLEFT", 24, -18)
-                local acqH = fitHeight(row.acq, 15)
+                local acqH = 0
+                wrapLabel(row.acq, -18, width)
+                if sourceText then
+                    row.acq:SetText(sourceText)
+                    row.acq:Show()
+                    acqH = fitHeight(row.acq, 15)
+                else
+                    row.acq:SetText("")
+                    row.acq:Hide()
+                end
 
                 local body = {}
                 if entry.kind == "source" and entry.lines then
                     for j = 1, #entry.lines do body[#body + 1] = entry.lines[j] end
                 end
                 if entry.similarities and #entry.similarities > 0 then
-                    body[#body + 1] = "Similarities: " .. table.concat(entry.similarities, " ")
+                    body[#body + 1] = "Similarities: " .. sentences(entry.similarities)
                 end
                 if entry.differences and #entry.differences > 0 then
-                    body[#body + 1] = "Differences: " .. table.concat(entry.differences, " ")
+                    body[#body + 1] = "Differences: " .. sentences(entry.differences)
                 end
-                local domain = sourceDomain(entry)
-                if domain then body[#body + 1] = "Reference: " .. domain end
                 if shown < #entries and i == shown then
                     body[#body + 1] = "+" .. (#entries - shown) .. " more comparisons."
                 end
-                row.body:SetText(table.concat(body, "\n"))
-                row.body:ClearAllPoints()
-                row.body:SetPoint("TOPLEFT", 24, -(22 + acqH + 4))
-                local rowH = 22 + acqH + 4 + fitHeight(row.body, 25) + 10
-                row:SetHeight(math.max(ROW_H, rowH))
+                local bodyText = table.concat(body, "\n")
+                local bodyH = 0
+                wrapLabel(row.body, -(22 + acqH + 2), width)
+                if bodyText ~= "" then
+                    row.body:SetText(bodyText)
+                    row.body:Show()
+                    bodyH = fitHeight(row.body, 14) + 4
+                else
+                    row.body:SetText("")
+                    row.body:Hide()
+                end
+                local rowH = 22 + acqH + bodyH + 6
+                row:SetWidth(width + 32)
+                row:SetHeight(rowH)
                 row:ClearAllPoints()
                 row:SetPoint("TOPLEFT", 0, -offset)
                 offset = offset + row:GetHeight()
@@ -361,7 +413,8 @@ function UI.BuildDetails(panel)
                 row:Hide()
             end
         end
-        child:SetHeight(math.max(ROW_H, offset))
+        child:SetHeight(math.max(28, offset))
+        placeComparisons(offset)
     end
 
     local function showMaterials(recipe)
@@ -444,12 +497,7 @@ function UI.BuildDetails(panel)
         pattern:SetText(scrollId and RRP.ItemLabel(scrollId) or "")
         pattern:SetTextColor(0.9, 0.86, 0.75)
         showMaterials(recipe)
-        if recipe.alternative and recipe.alternative ~= "" then
-            alertText:SetText(recipe.alternative)
-            alert:Show()
-        else
-            alert:Hide()
-        end
+        alert:Hide()
         if RRP.IsDiscovered(recipe) then forget:Show() else forget:Hide() end
         showComparisons(recipe)
     end

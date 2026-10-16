@@ -14,7 +14,7 @@ Favorcraft.AlchemyComparisons = {
     ["merchant_recipe_name"] = "Elixir of Lesser Spirit",
     ["classification"] = "alternative",
     ["effect_reported"] = "+6 Spirit, 30 min",
-    ["summary"] = "Spirit bonus; compare potency, duration and cost.",
+    ["summary"] = "Spirit bonus.",
     ["matches"] = {
       {
         ["name"] = "Elixir of Minor Spirit",
@@ -36,13 +36,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Lesser Mageblood Elixir"] = {
     ["merchant_recipe_name"] = "Lesser Mageblood Elixir",
     ["classification"] = "alternative",
     ["effect_reported"] = "+6 mana / 5 sec, 30 min",
-    ["summary"] = "Mana regeneration over time; tier and duration may differ.",
+    ["summary"] = "Mana regeneration over time. Tier and duration may differ.",
     ["matches"] = {
       {
         ["name"] = "Minor Mageblood Elixir",
@@ -64,13 +63,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Mender's Potion"] = {
     ["merchant_recipe_name"] = "Mender's Potion",
     ["classification"] = "alternative",
     ["effect_reported"] = "+28 healing, 30 sec",
-    ["summary"] = "Short-duration healing power enhancement; different magnitude.",
+    ["summary"] = "Short-duration healing power enhancement. Different magnitude.",
     ["matches"] = {
       {
         ["name"] = "Minor Mender's Potion",
@@ -92,13 +90,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Spellblasting Potion"] = {
     ["merchant_recipe_name"] = "Spellblasting Potion",
     ["classification"] = "alternative",
     ["effect_reported"] = "+14 spell damage, 30 sec",
-    ["summary"] = "Short-duration spell damage enhancement; different magnitude.",
+    ["summary"] = "Short-duration spell damage enhancement. Different magnitude.",
     ["matches"] = {
       {
         ["name"] = "Minor Spellblasting Potion",
@@ -120,13 +117,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Frenzy Potion"] = {
     ["merchant_recipe_name"] = "Frenzy Potion",
     ["classification"] = "alternative",
     ["effect_reported"] = "+14 attack power, 30 sec",
-    ["summary"] = "Short-duration attack power enhancement; different magnitude.",
+    ["summary"] = "Short-duration attack power enhancement. Different magnitude.",
     ["matches"] = {
       {
         ["name"] = "Minor Frenzy Potion",
@@ -148,61 +144,56 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Disorienting Smog Potion"] = {
     ["merchant_recipe_name"] = "Disorienting Smog Potion",
     ["classification"] = "distinct",
     ["effect_reported"] = "Ground-targeted -15% hit chance, 8 sec",
-    ["summary"] = "Ground-area hit-chance debuff; no verified close conventional counterpart.",
+    ["summary"] = "Ground-area hit-chance debuff.",
     ["matches"] = {
     },
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Dragonfire Potion"] = {
     ["merchant_recipe_name"] = "Dragonfire Potion",
     ["classification"] = "distinct",
     ["effect_reported"] = "Fire cone damage and burning effect",
-    ["summary"] = "Fire cone/direct damage-over-time; no verified close conventional counterpart.",
+    ["summary"] = "Fire cone/direct damage-over-time.",
     ["matches"] = {
     },
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Caustic Smog Potion"] = {
     ["merchant_recipe_name"] = "Caustic Smog Potion",
     ["classification"] = "distinct",
     ["effect_reported"] = "Ground-targeted Nature damage over time",
-    ["summary"] = "Ground-area nature damage; no verified close conventional counterpart.",
+    ["summary"] = "Ground-area nature damage.",
     ["matches"] = {
     },
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Potion of Venomous Blood"] = {
     ["merchant_recipe_name"] = "Potion of Venomous Blood",
     ["classification"] = "distinct",
     ["effect_reported"] = "Reactive Nature damage against bleed effects",
-    ["summary"] = "Reactive bleed-triggered nature damage; no verified close conventional counterpart.",
+    ["summary"] = "Reactive bleed-triggered nature damage.",
     ["matches"] = {
     },
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Major Mender's Potion"] = {
     ["merchant_recipe_name"] = "Major Mender's Potion",
     ["classification"] = "alternative",
     ["effect_reported"] = "+75 healing, 30 sec",
-    ["summary"] = "Same short healing-power buff family; stronger tier.",
+    ["summary"] = "Same short healing-power buff family. Stronger tier.",
     ["matches"] = {
       {
         ["name"] = "Greater Mender's Potion",
@@ -224,13 +215,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Potion of Elemental Purging"] = {
     ["merchant_recipe_name"] = "Potion of Elemental Purging",
     ["classification"] = "alternative",
     ["effect_reported"] = "Bonus spell damage versus Elementals (value/duration disputed)",
-    ["summary"] = "Spell damage against elementals only; unlike broad spell-damage buffs.",
+    ["summary"] = "Spell damage against elementals only. Unlike broad spell-damage buffs.",
     ["matches"] = {
       {
         ["name"] = "Arcane Elixir",
@@ -252,13 +242,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Major Spellblasting Potion"] = {
     ["merchant_recipe_name"] = "Major Spellblasting Potion",
     ["classification"] = "alternative",
     ["effect_reported"] = "+40 spell damage, 30 sec",
-    ["summary"] = "Same short spell-damage buff family; stronger tier.",
+    ["summary"] = "Same short spell-damage buff family. Stronger tier.",
     ["matches"] = {
       {
         ["name"] = "Greater Spellblasting Potion",
@@ -280,13 +269,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Major Frenzy Potion"] = {
     ["merchant_recipe_name"] = "Major Frenzy Potion",
     ["classification"] = "alternative",
     ["effect_reported"] = "+40 attack power, 30 sec",
-    ["summary"] = "Same short attack-power buff family; stronger tier.",
+    ["summary"] = "Same short attack-power buff family. Stronger tier.",
     ["matches"] = {
       {
         ["name"] = "Greater Frenzy Potion",
@@ -308,13 +296,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Elixir of Lesser Intellect"] = {
     ["merchant_recipe_name"] = "Elixir of Lesser Intellect",
     ["classification"] = "equivalent",
     ["effect_reported"] = "+6 Intellect, 30 min",
-    ["summary"] = "Wisdom shares +6 Intellect; 60 minutes versus Favor 30 minutes. Intellect is a related tier.",
+    ["summary"] = "Wisdom shares +6 Intellect. 60 minutes versus Favor 30 minutes. Intellect is a related tier.",
     ["matches"] = {
       {
         ["name"] = "Elixir of Wisdom",
@@ -336,13 +323,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Lesser Cleric's Elixir"] = {
     ["merchant_recipe_name"] = "Lesser Cleric's Elixir",
     ["classification"] = "alternative",
     ["effect_reported"] = "+20 healing, 30 min",
-    ["summary"] = "Same healing power family; different strength.",
+    ["summary"] = "Same healing power family. Different strength.",
     ["matches"] = {
       {
         ["name"] = "Minor Cleric's Elixir",
@@ -364,13 +350,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Lesser Arcane Elixir"] = {
     ["merchant_recipe_name"] = "Lesser Arcane Elixir",
     ["classification"] = "alternative",
     ["effect_reported"] = "+15 spell damage, 30 min",
-    ["summary"] = "+15 versus +20 versus +35 spell damage; different requirements and duration.",
+    ["summary"] = "+15 versus +20 versus +35 spell damage. Different requirements and duration.",
     ["matches"] = {
       {
         ["name"] = "Arcane Elixir",
@@ -392,13 +377,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Elixir of Greater Spirit"] = {
     ["merchant_recipe_name"] = "Elixir of Greater Spirit",
     ["classification"] = "alternative",
     ["effect_reported"] = "+18 Spirit, 30 min",
-    ["summary"] = "+18 Spirit for 30 minutes; other Spirit tiers differ.",
+    ["summary"] = "+18 Spirit for 30 minutes. Other Spirit tiers differ.",
     ["matches"] = {
       {
         ["name"] = "Elixir of Spirit",
@@ -420,13 +404,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Greater Mageblood Elixir"] = {
     ["merchant_recipe_name"] = "Greater Mageblood Elixir",
     ["classification"] = "alternative",
     ["effect_reported"] = "+20 mana / 5 sec, 30 min",
-    ["summary"] = "Mana regeneration family; different regeneration amount.",
+    ["summary"] = "Mana regeneration family. Different regeneration amount.",
     ["matches"] = {
       {
         ["name"] = "Mageblood Elixir",
@@ -448,13 +431,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Greater Cleric's Elixir"] = {
     ["merchant_recipe_name"] = "Greater Cleric's Elixir",
     ["classification"] = "alternative",
     ["effect_reported"] = "+40 healing, 30 min",
-    ["summary"] = "Healing power family; +40 versus Lesser +20.",
+    ["summary"] = "Healing power family. +40 versus Lesser +20.",
     ["matches"] = {
       {
         ["name"] = "Cleric's Elixir",
@@ -476,13 +458,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Elixir of Greater Fortitude"] = {
     ["merchant_recipe_name"] = "Elixir of Greater Fortitude",
     ["classification"] = "alternative",
     ["effect_reported"] = "+400 health, 30 min",
-    ["summary"] = "Maximum health bonus family; Favor +400 health.",
+    ["summary"] = "Maximum health bonus family. Favor +400 health.",
     ["matches"] = {
       {
         ["name"] = "Elixir of Minor Fortitude",
@@ -504,13 +485,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Elixir of the Phalanx"] = {
     ["merchant_recipe_name"] = "Elixir of the Phalanx",
     ["classification"] = "alternative",
     ["effect_reported"] = "+400 health, +500 armor, 30 min",
-    ["summary"] = "Favor combines +400 health and +500 armor; alternatives cover parts of the outcome.",
+    ["summary"] = "Favor combines +400 health and +500 armor. Alternatives cover parts of the outcome.",
     ["matches"] = {
       {
         ["name"] = "Elixir of Greater Fortitude",
@@ -540,13 +520,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Elixir of Cunning"] = {
     ["merchant_recipe_name"] = "Elixir of Cunning",
     ["classification"] = "alternative",
     ["effect_reported"] = "+25 Agility and Intellect, 30 min",
-    ["summary"] = "Favor combines +25 Agility and +25 Intellect; conventional elixirs focus on one stat.",
+    ["summary"] = "Favor combines +25 Agility and +25 Intellect. Conventional elixirs focus on one stat.",
     ["matches"] = {
       {
         ["name"] = "Elixir of Greater Agility",
@@ -568,13 +547,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Elixir of Ferocity"] = {
     ["merchant_recipe_name"] = "Elixir of Ferocity",
     ["classification"] = "alternative",
     ["effect_reported"] = "+18 Strength and Agility, 30 min",
-    ["summary"] = "Favor combines +18 Strength and +18 Agility; alternatives target single attributes.",
+    ["summary"] = "Favor combines +18 Strength and +18 Agility. Alternatives target single attributes.",
     ["matches"] = {
       {
         ["name"] = "Elixir of Ogre Strength",
@@ -597,13 +575,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Elixir of the Sages"] = {
     ["merchant_recipe_name"] = "Elixir of Sages",
     ["classification"] = "equivalent",
     ["effect_reported"] = "+25 Spirit, +2% critical chance, 30 min",
-    ["summary"] = "Whale has the same listed +25 Spirit and +2% crit for 30 minutes; Spirit elixir only overlaps in Spirit.",
+    ["summary"] = "Whale has the same listed +25 Spirit and +2% crit for 30 minutes. Spirit elixir only overlaps in Spirit.",
     ["matches"] = {
       {
         ["name"] = "Elixir of the Whale",
@@ -625,13 +602,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Elixir of the Whale"] = {
     ["merchant_recipe_name"] = "Elixir of the Whale",
     ["classification"] = "equivalent",
     ["effect_reported"] = "+25 Spirit, +2% critical chance, 30 min",
-    ["summary"] = "Sages has the same listed +25 Spirit and +2% crit for 30 minutes; Spirit elixir only overlaps in Spirit.",
+    ["summary"] = "Sages has the same listed +25 Spirit and +2% crit for 30 minutes. Spirit elixir only overlaps in Spirit.",
     ["matches"] = {
       {
         ["name"] = "Elixir of Sages",
@@ -654,13 +630,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Elixir of the Owl"] = {
     ["merchant_recipe_name"] = "Elixir of the Owl",
     ["classification"] = "alternative",
     ["effect_reported"] = "+25 Intellect, +2% critical chance, 30 min",
-    ["summary"] = "Favor combines +25 Intellect and +2% critical chance; different secondary benefits.",
+    ["summary"] = "Favor combines +25 Intellect and +2% critical chance. Different secondary benefits.",
     ["matches"] = {
       {
         ["name"] = "Elixir of Greater Intellect",
@@ -682,13 +657,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Elixir of Nature Power"] = {
     ["merchant_recipe_name"] = "Elixir of Nature Power",
     ["classification"] = "alternative",
     ["effect_reported"] = "+40 Nature spell damage, 30 min",
-    ["summary"] = "+40 Nature-specific spell damage; broader spell-damage alternatives differ.",
+    ["summary"] = "+40 Nature-specific spell damage. Broader spell-damage alternatives differ.",
     ["matches"] = {
       {
         ["name"] = "Arcane Elixir",
@@ -710,13 +684,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Elixir of Wicked Regeneration"] = {
     ["merchant_recipe_name"] = "Elixir of Wicked Regeneration",
     ["classification"] = "alternative",
     ["effect_reported"] = "+9 health and +10 mana / 5 sec, 30 min",
-    ["summary"] = "Favor combines health and mana regeneration; alternatives cover one resource.",
+    ["summary"] = "Favor combines health and mana regeneration. Alternatives cover one resource.",
     ["matches"] = {
       {
         ["name"] = "Troll's Blood Elixir",
@@ -738,13 +711,12 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Elixir of the Grizzly"] = {
     ["merchant_recipe_name"] = "Elixir of the Grizzly",
     ["classification"] = "alternative",
     ["effect_reported"] = "+25 Strength, +2% critical chance, 30 min",
-    ["summary"] = "Favor +25 Strength and +2% crit; conventional Strength elixirs differ.",
+    ["summary"] = "Favor +25 Strength and +2% crit. Conventional Strength elixirs differ.",
     ["matches"] = {
       {
         ["name"] = "Elixir of Ogre Strength",
@@ -767,6 +739,5 @@ Favorcraft.AlchemyComparisons = {
     ["verification"] = "review_required",
     ["spell_id"] = nil,
     ["item_id"] = nil,
-    ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
 }

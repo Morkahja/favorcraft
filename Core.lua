@@ -43,25 +43,21 @@ function RRP.GetProfile()
     RRPDB.characters = RRPDB.characters or {}
     if not RRPDB.characters[charKey] then
         local _, class = UnitClass("player")
-        local defaults = {All = false}
-        if class == "WARRIOR" or class == "ROGUE" then
-            defaults.Tank = class == "WARRIOR"
-            defaults.Melee = true
-        elseif class == "PALADIN" then
-            defaults.Tank, defaults.Melee, defaults.Healer, defaults.Paladin = true, true, true, true
+        local defaults = {All = false, Tank = true, Healer = true, Utility = true}
+        if class == "MAGE" or class == "WARLOCK" or class == "PRIEST" then
+            defaults.Caster = true
+        elseif class == "SHAMAN" or class == "DRUID" then
+            defaults.Melee, defaults.Caster = true, true
         elseif class == "HUNTER" then
             defaults.Hunter, defaults.Melee = true, true
-        elseif class == "DRUID" or class == "SHAMAN" then
-            defaults.Tank, defaults.Melee, defaults.Healer, defaults.Caster = true, true, true, true
-        elseif class == "PRIEST" then
-            defaults.Healer, defaults.Caster = true, true
         else
-            defaults.Caster = true
+            defaults.Melee = true
         end
-        defaults.Utility = true
+        if class == "PALADIN" then defaults.Paladin = true end
         RRPDB.characters[charKey] = {
             plan = {}, known = {}, learnScan = {}, roles = defaults, profession = "All",
-            showAll = false, page = 1, trainer = {}, professions = {}, professionRanks = {},
+            showAll = false, allClasses = true, page = 1, trainer = {}, professions = {}, professionRanks = {},
+            specsDefaulted = true, specMode = "all",
         }
     end
     local p = RRPDB.characters[charKey]
@@ -82,6 +78,7 @@ function RRP.GetProfile()
     if type(p.scanSig) ~= "table" then p.scanSig = {} end
     if type(p.roles) ~= "table" then p.roles = {Utility = true} end
     if type(p.profession) ~= "string" then p.profession = "All" end
+    if p.allClasses == nil then p.allClasses = true end
     if type(p.page) ~= "number" then p.page = 1 end
     if p.expandIntermediate == nil then p.expandIntermediate = true end
     if type(p.professions) ~= "table" then p.professions = {} end
@@ -99,6 +96,32 @@ function RRP.GetProfile()
     if UnitClass then
         local _, class = UnitClass("player")
         if type(class) == "string" then p.class = class end
+    end
+    if not p.specsDefaulted and type(p.roles) == "table" then
+        p.roles.Tank = true
+        p.roles.Healer = true
+        p.roles.Melee, p.roles.Hunter, p.roles.Caster = false, false, false
+        local class = p.previewClass or p.class
+        if RRP.DPSRolesFor then
+            for _, role in ipairs(RRP.DPSRolesFor(class)) do p.roles[role] = true end
+        else
+            p.roles.Melee = true
+        end
+        if class == "PALADIN" then p.roles.Paladin = true end
+        p.specsDefaulted = true
+    end
+    if type(p.yourSpec) ~= "table" then
+        local class = p.previewClass or p.class
+        local spec = {Tank = false, Healer = false, DPS = true}
+        if class == "WARRIOR" then spec.Tank = true
+        elseif class == "PALADIN" or class == "DRUID" or class == "SHAMAN" then
+            spec.Tank, spec.Healer = true, true
+        elseif class == "PRIEST" then spec.Healer = true
+        end
+        p.yourSpec = spec
+    end
+    if p.specMode ~= "all" and p.specMode ~= "yours" then
+        p.specMode = "all"
     end
     return p
 end
@@ -269,14 +292,103 @@ function RRP.Schematic(key)
     return static or saved
 end
 
+local function characterID()
+    local realm = (GetRealmName and GetRealmName()) or "Realm"
+    local name = (UnitName and UnitName("player")) or "Player"
+    return realm .. "-" .. name
+end
+
+-- Recipes confirmed learned in this session. A stale profession window can
+-- still list the old recipes and must not clear these marks.
+local learnedThisSession = {}
+
+local function rememberSessionLearn(key)
+    if type(key) == "string" then learnedThisSession[characterID() .. "\n" .. key] = true end
+end
+
+local function sessionKnows(key)
+    return learnedThisSession[characterID() .. "\n" .. key] and true or false
+end
+
+local function spellIsKnown(spellID)
+    spellID = tonumber(spellID)
+    if not spellID then return false end
+    if type(IsSpellKnown) == "function" then
+        local ok, known = pcall(IsSpellKnown, spellID)
+        if ok and known then return true end
+    end
+    if type(IsPlayerSpell) == "function" then
+        local ok, known = pcall(IsPlayerSpell, spellID)
+        if ok and known then return true end
+    end
+    if C_SpellBook and type(C_SpellBook.IsSpellKnown) == "function" then
+        local ok, known = pcall(C_SpellBook.IsSpellKnown, spellID)
+        if ok and known then return true end
+    end
+    return false
+end
+
+local function schematicSpell(key)
+    local sch = RRP.Schematics and RRP.Schematics[key]
+    if type(sch) ~= "table" then return nil end
+    return tonumber(sch.spellID)
+end
+
+local function spellName(spellID)
+    local name = safeCall(GetSpellInfo, spellID)
+    if type(name) == "string" and name ~= "" then return name end
+    if C_Spell and type(C_Spell.GetSpellName) == "function" then
+        local spell = safeCall(C_Spell.GetSpellName, spellID)
+        if type(spell) == "string" and spell ~= "" then return spell end
+    end
+    if C_Spell and type(C_Spell.GetSpellInfo) == "function" then
+        local info = safeCall(C_Spell.GetSpellInfo, spellID)
+        if type(info) == "table" and type(info.name) == "string" and info.name ~= "" then return info.name end
+        if type(info) == "string" and info ~= "" then return info end
+    end
+    if C_TradeSkillUI and type(C_TradeSkillUI.GetRecipeInfo) == "function" then
+        local info = safeCall(C_TradeSkillUI.GetRecipeInfo, spellID)
+        if type(info) == "table" and type(info.name) == "string" and info.name ~= "" then return info.name end
+    end
+end
+
+local function noteLearned(p, key, session)
+    if not p or type(key) ~= "string" then return false end
+    p.known = p.known or {}
+    if session then rememberSessionLearn(key) end
+    if p.known[key] then return false end
+    p.known[key] = true
+    return true
+end
+
+local function refreshLearned()
+    if RRP.QueueRefresh then RRP.QueueRefresh()
+    elseif RRP.Refresh then RRP.Refresh() end
+end
+
 function RRP.LearnState(recipe)
-    if not recipe then return "unknown" end
+    if not recipe then return "unlearned" end
     local p = RRP.GetProfile()
-    if not p then return "unknown" end
+    if not p then return "unlearned" end
     if p.known and p.known[recipe.key] then return "learned" end
-    local scan = p.learnScan and p.learnScan[recipe.profession]
-    if type(scan) == "table" and scan.complete then return "unlearned" end
-    return "unknown"
+    if sessionKnows(recipe.key) or spellIsKnown(schematicSpell(recipe.key)) then
+        noteLearned(p, recipe.key, true)
+        return "learned"
+    end
+    return "unlearned"
+end
+
+function RRP.SyncKnownSpells()
+    local p = RRP.GetProfile()
+    if not p or type(RRP.Schematics) ~= "table" then return false end
+    local changed = false
+    for key, sch in pairs(RRP.Schematics) do
+        if type(sch) == "table" and spellIsKnown(sch.spellID) and noteLearned(p, key, true) then
+            changed = true
+        end
+    end
+    if changed then refreshLearned() end
+    return changed
 end
 
 function RRP.RecordLearnScan(profession, seen, complete, rows)
@@ -286,9 +398,21 @@ function RRP.RecordLearnScan(profession, seen, complete, rows)
     p.learnScan = p.learnScan or {}
     seen = type(seen) == "table" and seen or {}
     if complete then
+        local knownBefore, seenCount = 0, 0
+        for _, r in ipairs(RRP.GetRecipes()) do
+            if r.profession == profession and p.known[r.key] then knownBefore = knownBefore + 1 end
+        end
+        for _, on in pairs(seen) do
+            if on then seenCount = seenCount + 1 end
+        end
+        -- A window that still shows the old list has fewer learned rows than we
+        -- already recorded. Keep those marks until the list catches up.
+        local keepKnown = seenCount < knownBefore
         for _, r in ipairs(RRP.GetRecipes()) do
             if r.profession == profession then
-                p.known[r.key] = seen[r.key] and true or nil
+                local keep = seen[r.key] or sessionKnows(r.key) or spellIsKnown(schematicSpell(r.key))
+                if not keep and keepKnown and p.known[r.key] then keep = true end
+                p.known[r.key] = keep and true or nil
             end
         end
         local stamp = 0
@@ -299,25 +423,36 @@ function RRP.RecordLearnScan(profession, seen, complete, rows)
             if on then p.known[key] = true end
         end
     end
+    RRP.SyncKnownSpells()
 end
 
 function RRP.MarkLearnedSpell(spellID)
     spellID = tonumber(spellID)
-    if not spellID or type(RRP.Schematics) ~= "table" then return end
+    if not spellID then return end
     local p = RRP.GetProfile()
     if not p then return end
     p.known = p.known or {}
-    local changed = false
-    for key, sch in pairs(RRP.Schematics) do
-        if type(sch) == "table" and tonumber(sch.spellID) == spellID then
-            p.known[key] = true
-            changed = true
+    local changed, matched = false, false
+    if type(RRP.Schematics) == "table" then
+        for key, sch in pairs(RRP.Schematics) do
+            if type(sch) == "table" and tonumber(sch.spellID) == spellID then
+                matched = true
+                if noteLearned(p, key, true) then changed = true end
+            end
         end
     end
-    if changed then
-        if RRP.QueueRefresh then RRP.QueueRefresh()
-        elseif RRP.Refresh then RRP.Refresh() end
+    if not matched then
+        local name = spellName(spellID)
+        local matches = {}
+        if type(name) == "string" then
+            local want = normalize(name)
+            for _, recipe in ipairs(RRP.GetRecipes()) do
+                if normalize(recipe.name) == want then matches[#matches + 1] = recipe end
+            end
+        end
+        if #matches == 1 and noteLearned(p, matches[1].key, true) then changed = true end
     end
+    if changed then refreshLearned() end
 end
 
 RRP.ClassOrder = {"WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "SHAMAN", "MAGE", "WARLOCK", "DRUID"}
@@ -341,6 +476,13 @@ function RRP.DPSRolesFor(class)
         return {"Hunter", "Melee"}
     end
     return {"Melee"}
+end
+
+-- Mana classes can drink caster Alchemy. This is not a gear role.
+function RRP.UsesMana(class)
+    return class == "HUNTER" or class == "PALADIN" or class == "SHAMAN"
+        or class == "DRUID" or class == "PRIEST" or class == "MAGE"
+        or class == "WARLOCK"
 end
 
 function RRP.LevelTone(required, have)
@@ -532,7 +674,7 @@ end
 -- a recipe for paladins. It does not hide a weapon a warrior can equip.
 function RRP.IsRelevant(r)
     local p = RRP.GetProfile()
-    if not p or p.showAll then return true end
+    if not p or p.showAll or p.allClasses ~= false then return true end
     local class = p.previewClass or p.class
     if r.classes and class and not hasToken(r.classes, class) then
         return false
@@ -545,6 +687,15 @@ function RRP.IsRelevant(r)
         return false
     end
     return true
+end
+
+function RRP.HasScannedProfession()
+    local p = RRP.GetProfile()
+    if not p or type(p.learnScan) ~= "table" then return false end
+    for _, name in ipairs(RRP.Professions) do
+        if name ~= "All" and type(p.learnScan[name]) == "table" then return true end
+    end
+    return false
 end
 
 function RRP.UnscannedProfessions()
@@ -584,14 +735,26 @@ end
 function RRP.BuildMatch(r)
     local p = RRP.GetProfile()
     if not p or not r or not r.roles then return false end
-    local class = RRP.ViewClass()
+    if p.allRoles then return true end
     local wanted = {}
-    if p.roles.Tank then wanted.Tank = true end
-    if p.roles.Healer then wanted.Healer = true end
-    if p.roles.Utility then wanted.Utility = true end
+    local any = false
+    if p.roles.Tank then wanted.Tank = true any = true end
+    if p.roles.Healer then wanted.Healer = true any = true end
     if RRP.BuildOn("DPS") then
-        for _, role in ipairs(RRP.DPSRolesFor(class)) do wanted[role] = true end
+        any = true
+        if p.allClasses ~= false then
+            wanted.Melee, wanted.Hunter, wanted.Caster = true, true, true
+        else
+            local class = RRP.ViewClass()
+            for _, role in ipairs(RRP.DPSRolesFor(class)) do wanted[role] = true end
+            if r.profession == "Alchemy" and RRP.UsesMana(class) then
+                wanted.Caster = true
+            end
+        end
     end
+    -- Utility recipes stay with every build instead of a separate Other filter.
+    if not any then return false end
+    wanted.Utility = true
     for part in r.roles:gmatch("[^,]+") do
         if wanted[trim(part)] then return true end
     end
@@ -679,6 +842,9 @@ function RRP.SetProfession(prof)
     local p = RRP.GetProfile()
     if not p then return end
     p.profession, p.page, p.professionPicked = prof, 1, true
+    if RRP.BroadProfessions and RRP.BroadProfessions[prof] then
+        p.allClasses = true
+    end
     RRP.clearArmed = nil
     if RRP.Refresh then RRP.Refresh() end
 end
@@ -750,6 +916,7 @@ function RRP.SetBuild(name, on)
     if not p then return end
     on = on and true or false
     p.showAll = false
+    p.allRoles = false
     if name == "Tank" then p.roles.Tank = on
     elseif name == "Healer" then p.roles.Healer = on
     elseif name == "Other" then p.roles.Utility = on
@@ -760,6 +927,28 @@ function RRP.SetBuild(name, on)
                 p.roles[role] = true
             end
         end
+    end
+    local tank = p.roles.Tank and true or false
+    local healer = p.roles.Healer and true or false
+    local dps = false
+    for _, role in ipairs(RRP.DPSRolesFor(p.previewClass or p.class)) do
+        if p.roles[role] then dps = true end
+    end
+    if not tank and not healer and not dps then
+        if name == "Tank" then p.roles.Tank = true tank = true
+        elseif name == "Healer" then p.roles.Healer = true healer = true
+        elseif name == "DPS" then
+            for _, role in ipairs(RRP.DPSRolesFor(p.previewClass or p.class)) do
+                p.roles[role] = true
+            end
+            dps = true
+        end
+    end
+    if tank and healer and dps then
+        p.specMode = "all"
+    else
+        p.specMode = "yours"
+        p.yourSpec = {Tank = tank, Healer = healer, DPS = dps}
     end
     p.page = 1
     RRP.clearArmed = nil
@@ -803,9 +992,75 @@ function RRP.ToggleRole(role)
     if not p then return end
     if role == "All" then
         p.showAll = not p.showAll
+        if p.showAll then p.allRoles = false end
     else
         p.showAll = false
+        p.allRoles = false
         p.roles[role] = not p.roles[role]
+    end
+    p.page = 1
+    RRP.clearArmed = nil
+    if RRP.Refresh then RRP.Refresh() end
+end
+local function writeSpecs(p, on)
+    p.showAll = false
+    p.allRoles = false
+    p.roles.Tank = on and true or false
+    p.roles.Healer = on and true or false
+    p.roles.Melee, p.roles.Hunter, p.roles.Caster = false, false, false
+    if on then
+        for _, role in ipairs(RRP.DPSRolesFor(RRP.ViewClass())) do
+            p.roles[role] = true
+        end
+        if RRP.ViewClass() == "PALADIN" then p.roles.Paladin = true end
+    end
+    p.specsDefaulted = true
+end
+
+function RRP.ToggleAllClasses()
+    local p = RRP.GetProfile()
+    if not p then return end
+    p.allClasses = not (p.allClasses ~= false)
+    if not p.allClasses then p.previewClass = nil end
+    p.page = 1
+    RRP.clearArmed = nil
+    if RRP.Refresh then RRP.Refresh() end
+end
+
+local function applyYourSpec(p)
+    local spec = p.yourSpec or {}
+    p.showAll = false
+    p.allRoles = false
+    p.roles.Tank = spec.Tank and true or false
+    p.roles.Healer = spec.Healer and true or false
+    p.roles.Melee, p.roles.Hunter, p.roles.Caster = false, false, false
+    if spec.DPS then
+        for _, role in ipairs(RRP.DPSRolesFor(RRP.ViewClass())) do
+            p.roles[role] = true
+        end
+    end
+    if RRP.ViewClass() == "PALADIN" then p.roles.Paladin = true end
+    p.specsDefaulted = true
+    p.specMode = "yours"
+end
+
+function RRP.EnableAllSpecs()
+    local p = RRP.GetProfile()
+    if not p then return end
+    writeSpecs(p, true)
+    p.specMode = "all"
+end
+
+function RRP.ShowAllSpecs()
+    local p = RRP.GetProfile()
+    if not p then return end
+    local nextMode = p.specMode == "yours" and "all" or "yours"
+    p.showAll = false
+    p.allRoles = false
+    if nextMode == "yours" then applyYourSpec(p)
+    else
+        writeSpecs(p, true)
+        p.specMode = "all"
     end
     p.page = 1
     RRP.clearArmed = nil
@@ -1295,9 +1550,14 @@ local function favorcraftOpen()
     return RRP.Window and RRP.Window.IsShown and RRP.Window:IsShown()
 end
 
-local function professionWindowOpen()
+local function professionFrameShown()
     if TradeSkillFrame and TradeSkillFrame.IsShown and TradeSkillFrame:IsShown() then return true end
     if ProfessionsFrame and ProfessionsFrame.IsShown and ProfessionsFrame:IsShown() then return true end
+    return false
+end
+
+local function professionWindowOpen()
+    if professionFrameShown() then return true end
     if type(GetNumTradeSkills) == "function" then
         local ok, n = pcall(GetNumTradeSkills)
         if ok and type(n) == "number" and n > 0 then return true end
@@ -1591,6 +1851,8 @@ end
 register("ADDON_LOADED")
 register("PLAYER_LOGIN")
 register("SKILL_LINES_CHANGED")
+register("SPELLS_CHANGED")
+register("LEARNED_SPELL_IN_TAB")
 register("TRADE_SKILL_SHOW")
 register("TRADE_SKILL_UPDATE")
 register("NEW_RECIPE_LEARNED")
@@ -1606,17 +1868,20 @@ eventFrame:SetScript("OnEvent", function(_, event, arg)
         local p = RRP.GetProfile()
         if p and p.expandIntermediate == nil then p.expandIntermediate = true end
         RRP.SyncProfessions()
+        if RRP.SyncKnownSpells then RRP.SyncKnownSpells() end
         if RRP.UI and RRP.UI.RestoreLayout then RRP.UI.RestoreLayout() end
         say("Ready. /fc opens FavorCraft.")
     elseif event == "SKILL_LINES_CHANGED" then
         RRP.SyncProfessions()
-    elseif event == "TRADE_SKILL_SHOW" or event == "NEW_RECIPE_LEARNED" then
-        if event == "NEW_RECIPE_LEARNED" then RRP.MarkLearnedSpell(arg) end
+        if RRP.SyncKnownSpells then RRP.SyncKnownSpells() end
+    elseif event == "SPELLS_CHANGED" or event == "LEARNED_SPELL_IN_TAB" or event == "NEW_RECIPE_LEARNED" then
+        if event ~= "SPELLS_CHANGED" then RRP.MarkLearnedSpell(arg) end
+        if RRP.SyncKnownSpells then RRP.SyncKnownSpells() end
+        if RRP.ready and professionFrameShown() then autoScanQueued = true end
+    elseif event == "TRADE_SKILL_SHOW" then
         if RRP.ready then
             autoScanQueued = true
-            if event == "TRADE_SKILL_SHOW" and favorcraftOpen() then
-                RRP.autoScanAnnounce = true
-            end
+            if favorcraftOpen() then RRP.autoScanAnnounce = true end
         end
     elseif event == "TRADE_SKILL_UPDATE" then
         local now = (GetTime and GetTime()) or 0
@@ -1661,6 +1926,8 @@ eventFrame:SetScript("OnUpdate", function(_, elapsed)
             lastAutoAt = (GetTime and GetTime()) or 0
             if scanning then
                 autoScanQueued = true
+            elseif not professionFrameShown() then
+                if RRP.SyncKnownSpells then RRP.SyncKnownSpells() end
             else
                 local announce = RRP.autoScanAnnounce and true or false
                 RRP.autoScanAnnounce = false

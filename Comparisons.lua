@@ -45,39 +45,96 @@ local function classify(record, match, catalogBacked)
     return "related"
 end
 
+local function cleanPlace(place)
+    if type(place) ~= "string" or place == "" then return nil end
+    place = place:gsub("%s*%([^)]*[Ww]owhead[^)]*%)", "")
+    place = place:gsub("%s*%([^)]*[Dd]atabase[^)]*%)", "")
+    place = place:gsub("%s*[Dd]atabase listing%.?", "")
+    place = place:gsub("^Drop:%s*", "")
+    place = place:gsub("^%s+", ""):gsub("%s+$", "")
+    if place == "" or place:find("not confirmed", 1, true) then return nil end
+    return place
+end
+
 local function acquisition(match)
     local raw=match and match.acquisition or ""
     local indexed=match and match.source_verified==true or false
-    local place=match and (match.source_note or match.source_name)
-    if type(place)~="string" or place=="" then place=nil end
+    local place=cleanPlace(match and (match.source_note or match.source_name))
     if raw=="world_drop" or raw=="drop" then
-        return place and ("World drop. "..place) or "World drop (database listing)",indexed
+        return place and ("World drop: "..place) or "World drop",indexed
     elseif raw=="trainer" or raw=="trainer_client_index" then
-        return "Profession trainer (database listing)",indexed
+        return "Profession trainer",indexed
     elseif raw=="merchants_favor" then return "Merchant's Favor vendor",true
-    elseif raw=="recipe_item" then return "Learned from a recipe item; exact source may vary.",indexed
-    elseif raw=="vendor" or raw=="vendor_sale" then
-        return place and ("Vendor: "..place) or "Vendor (database listing)",indexed
-    elseif raw=="" or raw=="unverified" or raw=="source_unverified"
+    elseif raw=="recipe_item" or raw=="" or raw=="unverified" or raw=="source_unverified"
         or raw=="recipe_item_source_unresolved" or raw=="recipe_source_unverified" then
-        return "Acquisition source not recorded.",false
+        return "Learned from a recipe",false
+    elseif raw=="vendor" or raw=="vendor_sale" then
+        return place and ("Vendor: "..place) or "Vendor",indexed
     end
-    return raw..(place and (": "..place) or ""),indexed
+    return place and (raw..": "..place) or raw,indexed
 end
 
-local function points(match)
-    local sims, diffs = {}, {}
-    if type(match.similarity) == "string" and match.similarity ~= "" then
-        if match.similarity == "equipment_slot" then
-            sims[#sims + 1] = "Same equipment slot only. Stats were not compared."
-        else
-            sims[#sims + 1] = match.similarity
+local UNFINISHED = {
+    "must be compared", "must be verified", "not yet", "separately verify",
+    "no quantified", "no exact trainer", "not confirmed", "need item data",
+    "needs item data", "do not display", "were not compared", "not an equivalent",
+    "compare potency", "no verified close", "until independently verified",
+    "not consistently present",
+}
+local function unfinished(text)
+    local low = text:lower()
+    for i = 1, #UNFINISHED do
+        if low:find(UNFINISHED[i], 1, true) then return true end
+    end
+    return false
+end
+local function statedParts(text)
+    local parts = {}
+    if type(text) ~= "string" or text == "" then return parts end
+    local padded = text
+    if not padded:find("%.%s*$") then padded = padded .. "." end
+    for sentence in padded:gmatch("(.-)%.%s*") do
+        for clause in (sentence .. ";"):gmatch("(.-)%s*;%s*") do
+            clause = clause:gsub("^%s+", ""):gsub("%s+$", "")
+            if clause ~= "" and not unfinished(clause) then parts[#parts + 1] = clause end
         end
     end
-    if type(match.difference) == "string" and match.difference ~= "" then diffs[#diffs + 1] = match.difference end
-    if type(match.differences) == "string" and match.differences ~= "" then diffs[#diffs + 1] = match.differences end
-    local blob = match.similarity_and_difference or match.similarities_and_differences
-    if type(blob) == "string" and blob ~= "" then diffs[#diffs + 1] = blob end
+    return parts
+end
+local function isDifference(text)
+    local low = text:lower()
+    return low:find("differ", 1, true) or low:find("versus", 1, true)
+        or low:find("instead", 1, true) or low:find("unlike", 1, true)
+        or low:find("stronger", 1, true) or low:find("overlap", 1, true)
+        or low:find("lower-tier", 1, true) or low:find("tier", 1, true)
+end
+local function addFinding(sims, diffs, text)
+    if isDifference(text) then diffs[#diffs + 1] = text
+    else sims[#sims + 1] = text end
+end
+local function points(match, summary)
+    local sims, diffs = {}, {}
+    if match.similarity == "equipment_slot" then
+        sims[#sims + 1] = "Same equipment slot."
+    elseif match.similarity == "weapon_or_slot" then
+        sims[#sims + 1] = "Same weapon category."
+    else
+        local found = statedParts(match.similarity)
+        for i = 1, #found do sims[#sims + 1] = found[i] end
+    end
+    local blobs = {match.difference, match.differences, match.similarity_and_difference, match.similarities_and_differences}
+    for i = 1, #blobs do
+        local found = statedParts(blobs[i])
+        for j = 1, #found do diffs[#diffs + 1] = found[j] end
+    end
+    if #diffs == 0 then
+        local found = statedParts(summary)
+        for i = 1, #found do
+            if not found[i]:find("Both craft equipment", 1, true) then
+                addFinding(sims, diffs, found[i])
+            end
+        end
+    end
     return sims, diffs
 end
 
@@ -199,17 +256,6 @@ local function buildAcquisition(key, name, raw, catalog, merchant)
     }}
 end
 
-local function headerFor(raw)
-    local bits = {}
-    if type(raw.effect_reported) == "string" and raw.effect_reported ~= "" then
-        bits[#bits + 1] = "Effect (research): " .. raw.effect_reported .. "."
-    end
-    local summary = raw.summary or raw.comparison_summary or raw.note
-    if type(summary) == "string" and summary ~= "" then bits[#bits + 1] = summary end
-    if #bits == 0 then return nil end
-    return table.concat(bits, " ")
-end
-
 local function buildView(profession, name, raw)
     local key = profession .. "|" .. name
     local catalog = RRP.GetByKey and RRP.GetByKey(key)
@@ -227,7 +273,7 @@ local function buildView(profession, name, raw)
             where = "Profession trainer"
             verified = true
         end
-        local sims, diffs = points(match)
+        local sims, diffs = points(match, raw.summary)
         if catalogBacked and catalog.alternative then
             diffs[#diffs + 1] = catalog.alternative
         end
@@ -256,7 +302,8 @@ local function buildView(profession, name, raw)
         end
         entries[#entries + 1] = {
             tier = tier,
-            label = LABEL[tier] or LABEL.related,
+            label = (name == "Elixir of Lesser Intellect" and matchName == "Elixir of Wisdom")
+                and "Almost Identical Item" or (LABEL[tier] or LABEL.related),
             name = matchName,
             acquisition = where,
             acquisitionVerified = verified,
@@ -273,7 +320,11 @@ local function buildView(profession, name, raw)
         }
     end
     table.sort(entries, function(a, b)
-        local ar, br = RANK[a.tier] or 9, RANK[b.tier] or 9
+        local function rank(entry)
+            if entry.label == "Almost Identical Item" then return 0 end
+            return RANK[entry.tier] or 9
+        end
+        local ar, br = rank(a), rank(b)
         if ar ~= br then return ar < br end
         return (a.name or "") < (b.name or "")
     end)
@@ -286,9 +337,9 @@ local function buildView(profession, name, raw)
         note = "No comparison has been recorded for this recipe yet."
     end
     local sources = buildAcquisition(key, name, raw, catalog, merchant)
-    local header = (#entries > 0 or sources) and headerFor(raw) or nil
+    local header = nil
     if sources and sources[1] and sources[1].idCheck then
-        header = "Same recipe pattern; additional source listings from Forever databases appear below."
+        header = "Same recipe pattern. The extra source below is not confirmed."
     end
     if #entries == 0 and sources then best = "reported" end
     return {

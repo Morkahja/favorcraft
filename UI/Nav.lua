@@ -3,10 +3,21 @@ local UI = RRP.UI
 
 function UI.BuildNav(panel)
     local buttons = {}
-    for i, name in ipairs(RRP.Professions) do
+    local y = -8
+    local function addDivider()
+        y = y - 5
+        local line = panel:CreateTexture(nil, "ARTWORK")
+        line:SetPoint("TOPLEFT", 18, y)
+        line:SetSize(122, 1)
+        line:SetTexture("Interface\\Buttons\\WHITE8X8")
+        line:SetVertexColor(0.72, 0.58, 0.24, 0.9)
+        y = y - 8
+    end
+    local function addButton(name)
         local b = CreateFrame("Button", nil, panel, "BackdropTemplate")
         b:SetSize(142, 38)
-        b:SetPoint("TOPLEFT", 8, -8 - (i - 1) * 42)
+        b:SetPoint("TOPLEFT", 8, y)
+        y = y - 42
         if b.SetBackdrop then
             b:SetBackdrop({
                 bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
@@ -51,8 +62,26 @@ function UI.BuildNav(panel)
             UI.HideTip()
             UI.RefreshNav()
         end)
-        buttons[i] = b
+        buttons[#buttons + 1] = b
     end
+    addButton("All")
+    y = y - 2
+    local groups = RRP.ProfessionGroups or {}
+    for g, group in ipairs(groups) do
+        if g > 1 then addDivider() end
+        for _, name in ipairs(group) do
+            addButton(name)
+        end
+    end
+
+    local scan = UI.Button(panel, "Scan profession", 142, 24)
+    scan:SetPoint("BOTTOMLEFT", 8, 10)
+    scan.tip = "Scan profession"
+    scan.tipLine = "Open a profession window so FavorCraft can read the recipes you know."
+    scan:SetScript("OnClick", function()
+        if UI.ShowScanHelp then UI.ShowScanHelp() end
+    end)
+    scan:Hide()
 
     function UI.RefreshNav()
         local profile = RRP.GetProfile()
@@ -75,5 +104,7 @@ function UI.BuildNav(panel)
             elseif mine then b.text:SetTextColor(0.75, 0.95, 0.7)
             else b.text:SetTextColor(0.82, 0.78, 0.68) end
         end
+        if RRP.HasScannedProfession and RRP.HasScannedProfession() then scan:Hide()
+        else scan:Show() end
     end
 end

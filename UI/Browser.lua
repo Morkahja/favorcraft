@@ -69,7 +69,7 @@ function UI.BuildBrowser(panel)
         header("Recipe", 36, 200, "name", "Sort by recipe name."),
         header("Skill", 248, 48, "skill", "Sort by required skill."),
         header("Favor", 298, 48, "favor", "Sort by Merchant's Favor. This is the cost to buy the recipe once."),
-        header("Learned", 348, 58, nil, "Green check: this character knows the recipe. Red x: a complete scan of that profession did not list it. Question mark: not checked yet."),
+        header("Learned", 348, 58, nil, "Green check: this character knows the recipe. Red x: this character has not learned it."),
         header("Level", 408, 48, "level", "Required level of the crafted item. Green: you can use it. Orange: 1 to 3 levels above you. Red: higher than that."),
     }
 
@@ -213,7 +213,7 @@ function UI.BuildBrowser(panel)
             if recipe then
                 row:Show()
                 local inPlan = RRP.PlanOn and RRP.PlanOn(recipe.key)
-                local learnState = RRP.LearnState and RRP.LearnState(recipe) or (known[recipe.key] and "learned" or "unknown")
+                local learnState = RRP.LearnState and RRP.LearnState(recipe) or (known[recipe.key] and "learned" or "unlearned")
                 local isKnown = learnState == "learned"
                 local recommended = RRP.BuildMatch and RRP.BuildMatch(recipe)
                 if inPlan then
@@ -239,14 +239,10 @@ function UI.BuildBrowser(panel)
                 if learnState == "learned" then
                     row.learnedMark:Show()
                     row.learnedMiss:Hide()
-                elseif learnState == "unlearned" then
-                    row.learnedMark:Hide()
-                    row.learnedMiss:Show()
-                    row.learnedMiss:SetText("|cffff4444x|r")
                 else
                     row.learnedMark:Hide()
                     row.learnedMiss:Show()
-                    row.learnedMiss:SetText("|cffaa9988?|r")
+                    row.learnedMiss:SetText("|cffff4444x|r")
                 end
                 local playerLevel = UnitLevel and UnitLevel("player") or nil
                 if recipe.level then

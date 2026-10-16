@@ -12,6 +12,14 @@ local addonName, RRP = ...
 RRP.Catalog = {}
 RRP.ByKey = {}
 RRP.Professions = {"All", "Alchemy", "Blacksmithing", "Cooking", "Enchanting", "Engineering", "Leatherworking", "Tailoring"}
+RRP.ProfessionGroups = {
+    {"Blacksmithing", "Leatherworking", "Tailoring"},
+    {"Enchanting", "Engineering", "Alchemy"},
+    {"Cooking"},
+}
+RRP.BroadProfessions = {
+    Alchemy = true, Cooking = true, Enchanting = true, Engineering = true,
+}
 RRP.Roles = {"All", "Tank", "Melee", "Healer", "Caster", "Hunter", "Paladin", "Utility"}
 RRP.ProfessionsSet = {}
 RRP.ProfessionLabel = {

@@ -24,11 +24,11 @@ The shared catalog has 309 recipes. Public counts of 314 offers are those recipe
 
 Favor is the cost of buying a recipe once. Selecting a recipe counts that cost once and lists the materials for one craft.
 
-The recipe list, reagents, and crafted item IDs come with the addon. You do not need to visit a camp vendor or learn the recipe to see them. A green check means this character knows the recipe. A red x means a complete look at that profession window did not list it. A question mark means that window has not been checked yet. Fishing and Mining are left alone.
+The recipe list, reagents, and crafted item IDs come with the addon. You do not need to visit a camp vendor or learn the recipe to see them. A green check means this character knows the recipe. A red x means this character has not learned it. Fishing and Mining are left alone.
 
 Spell IDs, crafted item IDs, and reagent quantities are World of Warcraft: Forever client data published by [AHledger](https://ahledger.com), client build 1.60.1, imported 15 October 2026. Auction prices are not stored. Lesser Arcane Elixir uses the camp scroll that requires Alchemy 120 and takes 4 Kingsblood and 1 Leaded Vial. Recipe scrolls were not found for Sentinel's Wristguards, Officer's Wristguards, Prefect's Wristguards, or Warder's Wristguards. Icons and item tooltips are loaded by the game from the item IDs, and this repository cannot confirm them without the client. Run `luajit tests/validate_db.lua` for the current counts. The only verified trainer comparison in the catalog is Elixir of Wisdom against Elixir of Lesser Intellect.
 
-Tank, DPS, Healer, and Other limit the list to recipes for the checked builds and your class. Paladin-only plate stays off other classes. Show All Recipes removes those limits.
+Tank, DPS, and Healer limit the list to recipes for the checked specs and the selected class. Utility recipes, such as bags and tools, stay in each of those specs. Opening the window checks all three. The spec button switches between All specs and My spec. Boxes you set on My spec are saved. Closing the window and opening it returns to All specs. All classes shows every class and keeps the spec checks. My class limits the list to this character, and that choice stays saved. Choosing Alchemy, Cooking, Enchanting, or Engineering switches the button back to All classes. Show All Recipes removes the class and spec limits.
 
 ## Profession comparisons (beta)
 
