@@ -1,0 +1,55 @@
+# CurseForge publishing
+
+FavorCraft has its addon files and `FavorCraft.toc` at the repository root.
+`pkgmeta.yaml` instructs the CurseForge repository packager to put the
+addon into a **FavorCraft/** directory and omit development-only files.
+
+## Package verification
+
+GitHub Actions creates a downloadable ZIP artifact on pushes to main and on
+new version tags. The ZIP has `FavorCraft/FavorCraft.toc` at its root.
+
+The ZIP can also be uploaded manually to the CurseForge project dashboard.
+An ordinary GitHub source archive is **not** the same as a packaged addon.
+
+## Enabling CurseForge automation
+
+1. Create/approve the WoW addon project on CurseForge and configure the
+   project's Source / Repository settings for
+   `https://github.com/Morkahja/favorcraft`.
+2. For CurseForge's repository auto-packager, generate an API token **in your
+   CurseForge account** and add a **GitHub repository webhook** with payload:
+   `https://www.curseforge.com/api/projects/PROJECT_ID/package?token=TOKEN`.
+   The project ID comes from the CurseForge project page.
+   Use Content type `application/json` and push events. **Never commit the
+   token to this repository, an issue, or a screenshot.**
+3. Check the GitHub webhook deliveries for a successful HTTP result.
+4. Once the release files and game flavor are verified, **push a new version
+   tag**, for example `v0.4.2-beta` (after updating the TOC versions and
+   CHANGELOG to match). A tag containing `beta` is classified as a Beta
+   build by the CurseForge repository packager.
+5. Check the CurseForge project **Files** page for the packaged ZIP and
+   the correct WoW Forever game version. A new project/file may require
+   CurseForge moderation before it becomes publicly installable.
+
+**Important:** A new Git commit, GitHub Release, or Actions ZIP by itself
+cannot make CurseForge import an addon. The CurseForge repository connection
+and delivery mechanism must be configured.
+
+## Troubleshooting
+
+- No GitHub webhook delivery? Set up/repair the CurseForge webhook.
+- Delivery succeeded but no file? Check CurseForge Source/Packaging settings
+  and ask CurseForge support to review the project, source URL and webhook.
+- Only Alpha is available? Make sure a *new tagged commit* was pushed with
+  a tag containing `beta` or `alpha` as intended.
+- The published archive has scattered files instead of the addon folder?
+  Confirm `pkgmeta.yaml` contains `package-as: FavorCraft`.
+- CurseForge app cannot discover the project? Check its approval status and
+  that an approved Beta or Release file exists.
+- To avoid accidental duplicate versions, never move/overwrite an existing
+  published tag simply to retrigger packaging.
+
+Sources:
+- https://support.curseforge.com/support/solutions/articles/9000197281
+- https://support.curseforge.com/support/solutions/articles/9000203228-manually-triggering-the-auto-packager
