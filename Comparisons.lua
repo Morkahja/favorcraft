@@ -379,7 +379,7 @@ local function blank(reason)
         status = "none",
         label = LABEL.none,
         entries = {},
-        note = "No Verified Comparison. This does not mean the recipe is unique.",
+        note = "No comparison has been recorded for this recipe yet.",
         missingRecord = true,
         reason = reason,
     }
