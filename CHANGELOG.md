@@ -1,5 +1,15 @@
 # FavorCraft — Changelog
 
+## 0.5.0-beta — 2026-10-16
+
+- Recipe and material names load ahead of time and stay saved, so item numbers no longer flash in.
+- Materials list every reagent. Materials and recipe comparisons scroll together.
+- All classes shows all 309 recipes, including the three Paladin enchanting relics.
+- Enchanting and Engineering comparisons use researched alternatives with native tooltips.
+- A recipe with no comparison just says None.
+- Some Blacksmithing plans and Leatherworking patterns list another reported place to get the same recipe.
+- Weak same-slot trainer gear is no longer compared with Favor pieces of a different quality or level.
+
 ## 0.4.9-beta — 2026-10-16
 
 - Cooking, Enchanting, and Engineering check All specs when you open them. The spec you saved stays underneath.

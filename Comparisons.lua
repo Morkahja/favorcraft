@@ -12,7 +12,7 @@ local LABEL = {
     related="Related Item",
     slot="Same-slot Gear",
     reported="Additional Recipe Source",
-    none="No Comparison Recorded",
+    none="None",
 }
 RRP.ComparisonLabel=LABEL
 
@@ -26,6 +26,40 @@ local function sameSlot(record, match)
     local scope=record and record.comparison_scope or ""
     return scope=="same_slot_only" or scope=="same_slot_or_weapon_category"
         or (match and match.similarity=="equipment_slot")
+        or (match and match.similarity=="weapon_or_slot")
+end
+
+local function qualityToken(value)
+    if type(value) == "number" then
+        if value == 2 then return "uncommon" end
+        if value == 3 then return "rare" end
+        if value == 4 then return "epic" end
+        if value == 1 then return "common" end
+        return nil
+    end
+    if type(value) ~= "string" or value == "" then return nil end
+    local low = value:lower()
+    if low == "green" or low == "uncommon" then return "uncommon" end
+    if low == "blue" or low == "rare" then return "rare" end
+    if low == "purple" or low == "epic" then return "epic" end
+    if low == "white" or low == "common" then return "common" end
+    return low
+end
+
+-- Same-slot trainer gear is only useful when quality matches and the required
+-- levels are close. A blue level-15 Favor piece is not compared with a green
+-- level-10 trainer piece.
+local function weakSlotOnly(record, match)
+    if not sameSlot(record, match) then return false end
+    local merchantQuality = qualityToken(record.quality or record.item_quality or record.itemQuality)
+    local matchQuality = qualityToken(match.quality or match.item_quality or match.itemQuality)
+    local merchantLevel = tonumber(record.required_level or record.requiredLevel or record.level)
+    local matchLevel = tonumber(match.required_level or match.requiredLevel or match.level)
+    if merchantQuality and matchQuality and merchantQuality == matchQuality
+        and merchantLevel and matchLevel and math.abs(merchantLevel - matchLevel) <= 3 then
+        return false
+    end
+    return true
 end
 
 -- Beta policy: source-backed comparisons are shown without a separate
@@ -56,10 +90,31 @@ local function cleanPlace(place)
     return place
 end
 
+local function soften(text)
+    if type(text) ~= "string" then return "" end
+    text = text:gsub("[Nn]on%-Favor world formula", "This")
+    text = text:gsub("[Tt]he world formula", "This")
+    text = text:gsub("[Nn]on%-Favor formula", "")
+    text = text:gsub("[Nn]on%-Favor ", "")
+    text = text:gsub("%s+", " ")
+    text = text:gsub("^%s+", ""):gsub("%s+$", "")
+    text = text:gsub("^,%s*", ""):gsub(",%s*$", "")
+    return text
+end
+local function formulaOnly(place)
+    if type(place) ~= "string" or place == "" then return true end
+    local low = place:lower()
+    if low == "world-drop formula" or low == "world/raid-drop formula" then return true end
+    if low:find("^vendor%s*%(") then return true end
+    if low:find("formula", 1, true) or low:find("listing", 1, true) then return true end
+    return false
+end
 local function acquisition(match)
     local raw=match and match.acquisition or ""
     local indexed=match and match.source_verified==true or false
     local place=cleanPlace(match and (match.source_note or match.source_name))
+    place = soften(place)
+    if formulaOnly(place) then place = nil end
     if raw=="world_drop" or raw=="drop" then
         return place and ("World drop: "..place) or "World drop",indexed
     elseif raw=="trainer" or raw=="trainer_client_index" then
@@ -95,7 +150,7 @@ local function statedParts(text)
     if not padded:find("%.%s*$") then padded = padded .. "." end
     for sentence in padded:gmatch("(.-)%.%s*") do
         for clause in (sentence .. ";"):gmatch("(.-)%s*;%s*") do
-            clause = clause:gsub("^%s+", ""):gsub("%s+$", "")
+            clause = soften(clause)
             if clause ~= "" and not unfinished(clause) then parts[#parts + 1] = clause end
         end
     end
@@ -122,7 +177,17 @@ local function points(match, summary)
         local found = statedParts(match.similarity)
         for i = 1, #found do sims[#sims + 1] = found[i] end
     end
-    local blobs = {match.difference, match.differences, match.similarity_and_difference, match.similarities_and_differences}
+    -- Keep this list dense. A leading nil makes Lua treat the array as empty.
+    local blobs = {}
+    local function addBlob(value)
+        if type(value) == "string" and value ~= "" then blobs[#blobs + 1] = value end
+    end
+    addBlob(match.difference)
+    addBlob(match.differences)
+    addBlob(match.similarity_and_difference)
+    addBlob(match.similarities_and_differences)
+    addBlob(match.tier_context)
+    addBlob(match.levelTiersContext)
     for i = 1, #blobs do
         local found = statedParts(blobs[i])
         for j = 1, #found do diffs[#diffs + 1] = found[j] end
@@ -172,17 +237,17 @@ local function idState(researchId, currentId)
 end
 
 local function sourceLine(src)
-    local kind=src.type or "dungeon_drop"
-    if kind=="vendor_sale" then
-        return "Listed sale: "..(src.npc or "unspecified vendor")
-            ..(src.location and (" ("..src.location..")") or "").."."
-    elseif kind=="world_drop" then
-        return "Also listed as a general world drop (source databases differ)."
-    elseif kind=="zone_report" then
-        return "Listed zones: "..(src.location or "unspecified")..". "..(src.note or "")
+    local kind = src.type or "dungeon_drop"
+    if kind == "vendor_sale" then
+        return "Listed sale: " .. (src.npc or "unspecified vendor")
+            .. (src.location and (" (" .. src.location .. ")") or "") .. "."
+    elseif kind == "world_drop" then
+        return "Also listed as a general world drop."
+    elseif kind == "zone_report" or kind == "dungeon_report" then
+        return "Other listings mention " .. (src.location or "unspecified locations") .. "."
     end
-    return "Listed drop: "..(src.npc or "unspecified creature")
-        ..(src.location and (" ("..src.location..")") or "")..". "..(src.note or "")
+    return "Listed dungeon drop: " .. (src.npc or "unspecified creature")
+        .. (src.location and (" (" .. src.location .. ")") or "") .. "."
 end
 
 local function genericSources(raw)
@@ -214,9 +279,8 @@ local function buildAcquisition(key, name, raw, catalog, merchant)
     if type(reported) ~= "table" or #reported == 0 then reported = genericSources(raw) end
     if #reported == 0 then return nil end
     local lines = {}
-    if catalog and tonumber(catalog.favor) then
-        lines[#lines + 1] = "Merchant: " .. catalog.favor .. " Merchant's Favor."
-    end
+    local scrollId = merchant and tonumber(merchant.scrollItemID)
+        or (audit and tonumber(audit.researchScrollID))
     for i = 1, #reported do lines[#lines + 1] = sourceLine(reported[i]) end
     if audit and type(audit.conflicts) == "table" then
         for i = 1, #audit.conflicts do
@@ -241,8 +305,8 @@ local function buildAcquisition(key, name, raw, catalog, merchant)
         kind = "source",
         sameRecipe = true,
         acquisitionVerified = false,
-        verification = "database_listed",
-        scrollItemID = merchant and tonumber(merchant.scrollItemID) or nil,
+        verification = "reported",
+        scrollItemID = scrollId,
         lines = lines,
         references = (function()
             local urls={}
@@ -264,6 +328,10 @@ local function buildView(profession, name, raw)
     local entries = {}
     for i = 1, #matches do
         local match = matches[i]
+        if weakSlotOnly(raw, match) then
+            match = nil
+        end
+        if match then
         local matchName = match.name or name
         local slotOnly = sameSlot(raw, match)
         local catalogBacked = catalog and type(catalog.alternative) == "string" and catalog.alternative:find(matchName, 1, true)
@@ -279,21 +347,25 @@ local function buildView(profession, name, raw)
         end
         local sch = schematic(matchName)
         -- Explicit IDs from research can supply tooltips for non-merchant
-        -- alternatives. Never reinterpret a recipe scroll as an output.
+        -- alternatives. A formula item is not the enchant, and a researched
+        -- effect spell is not replaced by a same-name Merchant's Favor spell.
         local itemID=tonumber(match.outputItemID or match.output_item_id or match.crafted_item_id)
         local recipeSpellID=tonumber(match.recipeSpellID or match.recipe_spell_id)
         local spellID=tonumber(match.effect_spell_id)
         local kind
         if type(sch) == "table" then
-            recipeSpellID=tonumber(sch.spellID) or recipeSpellID
+            if not recipeSpellID then recipeSpellID=tonumber(sch.spellID) end
             if sch.kind == "enchant" then
-                spellID=recipeSpellID
+                if not spellID then spellID=tonumber(sch.spellID) end
                 kind="enchant"
+                itemID=nil
             else
                 itemID=tonumber(sch.outputItemID) or itemID
                 kind=sch.kind or "item"
             end
-        elseif spellID then kind="enchant"
+        elseif spellID then
+            kind="enchant"
+            itemID=nil
         elseif itemID then kind="item" end
         local refs = {}
         if type(match.source_url) == "string" then refs[#refs + 1] = match.source_url end
@@ -318,6 +390,7 @@ local function buildView(profession, name, raw)
             sourceType = match.acquisition,
             sameRecipe = match.relation == "possible_duplicate",
         }
+        end
     end
     table.sort(entries, function(a, b)
         local function rank(entry)
@@ -333,14 +406,8 @@ local function buildView(profession, name, raw)
         if (RANK[entries[i].tier] or 9) < (RANK[best] or 9) then best = entries[i].tier end
     end
     local note = nil
-    if #entries == 0 then
-        note = "No comparison has been recorded for this recipe yet."
-    end
     local sources = buildAcquisition(key, name, raw, catalog, merchant)
     local header = nil
-    if sources and sources[1] and sources[1].idCheck then
-        header = "Same recipe pattern. The extra source below is not confirmed."
-    end
     if #entries == 0 and sources then best = "reported" end
     return {
         key = key,
@@ -430,7 +497,7 @@ local function blank(reason)
         status = "none",
         label = LABEL.none,
         entries = {},
-        note = "No comparison has been recorded for this recipe yet.",
+        note = nil,
         missingRecord = true,
         reason = reason,
     }

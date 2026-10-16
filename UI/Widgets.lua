@@ -65,21 +65,11 @@ end
 
 function RRP.ItemLabel(id)
     id = tonumber(id)
-    if not id then return "Unknown item" end
-    if RRP.itemNames and RRP.itemNames[id] then return RRP.itemNames[id] end
-    local name
-    if type(GetItemInfo) == "function" then name = GetItemInfo(id) end
-    if not name and C_Item and type(C_Item.GetItemNameByID) == "function" then
-        local ok, value = pcall(C_Item.GetItemNameByID, id)
-        if ok and type(value) == "string" and value ~= "" then name = value end
-    end
-    if type(name) == "string" and name ~= "" then
-        RRP.itemNames = RRP.itemNames or {}
-        RRP.itemNames[id] = name
-        return name
-    end
+    if not id then return "" end
+    local name = RRP.ReadItemName and RRP.ReadItemName(id)
+    if name then return name end
     if RRP.RequestItem then RRP.RequestItem(id) end
-    return "Item #" .. id
+    return ""
 end
 
 function RRP.RecipeTexture(recipe)

@@ -1,6 +1,5 @@
 local addonName, RRP = ...
 local UI = RRP.UI
-local MATERIAL_ROWS = 5
 
 function UI.BuildDetails(panel)
     local iconBorder = CreateFrame("Button", nil, panel, "BackdropTemplate")
@@ -41,44 +40,39 @@ function UI.BuildDetails(panel)
     pattern:SetHeight(16)
 
     UI.Divider(panel, -84)
-    local materialsTitle = UI.Label(panel, "GameFontNormal", "Materials")
-    materialsTitle:SetPoint("TOPLEFT", 12, -92)
-    local function matHead(text, x, width)
-        local s = UI.Label(panel, "GameFontDisableSmall", text)
-        s:SetPoint("TOPLEFT", x, -112)
+
+    local scroll = CreateFrame("ScrollFrame", nil, panel)
+    scroll:SetPoint("TOPLEFT", 8, -90)
+    scroll:SetPoint("BOTTOMRIGHT", -8, 36)
+    scroll:EnableMouseWheel(true)
+    local child = CreateFrame("Frame", nil, scroll)
+    child:SetSize(344, 40)
+    scroll:SetScrollChild(child)
+    local function onWheel(_, delta)
+        local current = scroll:GetVerticalScroll() or 0
+        local maxScroll = scroll:GetVerticalScrollRange() or 0
+        local nextScroll = current - delta * 24
+        if nextScroll < 0 then nextScroll = 0 end
+        if nextScroll > maxScroll then nextScroll = maxScroll end
+        scroll:SetVerticalScroll(nextScroll)
+    end
+    scroll:SetScript("OnMouseWheel", onWheel)
+    child:EnableMouseWheel(true)
+    child:SetScript("OnMouseWheel", onWheel)
+
+    local materialsTitle = UI.Label(child, "GameFontNormal", "Materials")
+    local function matHead(text, width, justify)
+        local s = UI.Label(child, "GameFontDisableSmall", text)
         s:SetWidth(width)
-        s:SetJustifyH(x < 40 and "LEFT" or "CENTER")
+        s:SetJustifyH(justify)
         return s
     end
-    matHead("Material", 34, 180)
-    matHead("Needed", 220, 64)
-    matHead("In Bags", 290, 70)
+    local headMaterial = matHead("Material", 180, "LEFT")
+    local headNeeded = matHead("Needed", 64, "CENTER")
+    local headBags = matHead("In Bags", 70, "CENTER")
     local materialRows = {}
-    for i = 1, MATERIAL_ROWS do
-        local row = CreateFrame("Frame", nil, panel)
-        row:SetSize(360, 20)
-        row:SetPoint("TOPLEFT", 12, -130 - (i - 1) * 20)
-        row.icon = row:CreateTexture(nil, "ARTWORK")
-        row.icon:SetSize(16, 16)
-        row.icon:SetPoint("LEFT", 0, 0)
-        row.name = UI.Label(row, "GameFontHighlight")
-        row.name:SetPoint("LEFT", 22, 0)
-        row.name:SetWidth(180)
-        row.needed = UI.Label(row, "GameFontHighlightSmall")
-        row.needed:SetPoint("LEFT", 208, 0)
-        row.needed:SetWidth(64)
-        row.needed:SetJustifyH("CENTER")
-        row.owned = UI.Label(row, "GameFontHighlightSmall")
-        row.owned:SetPoint("LEFT", 278, 0)
-        row.owned:SetWidth(70)
-        row.owned:SetJustifyH("CENTER")
-        row:Hide()
-        materialRows[i] = row
-    end
-    local materialStatus = UI.Label(panel, "GameFontHighlightSmall")
-    materialStatus:SetPoint("TOPLEFT", 12, -132)
-    materialStatus:SetWidth(360)
-    materialStatus:SetHeight(32)
+    local materialStatus = UI.Label(child, "GameFontHighlightSmall")
+    materialStatus:SetWidth(320)
     materialStatus:SetJustifyV("TOP")
     materialStatus:SetTextColor(1, 0.75, 0.4)
 
@@ -111,43 +105,54 @@ function UI.BuildDetails(panel)
     end)
     forget:Hide()
 
-    local comparisonTitle = UI.Label(panel, "GameFontNormal", "Recipe Comparisons")
-    comparisonTitle:SetPoint("TOPLEFT", 12, -236)
-    comparisonTitle:Hide()
-    local comparisonNote = UI.Label(panel, "GameFontDisableSmall")
-    comparisonNote:SetPoint("TOPLEFT", 12, -254)
-    comparisonNote:SetSize(344, 28)
-    comparisonNote:SetJustifyV("TOP")
-    comparisonNote:SetTextColor(0.65, 0.6, 0.5)
-    comparisonNote:Hide()
-    local scroll = CreateFrame("ScrollFrame", nil, panel)
-    scroll:SetPoint("TOPLEFT", 8, -284)
-    scroll:SetPoint("BOTTOMRIGHT", -8, 40)
-    scroll:EnableMouseWheel(true)
-    local child = CreateFrame("Frame", nil, scroll)
-    child:SetSize(344, 40)
-    scroll:SetScrollChild(child)
-    local function onWheel(_, delta)
-        local current = scroll:GetVerticalScroll() or 0
-        local maxScroll = scroll:GetVerticalScrollRange() or 0
-        local nextScroll = current - delta * 24
-        if nextScroll < 0 then nextScroll = 0 end
-        if nextScroll > maxScroll then nextScroll = maxScroll end
-        scroll:SetVerticalScroll(nextScroll)
-    end
-    scroll:SetScript("OnMouseWheel", onWheel)
-    child:EnableMouseWheel(true)
-    child:SetScript("OnMouseWheel", onWheel)
-    local COMPARE_ROWS = 16
-    local ROW_H = 76
-    -- All research summaries are scrollable, not clipped into fixed 76px rows.
+    local comparisonTitle = UI.Label(child, "GameFontNormal", "Recipe Comparisons")
     local intro = UI.Label(child, "GameFontDisableSmall")
-    intro:SetPoint("TOPLEFT", 24, 0)
-    intro:SetWidth(316)
     intro:SetJustifyV("TOP")
     intro:SetTextColor(0.76, 0.74, 0.66)
     intro:Hide()
     local compareRows = {}
+    local compareKey = nil
+
+    local function tone(tier)
+        if tier == "duplicate" or tier == "equivalent" then return 0.35, 0.9, 0.4 end
+        if tier == "alternative" then return 0.78, 0.88, 0.5 end
+        if tier == "related" or tier == "slot" or tier == "reported" then return 0.95, 0.72, 0.28 end
+        return 0.7, 0.66, 0.58
+    end
+    local function textWidth()
+        local w = scroll.GetWidth and scroll:GetWidth() or 0
+        if type(w) ~= "number" or w < 120 then
+            w = panel.GetWidth and panel:GetWidth() or 0
+            if type(w) == "number" and w > 40 then w = w - 20 end
+        end
+        if type(w) ~= "number" or w < 120 then w = 360 end
+        return math.floor(w - 36)
+    end
+    local function wrapLabel(label, x, y, width)
+        label:ClearAllPoints()
+        label:SetPoint("TOPLEFT", x, y)
+        label:SetWidth(width)
+        if label.SetWordWrap then label:SetWordWrap(true) end
+        label:SetJustifyH("LEFT")
+        label:SetJustifyV("TOP")
+    end
+    local function fitHeight(label, minimum)
+        label:SetHeight(900)
+        local h = type(label.GetStringHeight) == "function" and label:GetStringHeight() or 0
+        h = tonumber(h) or 0
+        h = math.max(minimum, math.ceil(h + 2))
+        label:SetHeight(h)
+        return h
+    end
+    local function sentences(parts)
+        local bits = {}
+        for i = 1, #parts do
+            local part = tostring(parts[i] or "")
+            part = part:gsub("%.+$", "")
+            if part ~= "" then bits[#bits + 1] = part .. "." end
+        end
+        return table.concat(bits, " ")
+    end
     local function showCompareTip(owner, entry)
         if not entry then return end
         if entry.kind == "source" then
@@ -172,10 +177,36 @@ function UI.BuildDetails(panel)
         end
         UI.ShowTip(owner, entry.name or "", line)
     end
-    for i = 1, COMPARE_ROWS do
-        local row = CreateFrame("Frame", nil, child)
-        row:SetSize(344, ROW_H)
-        row:SetPoint("TOPLEFT", 0, -((i - 1) * ROW_H))
+    local function materialRow(index)
+        local row = materialRows[index]
+        if row then return row end
+        row = CreateFrame("Frame", nil, child)
+        row:SetSize(340, 20)
+        row.icon = row:CreateTexture(nil, "ARTWORK")
+        row.icon:SetSize(16, 16)
+        row.icon:SetPoint("LEFT", 0, 0)
+        row.name = UI.Label(row, "GameFontHighlight")
+        row.name:SetPoint("LEFT", 22, 0)
+        row.name:SetWidth(170)
+        row.needed = UI.Label(row, "GameFontHighlightSmall")
+        row.needed:SetPoint("LEFT", 198, 0)
+        row.needed:SetWidth(64)
+        row.needed:SetJustifyH("CENTER")
+        row.owned = UI.Label(row, "GameFontHighlightSmall")
+        row.owned:SetPoint("LEFT", 268, 0)
+        row.owned:SetWidth(70)
+        row.owned:SetJustifyH("CENTER")
+        row:EnableMouseWheel(true)
+        row:SetScript("OnMouseWheel", onWheel)
+        row:Hide()
+        materialRows[index] = row
+        return row
+    end
+    local function compareRow(index)
+        local row = compareRows[index]
+        if row then return row end
+        row = CreateFrame("Frame", nil, child)
+        row:SetSize(344, 40)
         row.iconHit = CreateFrame("Button", nil, row)
         row.iconHit:SetSize(18, 18)
         row.iconHit:SetPoint("TOPLEFT", 2, -2)
@@ -203,240 +234,63 @@ function UI.BuildDetails(panel)
         row.status:SetHeight(12)
         row.status:SetTextColor(0.75, 0.7, 0.55)
         row.acq = UI.Label(row, "GameFontHighlightSmall")
-        row.acq:SetPoint("TOPLEFT", 24, -30)
-        row.acq:SetPoint("RIGHT", -4, 0)
-        row.acq:SetHeight(12)
         row.acq:SetTextColor(0.9, 0.86, 0.75)
         row.body = UI.Label(row, "GameFontDisableSmall")
-        row.body:SetPoint("TOPLEFT", 24, -44)
-        row.body:SetPoint("RIGHT", -4, 0)
-        row.body:SetHeight(30)
-        row.body:SetJustifyV("TOP")
         row.body:SetTextColor(0.75, 0.72, 0.64)
         row:EnableMouseWheel(true)
         row:SetScript("OnMouseWheel", onWheel)
         row:Hide()
-        compareRows[i] = row
+        compareRows[index] = row
+        return row
     end
-    scroll:Hide()
-    local compareKey = nil
-    local function tone(tier)
-        if tier == "duplicate" or tier == "equivalent" then return 0.35, 0.9, 0.4 end
-        if tier == "alternative" then return 0.78, 0.88, 0.5 end
-        if tier == "related" or tier == "slot" or tier == "reported" then return 0.95, 0.72, 0.28 end
-        return 0.7, 0.66, 0.58
-    end
-    local function textWidth()
-        local w = scroll.GetWidth and scroll:GetWidth() or 0
-        if type(w) ~= "number" or w < 120 then
-            w = panel.GetWidth and panel:GetWidth() or 0
-            if type(w) == "number" and w > 40 then w = w - 20 end
-        end
-        if type(w) ~= "number" or w < 120 then w = 360 end
-        return math.floor(w - 36)
-    end
-    local function wrapLabel(label, y, width)
-        label:ClearAllPoints()
-        label:SetPoint("TOPLEFT", 24, y)
-        label:SetWidth(width)
-        if label.SetWordWrap then label:SetWordWrap(true) end
-        label:SetJustifyH("LEFT")
-        label:SetJustifyV("TOP")
-    end
-    local function fitHeight(label, minimum)
-        label:SetHeight(900)
-        local h = type(label.GetStringHeight) == "function" and label:GetStringHeight() or 0
-        h = tonumber(h) or 0
-        h = math.max(minimum, math.ceil(h + 2))
-        label:SetHeight(h)
-        return h
-    end
-    local function sentences(parts)
-        local bits = {}
-        for i = 1, #parts do
-            local part = tostring(parts[i] or "")
-            part = part:gsub("%.+$", "")
-            if part ~= "" then bits[#bits + 1] = part .. "." end
-        end
-        return table.concat(bits, " ")
-    end
-    local function showComparisons(recipe)
-        if not recipe or not RRP.ComparisonsFor then
-            comparisonTitle:Hide()
-            comparisonNote:Hide()
-            scroll:Hide()
-            compareKey = nil
-            return
-        end
-        local view = RRP.ComparisonsFor(recipe)
-        comparisonTitle:Show()
-        comparisonNote:Hide()
-        scroll:Show()
-        if compareKey ~= recipe.key then
-            scroll:SetVerticalScroll(0)
-            compareKey = recipe.key
-        end
 
-        local function placeComparisons(contentH)
-            local bottom = alert:IsShown() and 78 or 36
-            local panelH = panel.GetHeight and panel:GetHeight() or 0
-            local maxH = 180
-            if type(panelH) == "number" and panelH > 300 then
-                maxH = panelH - 248 - bottom
-            end
-            if maxH < 36 then maxH = 36 end
-            local scrollH = contentH
-            if scrollH > maxH then scrollH = maxH end
-            if scrollH < 28 then scrollH = 28 end
-            scroll:ClearAllPoints()
-            scroll:SetPoint("BOTTOMLEFT", 8, bottom)
-            scroll:SetPoint("BOTTOMRIGHT", -8, bottom)
-            scroll:SetHeight(scrollH)
-            comparisonTitle:ClearAllPoints()
-            comparisonTitle:SetPoint("BOTTOMLEFT", scroll, "TOPLEFT", 4, 4)
-        end
-
-        local offset = 0
-        if type(view.header) == "string" and view.header ~= "" then
-            intro:SetText(view.header)
-            intro:Show()
-            wrapLabel(intro, 0, textWidth())
-            offset = fitHeight(intro, 20) + 12
-        else
-            intro:Hide()
-        end
-
-        local entries = {}
-        local sources = view.sources or {}
-        for i = 1, #sources do entries[#entries + 1] = sources[i] end
-        local itemEntries = view.entries or {}
-        for i = 1, #itemEntries do entries[#entries + 1] = itemEntries[i] end
-        if #entries == 0 then
-            local row = compareRows[1]
-            row:Show()
-            row.entry = nil
-            row.icon:SetTexture(nil)
-            row.title:SetText(RRP.ComparisonLabel and RRP.ComparisonLabel.none or "No Comparison Recorded")
-            row.title:SetTextColor(0.7, 0.66, 0.58)
-            row.status:SetText("")
-            row.acq:SetText("")
-            row.acq:Hide()
-            row.body:SetText(view.note or "No comparison has been recorded for this recipe yet.")
-            wrapLabel(row.body, -26, textWidth())
-            local rowH = 28 + fitHeight(row.body, 24) + 8
-            row:ClearAllPoints()
-            row:SetPoint("TOPLEFT", 0, -offset)
-            row:SetHeight(rowH)
-            for i = 2, #compareRows do compareRows[i]:Hide() end
-            child:SetHeight(offset + rowH)
-            placeComparisons(offset + rowH)
-            return
-        end
-
-        local shown = math.min(#entries, #compareRows)
+    local function showBody(recipe)
         local width = textWidth()
-        child:SetWidth(width + 32)
-        for i = 1, #compareRows do
-            local row = compareRows[i]
-            local entry = entries[i]
-            if i <= shown and entry then
-                row:Show()
-                row.entry = entry
-                local texture
-                if entry.kind == "source" and entry.scrollItemID then
-                    texture = RRP.ItemTexture(entry.scrollItemID)
-                    if RRP.RequestItem then RRP.RequestItem(entry.scrollItemID) end
-                else
-                    texture = entry.itemID and RRP.ItemTexture(entry.itemID)
-                    if entry.itemID and RRP.RequestItem then RRP.RequestItem(entry.itemID) end
-                end
-                if not texture and entry.spellID and type(GetSpellTexture) == "function" then
-                    local ok, spellTexture = pcall(GetSpellTexture, entry.spellID)
-                    if ok then texture = spellTexture end
-                end
-                if not texture then texture = RRP.ProfessionTexture[recipe.profession] end
-                UI.SetIcon(row.icon, texture)
-
-                row.title:SetText((entry.label or "Related Item") .. ": " .. (entry.name or ""))
-                row.title:SetTextColor(tone(entry.tier))
-                row.status:SetText("")
-                local sourceText
-                if entry.kind == "source" then
-                    sourceText = "Other sources listed for this same recipe pattern"
-                elseif type(entry.acquisition) == "string" and entry.acquisition ~= ""
-                    and entry.acquisition ~= "Acquisition source not recorded." then
-                    sourceText = entry.acquisition
-                end
-                local acqH = 0
-                wrapLabel(row.acq, -18, width)
-                if sourceText then
-                    row.acq:SetText(sourceText)
-                    row.acq:Show()
-                    acqH = fitHeight(row.acq, 15)
-                else
-                    row.acq:SetText("")
-                    row.acq:Hide()
-                end
-
-                local body = {}
-                if entry.kind == "source" and entry.lines then
-                    for j = 1, #entry.lines do body[#body + 1] = entry.lines[j] end
-                end
-                if entry.similarities and #entry.similarities > 0 then
-                    body[#body + 1] = "Similarities: " .. sentences(entry.similarities)
-                end
-                if entry.differences and #entry.differences > 0 then
-                    body[#body + 1] = "Differences: " .. sentences(entry.differences)
-                end
-                if shown < #entries and i == shown then
-                    body[#body + 1] = "+" .. (#entries - shown) .. " more comparisons."
-                end
-                local bodyText = table.concat(body, "\n")
-                local bodyH = 0
-                wrapLabel(row.body, -(22 + acqH + 2), width)
-                if bodyText ~= "" then
-                    row.body:SetText(bodyText)
-                    row.body:Show()
-                    bodyH = fitHeight(row.body, 14) + 4
-                else
-                    row.body:SetText("")
-                    row.body:Hide()
-                end
-                local rowH = 22 + acqH + bodyH + 6
-                row:SetWidth(width + 32)
-                row:SetHeight(rowH)
-                row:ClearAllPoints()
-                row:SetPoint("TOPLEFT", 0, -offset)
-                offset = offset + row:GetHeight()
-            else
-                row.entry = nil
-                row:Hide()
-            end
-        end
-        child:SetHeight(math.max(28, offset))
-        placeComparisons(offset)
-    end
-
-    local function showMaterials(recipe)
-        local schematic = RRP.Schematic and RRP.Schematic(recipe.key)
+        child:SetWidth(width + 36)
+        local y = 0
+        materialsTitle:ClearAllPoints()
+        materialsTitle:SetPoint("TOPLEFT", 4, -y)
+        materialsTitle:Show()
+        y = y + 20
+        local schematic = recipe and RRP.Schematic and RRP.Schematic(recipe.key)
         local list = schematic and type(schematic.materials) == "table" and schematic.materials or nil
         if not list or #list == 0 then
-            for _, row in ipairs(materialRows) do row:Hide() end
-            materialStatus:Show()
-            if schematic and schematic.incomplete then
+            headMaterial:Hide()
+            headNeeded:Hide()
+            headBags:Hide()
+            for i = 1, #materialRows do materialRows[i]:Hide() end
+            materialStatus:ClearAllPoints()
+            materialStatus:SetPoint("TOPLEFT", 4, -y)
+            materialStatus:SetWidth(width)
+            if not recipe then
+                materialStatus:SetText("Materials not yet known.")
+            elseif schematic and schematic.incomplete then
                 materialStatus:SetText("The reagent list for this recipe is incomplete.")
             else
                 materialStatus:SetText("This recipe has no reagent list in the database.")
             end
-            return
-        end
-        materialStatus:Hide()
-        for i, row in ipairs(materialRows) do
-            local material = list[i]
-            if material then
+            materialStatus:Show()
+            y = y + 28
+        else
+            materialStatus:Hide()
+            headMaterial:ClearAllPoints()
+            headMaterial:SetPoint("TOPLEFT", 26, -y)
+            headMaterial:Show()
+            headNeeded:ClearAllPoints()
+            headNeeded:SetPoint("TOPLEFT", 202, -y)
+            headNeeded:Show()
+            headBags:ClearAllPoints()
+            headBags:SetPoint("TOPLEFT", 272, -y)
+            headBags:Show()
+            y = y + 16
+            for i = 1, #list do
+                local material = list[i]
+                local row = materialRow(i)
+                row:ClearAllPoints()
+                row:SetPoint("TOPLEFT", 4, -y)
                 row:Show()
                 UI.SetIcon(row.icon, RRP.ItemTexture(material.itemID))
-                UI.Trim(row.name, RRP.ItemLabel(material.itemID), 170)
+                UI.Trim(row.name, RRP.ItemLabel(material.itemID), 160)
                 row.name:SetTextColor(0.85, 0.82, 0.75)
                 local owned = nil
                 if RRP.BagsReadable() then owned = RRP.BagCount(material.itemID) end
@@ -450,18 +304,139 @@ function UI.BuildDetails(panel)
                     row.owned:SetText("–")
                 end
                 row.owned:SetTextColor(1, 1, 1)
+                y = y + 22
+            end
+            for i = #list + 1, #materialRows do materialRows[i]:Hide() end
+        end
+
+        y = y + 8
+        if not recipe or not RRP.ComparisonsFor then
+            comparisonTitle:Hide()
+            intro:Hide()
+            for i = 1, #compareRows do compareRows[i]:Hide() end
+            compareKey = nil
+            child:SetHeight(math.max(40, y))
+            return
+        end
+        local view = RRP.ComparisonsFor(recipe)
+        comparisonTitle:ClearAllPoints()
+        comparisonTitle:SetPoint("TOPLEFT", 4, -y)
+        comparisonTitle:Show()
+        y = y + 20
+        if compareKey ~= recipe.key then
+            scroll:SetVerticalScroll(0)
+            compareKey = recipe.key
+        end
+
+        local entries = {}
+        local sources = view.sources or {}
+        for i = 1, #sources do entries[#entries + 1] = sources[i] end
+        local itemEntries = view.entries or {}
+        for i = 1, #itemEntries do entries[#entries + 1] = itemEntries[i] end
+
+        if type(view.header) == "string" and view.header ~= "" then
+            intro:SetText(view.header)
+            intro:Show()
+            wrapLabel(intro, 24, -y, width)
+            y = y + fitHeight(intro, 20) + 8
+        else
+            intro:Hide()
+        end
+
+        local shown = #entries
+        if shown == 0 then shown = 1 end
+        for i = 1, shown do compareRow(i) end
+        for i = 1, #compareRows do
+            local row = compareRows[i]
+            local entry = entries[i]
+            if i <= shown and (entry or #entries == 0) then
+                row:Show()
+                row:SetWidth(width + 32)
+                row.entry = entry
+                if not entry then
+                    row.icon:SetTexture(nil)
+                    row.title:SetText("None")
+                    row.title:SetTextColor(0.7, 0.66, 0.58)
+                    row.status:SetText("")
+                    row.acq:SetText("")
+                    row.acq:Hide()
+                    row.body:SetText("")
+                    row.body:Hide()
+                    local rowH = 18
+                    row:ClearAllPoints()
+                    row:SetPoint("TOPLEFT", 0, -y)
+                    row:SetHeight(rowH)
+                    y = y + rowH
+                else
+                    local texture
+                    if entry.kind == "source" and entry.scrollItemID then
+                        texture = RRP.ItemTexture(entry.scrollItemID)
+                        if RRP.RequestItem then RRP.RequestItem(entry.scrollItemID) end
+                    else
+                        texture = entry.itemID and RRP.ItemTexture(entry.itemID)
+                        if entry.itemID and RRP.RequestItem then RRP.RequestItem(entry.itemID) end
+                    end
+                    if not texture and entry.spellID and type(GetSpellTexture) == "function" then
+                        local ok, spellTexture = pcall(GetSpellTexture, entry.spellID)
+                        if ok then texture = spellTexture end
+                    end
+                    if not texture then texture = RRP.ProfessionTexture[recipe.profession] end
+                    UI.SetIcon(row.icon, texture)
+                    row.title:SetText((entry.label or "Related Item") .. ": " .. (entry.name or ""))
+                    row.title:SetTextColor(tone(entry.tier))
+                    row.status:SetText("")
+                    local sourceText
+                    if entry.kind == "source" then
+                        sourceText = "Same recipe from another listed source."
+                    elseif type(entry.acquisition) == "string" and entry.acquisition ~= ""
+                        and entry.acquisition ~= "Acquisition source not recorded." then
+                        sourceText = entry.acquisition
+                    end
+                    local acqH = 0
+                    wrapLabel(row.acq, 24, -18, width)
+                    if sourceText then
+                        row.acq:SetText(sourceText)
+                        row.acq:Show()
+                        acqH = fitHeight(row.acq, 15)
+                    else
+                        row.acq:SetText("")
+                        row.acq:Hide()
+                    end
+                    local body = {}
+                    if entry.kind == "source" and entry.lines then
+                        for j = 1, #entry.lines do body[#body + 1] = entry.lines[j] end
+                    end
+                    if entry.similarities and #entry.similarities > 0 then
+                        body[#body + 1] = "Similarities: " .. sentences(entry.similarities)
+                    end
+                    if entry.differences and #entry.differences > 0 then
+                        body[#body + 1] = "Differences: " .. sentences(entry.differences)
+                    end
+                    local bodyText = table.concat(body, "\n")
+                    local bodyH = 0
+                    wrapLabel(row.body, 24, -(22 + acqH + 2), width)
+                    if bodyText ~= "" then
+                        row.body:SetText(bodyText)
+                        row.body:Show()
+                        bodyH = fitHeight(row.body, 14) + 4
+                    else
+                        row.body:SetText("")
+                        row.body:Hide()
+                    end
+                    local rowH = 22 + acqH + bodyH + 6
+                    row:ClearAllPoints()
+                    row:SetPoint("TOPLEFT", 0, -y)
+                    row:SetHeight(rowH)
+                    y = y + rowH
+                end
             else
+                row.entry = nil
                 row:Hide()
             end
         end
-        if #list > #materialRows then
-            local last = materialRows[#materialRows]
-            last.icon:SetTexture(nil)
-            last.name:SetText("+" .. (#list - #materialRows + 1) .. " more")
-            last.needed:SetText("")
-            last.owned:SetText("")
-        end
+        child:SetHeight(math.max(40, y + 8))
     end
+
     function UI.RefreshDetails()
         local profile = RRP.GetProfile()
         local recipe = RRP.SelectedRecipe()
@@ -471,11 +446,8 @@ function UI.BuildDetails(panel)
             level:SetText("")
             pattern:SetText("")
             alert:Hide()
-            for _, row in ipairs(materialRows) do row:Hide() end
-            materialStatus:SetText("Materials not yet known.")
-            materialStatus:Show()
             forget:Hide()
-            showComparisons(nil)
+            showBody(nil)
             return
         end
         UI.SetIcon(icon, RRP.RecipeTexture(recipe))
@@ -496,9 +468,8 @@ function UI.BuildDetails(panel)
         local scrollId = RRP.ScrollID(recipe)
         pattern:SetText(scrollId and RRP.ItemLabel(scrollId) or "")
         pattern:SetTextColor(0.9, 0.86, 0.75)
-        showMaterials(recipe)
         alert:Hide()
         if RRP.IsDiscovered(recipe) then forget:Show() else forget:Hide() end
-        showComparisons(recipe)
+        showBody(recipe)
     end
 end

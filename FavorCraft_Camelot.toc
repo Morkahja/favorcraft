@@ -2,7 +2,7 @@
 ## Title: FavorCraft
 ## Notes: Merchant's Favor & Profession Planner for WoW Forever. Alliance and Horde.
 ## Author: Babunigaming
-## Version: 0.4.9-beta
+## Version: 0.5.0-beta
 ## SavedVariables: RRPDB, FavorcraftDB
 
 Catalog.lua
@@ -11,6 +11,7 @@ Faction.lua
 Core.lua
 AlchemyComparisons.lua
 BlacksmithingComparisons.lua
+BlacksmithingSourceAudit.lua
 CookingComparisons.lua
 EnchantingComparisons.lua
 EngineeringComparisons.lua

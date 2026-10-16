@@ -1,23 +1,28 @@
--- Favorcraft Engineering comparisons: WoW Forever client-specific research.
--- Per-match flags MUST be honored; no exact trainer duplicates verified.
+-- Engineering comparisons for non-Merchant's Favor trainer and world crafts.
+-- outputItemID is the crafted item, never a schematic or scroll.
+-- Source pages are stored and are not shown.
 local addonName, Favorcraft = ...
 Favorcraft = Favorcraft or {}
 Favorcraft.EngineeringComparisons = {
   ["SAF-T Dynamite"] = {
     ["merchant_recipe_name"] = "SAF-T Dynamite",
-    ["classification"] = "distinct",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["classification"] = "alternative",
+    ["verification"] = "researched_non_favor",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "explosive",
-    ["summary"] = "Related throwable explosive; SAF-T safety / user Engineering requirement must be confirmed.",
+    ["summary"] = "The non-Favor craft below overlaps in an actionable use; compare the explicit restrictions, armor slot, skill and cooldown before spending Favor.",
     ["matches"] = {
       {
         ["name"] = "Rough Dynamite",
-        ["relation"] = "related_unverified",
-        ["acquisition"] = "recipe_source_unverified",
-        ["source_verified"] = false,
-        ["similarity_and_difference"] = "Related throwable explosive; SAF-T safety / user Engineering requirement must be confirmed.",
-        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/",
+        ["outputItemID"] = 4358,
+        ["relation"] = "alternative",
+        ["acquisition"] = "trainer",
+        ["source_verified"] = true,
+        ["verification"] = "forever_client_recipe_and_item",
+        ["similarity"] = "Same basic 26-34 Fire damage in a 5-yard area.",
+        ["differences"] = "Rough Dynamite requires Engineering to use; SAF-T Dynamite can be used by non-engineers. Both are consumed.",
+        ["tier_context"] = "Level 10 item; early-tier explosive.",
+        ["source_url"] = "https://foreverdb.net/guide/professions",
       },
     },
     ["source_urls"] = {
@@ -28,18 +33,22 @@ Favorcraft.EngineeringComparisons = {
   ["SAF-T Copper Bomb"] = {
     ["merchant_recipe_name"] = "SAF-T Copper Bomb",
     ["classification"] = "alternative",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["verification"] = "researched_non_favor",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "explosive",
-    ["summary"] = "Both copper-tier area explosives; compare radius, damage, stun, safety and use restrictions.",
+    ["summary"] = "The non-Favor craft below overlaps in an actionable use; compare the explicit restrictions, armor slot, skill and cooldown before spending Favor.",
     ["matches"] = {
       {
         ["name"] = "Rough Copper Bomb",
+        ["outputItemID"] = 4360,
         ["relation"] = "alternative",
-        ["acquisition"] = "recipe_source_unverified",
-        ["source_verified"] = false,
-        ["similarity_and_difference"] = "Both copper-tier area explosives; compare radius, damage, stun, safety and use restrictions.",
-        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/",
+        ["acquisition"] = "trainer",
+        ["source_verified"] = true,
+        ["verification"] = "forever_client_recipe_and_item",
+        ["similarity"] = "Both inflict Fire damage and stun nearby enemies.",
+        ["differences"] = "Rough Copper Bomb: 22-28 Fire damage and 1-sec stun within 3 yards; requires Engineering (30). SAF-T Copper Bomb is intended for users without Engineering and uses SAF-T Tabs.",
+        ["tier_context"] = "Copper-tier explosives; nearby crafting tiers (Engineering 30 versus 55).",
+        ["source_url"] = "https://forevercompass.com/items/4360",
       },
     },
     ["source_urls"] = {
@@ -51,18 +60,22 @@ Favorcraft.EngineeringComparisons = {
   ["EZ-Thro Copper Bomb XL"] = {
     ["merchant_recipe_name"] = "EZ-Thro Copper Bomb XL",
     ["classification"] = "alternative",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["verification"] = "researched_non_favor",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "explosive",
-    ["summary"] = "Both area bombs; XL is 43–57 Fire damage, 5 yd stun 1 sec according to Forever data; tier/use restrictions differ.",
+    ["summary"] = "The non-Favor craft below overlaps in an actionable use; compare the explicit restrictions, armor slot, skill and cooldown before spending Favor.",
     ["matches"] = {
       {
         ["name"] = "Big Bronze Bomb",
+        ["outputItemID"] = 4380,
         ["relation"] = "alternative",
-        ["acquisition"] = "recipe_source_unverified",
-        ["source_verified"] = false,
-        ["similarity_and_difference"] = "Both area bombs; XL is 43–57 Fire damage, 5 yd stun 1 sec according to Forever data; tier/use restrictions differ.",
-        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/",
+        ["acquisition"] = "trainer",
+        ["source_verified"] = true,
+        ["verification"] = "forever_client_recipe_and_item",
+        ["similarity"] = "Both explode in a 5-yard area and briefly stun.",
+        ["differences"] = "Big Bronze Bomb: 85-115 Fire damage and 2-sec stun; requires Engineering to throw. EZ-Thro Copper Bomb XL: 43-57 Fire damage and 1-sec stun but can be used without Engineering.",
+        ["tier_context"] = "Neighboring Engineering tiers: 130 versus 140.",
+        ["source_url"] = "https://foreverdb.net/item/4380",
       },
     },
     ["source_urls"] = {
@@ -74,20 +87,11 @@ Favorcraft.EngineeringComparisons = {
   ["Satchel of Copper Bombs"] = {
     ["merchant_recipe_name"] = "Satchel of Copper Bombs",
     ["classification"] = "distinct",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["verification"] = "no_credible_non_favor_alternative_found",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "satchel",
-    ["summary"] = "Satchel is a reusable equipped thrown weapon; ordinary Copper Bomb is a consumable. Not equivalent.",
-    ["matches"] = {
-      {
-        ["name"] = "Copper Bomb",
-        ["relation"] = "related_unverified",
-        ["acquisition"] = "recipe_source_unverified",
-        ["source_verified"] = false,
-        ["similarity_and_difference"] = "Satchel is a reusable equipped thrown weapon; ordinary Copper Bomb is a consumable. Not equivalent.",
-        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/",
-      },
-    },
+    ["summary"] = "Reusable thrown-slot weapon with splash damage. A disposable Copper Bomb is not a substitute; no comparable non-Favor craft established.",
+    ["matches"] = {},
     ["source_urls"] = {
       "https://www.wow-professions.com/forever/npc/fritz-fizzle",
       "https://theforeverera.com/en/recipes/engineering/",
@@ -96,20 +100,11 @@ Favorcraft.EngineeringComparisons = {
   ["Satchel of Bronze Bombs"] = {
     ["merchant_recipe_name"] = "Satchel of Bronze Bombs",
     ["classification"] = "distinct",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["verification"] = "no_credible_non_favor_alternative_found",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "satchel",
-    ["summary"] = "Satchel equipped thrown weapon uses 20 crafted Big Bronze Bombs; +4 Stamina, 10.8 splash Fire damage; consumable bombs work differently.",
-    ["matches"] = {
-      {
-        ["name"] = "Big Bronze Bomb",
-        ["relation"] = "related_unverified",
-        ["acquisition"] = "recipe_source_unverified",
-        ["source_verified"] = false,
-        ["similarity_and_difference"] = "Satchel equipped thrown weapon uses 20 crafted Big Bronze Bombs; +4 Stamina, 10.8 splash Fire damage; consumable bombs work differently.",
-        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/",
-      },
-    },
+    ["summary"] = "Reusable thrown-slot weapon (+Stamina, splash on thrown attacks), not a consumable bomb. No direct non-Favor alternative established.",
+    ["matches"] = {},
     ["source_urls"] = {
       "https://www.wow-professions.com/forever/npc/fritz-fizzle",
       "https://theforeverera.com/en/recipes/engineering/",
@@ -119,20 +114,11 @@ Favorcraft.EngineeringComparisons = {
   ["Satchel of Iron Bombs"] = {
     ["merchant_recipe_name"] = "Satchel of Iron Bombs",
     ["classification"] = "distinct",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["verification"] = "no_credible_non_favor_alternative_found",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "satchel",
-    ["summary"] = "Re-usable thrown-slot area attack versus ordinary consumed grenade. Verify exact tooltips.",
-    ["matches"] = {
-      {
-        ["name"] = "Iron Grenade",
-        ["relation"] = "related_unverified",
-        ["acquisition"] = "recipe_source_unverified",
-        ["source_verified"] = false,
-        ["similarity_and_difference"] = "Re-usable thrown-slot area attack versus ordinary consumed grenade. Verify exact tooltips.",
-        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/",
-      },
-    },
+    ["summary"] = "Reusable thrown-slot weapon with splash on every throw; ordinary Iron Grenades are consumed. No direct non-Favor alternative established.",
+    ["matches"] = {},
     ["source_urls"] = {
       "https://www.wow-professions.com/forever/npc/fritz-fizzle",
       "https://theforeverera.com/en/recipes/engineering/",
@@ -141,20 +127,11 @@ Favorcraft.EngineeringComparisons = {
   ["Satchel of Dark Iron Bombs"] = {
     ["merchant_recipe_name"] = "Satchel of Dark Iron Bombs",
     ["classification"] = "distinct",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["verification"] = "no_credible_non_favor_alternative_found",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "satchel",
-    ["summary"] = "Equipped thrown-slot device versus consumable explosive; exact use conditions differ.",
-    ["matches"] = {
-      {
-        ["name"] = "Dark Iron Bomb",
-        ["relation"] = "related_unverified",
-        ["acquisition"] = "recipe_source_unverified",
-        ["source_verified"] = false,
-        ["similarity_and_difference"] = "Equipped thrown-slot device versus consumable explosive; exact use conditions differ.",
-        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/",
-      },
-    },
+    ["summary"] = "Reusable thrown-slot weapon with Fire splash, not a consumed Dark Iron Bomb. No direct non-Favor alternative established.",
+    ["matches"] = {},
     ["source_urls"] = {
       "https://www.wow-professions.com/forever/npc/fritz-fizzle",
       "https://theforeverera.com/en/recipes/engineering/",
@@ -163,20 +140,11 @@ Favorcraft.EngineeringComparisons = {
   ["Clanking Cord"] = {
     ["merchant_recipe_name"] = "Clanking Cord",
     ["classification"] = "distinct",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["verification"] = "no_credible_non_favor_alternative_found",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "belt",
-    ["summary"] = "Different engineered belt designs; compare actual equipment class, stats and equip/use effects.",
-    ["matches"] = {
-      {
-        ["name"] = "Gizmo Girdle",
-        ["relation"] = "related_unverified",
-        ["acquisition"] = "recipe_source_unverified",
-        ["source_verified"] = false,
-        ["similarity_and_difference"] = "Different engineered belt designs; compare actual equipment class, stats and equip/use effects.",
-        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/",
-      },
-    },
+    ["summary"] = "Level-30 crafted mail waist armor. No non-Favor Engineering recipe found with a sufficiently similar class, effect and item tier.",
+    ["matches"] = {},
     ["source_urls"] = {
       "https://www.wow-professions.com/forever/npc/fritz-fizzle",
       "https://theforeverera.com/en/recipes/engineering/",
@@ -185,12 +153,11 @@ Favorcraft.EngineeringComparisons = {
   ["Gizmo Girdle"] = {
     ["merchant_recipe_name"] = "Gizmo Girdle",
     ["classification"] = "distinct",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["verification"] = "no_credible_non_favor_alternative_found",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "belt",
-    ["summary"] = "Different Merchant’s Favor belts alone are not external recipe alternatives; compare only after verifying actual effects.",
-    ["matches"] = {
-    },
+    ["summary"] = "Level-30 crafted leather waist armor. Other Merchant Favor belts are excluded; no suitable external craft established.",
+    ["matches"] = {},
     ["source_urls"] = {
       "https://www.wow-professions.com/forever/npc/fritz-fizzle",
       "https://theforeverera.com/en/recipes/engineering/",
@@ -199,12 +166,11 @@ Favorcraft.EngineeringComparisons = {
   ["Whimsical Waistwrap"] = {
     ["merchant_recipe_name"] = "Whimsical Waistwrap",
     ["classification"] = "distinct",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["verification"] = "no_credible_non_favor_alternative_found",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "belt",
-    ["summary"] = "Different Merchant’s Favor belts alone are not external recipe alternatives; compare only after verifying actual effects.",
-    ["matches"] = {
-    },
+    ["summary"] = "Level-30 crafted cloth waist armor. Other Merchant Favor belts are excluded; no suitable external craft established.",
+    ["matches"] = {},
     ["source_urls"] = {
       "https://www.wow-professions.com/forever/npc/fritz-fizzle",
       "https://theforeverera.com/en/recipes/engineering/",
@@ -212,19 +178,23 @@ Favorcraft.EngineeringComparisons = {
   },
   ["Bent Goggles"] = {
     ["merchant_recipe_name"] = "Bent Goggles",
-    ["classification"] = "distinct",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["classification"] = "alternative",
+    ["verification"] = "researched_non_favor",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "goggles",
-    ["summary"] = "Goggles use trainer-taught Ornate Spyglass as a reagent, but a wearable helm is not the same item.",
+    ["summary"] = "The non-Favor craft below overlaps in an actionable use; compare the explicit restrictions, armor slot, skill and cooldown before spending Favor.",
     ["matches"] = {
       {
         ["name"] = "Ornate Spyglass",
-        ["relation"] = "related_unverified",
-        ["acquisition"] = "trainer_client_index",
+        ["outputItemID"] = 5507,
+        ["relation"] = "alternative",
+        ["acquisition"] = "trainer",
         ["source_verified"] = true,
-        ["similarity_and_difference"] = "Goggles use trainer-taught Ornate Spyglass as a reagent, but a wearable helm is not the same item.",
-        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/ornate-spyglass/",
+        ["verification"] = "forever_client_recipe_and_item",
+        ["similarity"] = "Both allow looking far into the distance.",
+        ["differences"] = "Ornate Spyglass is a non-equippable hand device, not leather head armor; no armor or wearable stats. The goggles are level-40 wearable headgear and consume a spyglass as a reagent.",
+        ["tier_context"] = "Exact viewing function; equipment levels differ, not a headgear upgrade comparison.",
+        ["source_url"] = "https://foreverdb.net/item/5507",
       },
     },
     ["source_urls"] = {
@@ -235,18 +205,22 @@ Favorcraft.EngineeringComparisons = {
   ["Dented Goggles"] = {
     ["merchant_recipe_name"] = "Dented Goggles",
     ["classification"] = "alternative",
-    ["verification"] = "documented_forever_comparison",
+    ["verification"] = "researched_non_favor",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "goggles",
-    ["summary"] = "Both provide long-distance vision according to Forever descriptions, but goggles are equipped 355-armor plate headgear and spyglass is a handheld item.",
+    ["summary"] = "The non-Favor craft below overlaps in an actionable use; compare the explicit restrictions, armor slot, skill and cooldown before spending Favor.",
     ["matches"] = {
       {
         ["name"] = "Ornate Spyglass",
+        ["outputItemID"] = 5507,
         ["relation"] = "alternative",
-        ["acquisition"] = "trainer_client_index",
+        ["acquisition"] = "trainer",
         ["source_verified"] = true,
-        ["similarity_and_difference"] = "Both provide long-distance vision according to Forever descriptions, but goggles are equipped 355-armor plate headgear and spyglass is a handheld item.",
-        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/ornate-spyglass/",
+        ["verification"] = "forever_client_recipe_and_item",
+        ["similarity"] = "Both allow looking far into the distance.",
+        ["differences"] = "Ornate Spyglass is a handheld device and offers none of the 355 plate armor or helm slot of level-40 Dented Goggles. A spyglass is required to craft the goggles.",
+        ["tier_context"] = "Only the viewing utility matches; not a plate-gear comparison.",
+        ["source_url"] = "https://foreverdb.net/item/5507",
       },
     },
     ["source_urls"] = {
@@ -257,19 +231,23 @@ Favorcraft.EngineeringComparisons = {
   },
   ["Floppy Goggles"] = {
     ["merchant_recipe_name"] = "Floppy Goggles",
-    ["classification"] = "distinct",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["classification"] = "alternative",
+    ["verification"] = "researched_non_favor",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "goggles",
-    ["summary"] = "Shares a spyglass reagent and goggles family; item effect/stats must be checked.",
+    ["summary"] = "The non-Favor craft below overlaps in an actionable use; compare the explicit restrictions, armor slot, skill and cooldown before spending Favor.",
     ["matches"] = {
       {
         ["name"] = "Ornate Spyglass",
-        ["relation"] = "related_unverified",
-        ["acquisition"] = "trainer_client_index",
+        ["outputItemID"] = 5507,
+        ["relation"] = "alternative",
+        ["acquisition"] = "trainer",
         ["source_verified"] = true,
-        ["similarity_and_difference"] = "Shares a spyglass reagent and goggles family; item effect/stats must be checked.",
-        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/ornate-spyglass/",
+        ["verification"] = "forever_client_recipe_and_item",
+        ["similarity"] = "Both allow looking far into the distance.",
+        ["differences"] = "Ornate Spyglass is non-equippable; Floppy Goggles are cloth headgear with 48 armor at level 40. The goggles consume a spyglass as a reagent.",
+        ["tier_context"] = "Only the viewing utility matches; not a cloth-gear comparison.",
+        ["source_url"] = "https://foreverdb.net/item/5507",
       },
     },
     ["source_urls"] = {
@@ -279,19 +257,23 @@ Favorcraft.EngineeringComparisons = {
   },
   ["Stuckbutton Goggles"] = {
     ["merchant_recipe_name"] = "Stuckbutton Goggles",
-    ["classification"] = "distinct",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["classification"] = "alternative",
+    ["verification"] = "researched_non_favor",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "goggles",
-    ["summary"] = "Shares a spyglass reagent and goggles family; item effect/stats must be checked.",
+    ["summary"] = "The non-Favor craft below overlaps in an actionable use; compare the explicit restrictions, armor slot, skill and cooldown before spending Favor.",
     ["matches"] = {
       {
         ["name"] = "Ornate Spyglass",
-        ["relation"] = "related_unverified",
-        ["acquisition"] = "trainer_client_index",
+        ["outputItemID"] = 5507,
+        ["relation"] = "alternative",
+        ["acquisition"] = "trainer",
         ["source_verified"] = true,
-        ["similarity_and_difference"] = "Shares a spyglass reagent and goggles family; item effect/stats must be checked.",
-        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/ornate-spyglass/",
+        ["verification"] = "forever_client_recipe_and_item",
+        ["similarity"] = "Both allow looking far into the distance.",
+        ["differences"] = "Ornate Spyglass is non-equippable; Stuckbutton Goggles offer 202 mail armor at level 40, with a possible random suffix. The goggles consume a spyglass.",
+        ["tier_context"] = "Only the viewing utility matches; not a mail-gear comparison.",
+        ["source_url"] = "https://foreverdb.net/item/5507",
       },
     },
     ["source_urls"] = {
@@ -301,19 +283,23 @@ Favorcraft.EngineeringComparisons = {
   },
   ["Emergency Field Cloak"] = {
     ["merchant_recipe_name"] = "Emergency Field Cloak",
-    ["classification"] = "distinct",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["classification"] = "alternative",
+    ["verification"] = "researched_non_favor",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "cloak",
-    ["summary"] = "Both are cloak-slot engineering items; actual Emergency effect needs verification before functional comparison.",
+    ["summary"] = "The non-Favor craft below overlaps in an actionable use; compare the explicit restrictions, armor slot, skill and cooldown before spending Favor.",
     ["matches"] = {
       {
-        ["name"] = "Parachute Cloak",
-        ["relation"] = "related_unverified",
-        ["acquisition"] = "recipe_source_unverified",
-        ["source_verified"] = false,
-        ["similarity_and_difference"] = "Both are cloak-slot engineering items; actual Emergency effect needs verification before functional comparison.",
-        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/",
+        ["name"] = "Gnomish Cloaking Device",
+        ["outputItemID"] = 4397,
+        ["relation"] = "alternative",
+        ["acquisition"] = "vendor",
+        ["source_verified"] = true,
+        ["verification"] = "forever_client_recipe_and_item",
+        ["similarity"] = "Both are item-level-40 trinkets granting 10 sec invisibility on a 1-hour cooldown.",
+        ["differences"] = "Gnomish Cloaking Device is a non-Favor schematic item (Engineering 200), traditionally sold by a vendor; Emergency Field Cloak costs Favor, is bind-on-pickup, and uses one Gnomish Cloaking Device plus SAF-T Casing. Despite its name, Emergency Field Cloak is a TRINKET, not back-slot armor.",
+        ["tier_context"] = "Identical reported active effect and item level.",
+        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/gnomish-cloaking-device/",
       },
     },
     ["source_urls"] = {
@@ -324,17 +310,21 @@ Favorcraft.EngineeringComparisons = {
   ["SAF-T Disposable Parachute"] = {
     ["merchant_recipe_name"] = "SAF-T Disposable Parachute",
     ["classification"] = "alternative",
-    ["verification"] = "documented_forever_comparison",
+    ["verification"] = "researched_non_favor",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "cloak",
-    ["summary"] = "Same 10s slow-fall activation, 30 min cooldown; Favor craft consumes Parachute Cloak plus SAF-T Casing, and lacks its +8 Agility.",
+    ["summary"] = "The non-Favor craft below overlaps in an actionable use; compare the explicit restrictions, armor slot, skill and cooldown before spending Favor.",
     ["matches"] = {
       {
         ["name"] = "Parachute Cloak",
+        ["outputItemID"] = 10518,
         ["relation"] = "alternative",
         ["acquisition"] = "recipe_item",
         ["source_verified"] = true,
-        ["similarity_and_difference"] = "Same 10s slow-fall activation, 30 min cooldown; Favor craft consumes Parachute Cloak plus SAF-T Casing, and lacks its +8 Agility.",
+        ["verification"] = "forever_client_recipe_and_item",
+        ["similarity"] = "Both offer 10 sec fall-speed reduction with 30-minute cooldown as equippable cloaks.",
+        ["differences"] = "Parachute Cloak is a non-Favor schematic craft with +8 Agility and item level 45; the Favor SAF-T Disposable Parachute (item level 50) consumes a Parachute Cloak plus SAF-T Casing, but lacks the +8 Agility bonus. Schematic source is a non-Favor recipe item; precise current-world drop not asserted.",
+        ["tier_context"] = "Adjacent item levels 45 versus 50; same use effect.",
         ["source_url"] = "https://theforeverera.com/en/recipes/engineering/parachute-cloak/",
       },
     },
@@ -347,20 +337,11 @@ Favorcraft.EngineeringComparisons = {
   ["Gnomish Poultryizer"] = {
     ["merchant_recipe_name"] = "Gnomish Poultryizer",
     ["classification"] = "distinct",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["verification"] = "no_credible_non_favor_alternative_found",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "gadget",
-    ["summary"] = "Both engineering control gadgets, but poultry transform (15 sec; 5 min cooldown) is not machine-control remote.",
-    ["matches"] = {
-      {
-        ["name"] = "Gnomish Universal Remote",
-        ["relation"] = "related_unverified",
-        ["acquisition"] = "recipe_source_unverified",
-        ["source_verified"] = false,
-        ["similarity_and_difference"] = "Both engineering control gadgets, but poultry transform (15 sec; 5 min cooldown) is not machine-control remote.",
-        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/",
-      },
-    },
+    ["summary"] = "Transforms a target into a chicken for up to 15 sec, with possible backfire. Ordinary control gadgets are not equivalent; no suitable non-Favor craft at a comparable tier established.",
+    ["matches"] = {},
     ["source_urls"] = {
       "https://www.wow-professions.com/forever/npc/fritz-fizzle",
       "https://theforeverera.com/en/recipes/engineering/",
@@ -370,20 +351,11 @@ Favorcraft.EngineeringComparisons = {
   ["Compact Critter Carrier"] = {
     ["merchant_recipe_name"] = "Compact Critter Carrier",
     ["classification"] = "distinct",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["verification"] = "no_credible_non_favor_alternative_found",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "gadget",
-    ["summary"] = "Both critter/pet concepts, but item behavior, repeatability and ownership must be verified.",
-    ["matches"] = {
-      {
-        ["name"] = "Mechanical Squirrel Box",
-        ["relation"] = "related_unverified",
-        ["acquisition"] = "recipe_source_unverified",
-        ["source_verified"] = false,
-        ["similarity_and_difference"] = "Both critter/pet concepts, but item behavior, repeatability and ownership must be verified.",
-        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/",
-      },
-    },
+    ["summary"] = "Portable temporary Hunter stable-access device for group members, NOT a vanity critter or pet. Mechanical Squirrel Box is not a functional alternative.",
+    ["matches"] = {},
     ["source_urls"] = {
       "https://www.wow-professions.com/forever/npc/fritz-fizzle",
       "https://theforeverera.com/en/recipes/engineering/",
@@ -392,18 +364,22 @@ Favorcraft.EngineeringComparisons = {
   ["Stealthman 52"] = {
     ["merchant_recipe_name"] = "Stealthman 52",
     ["classification"] = "alternative",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["verification"] = "researched_non_favor",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "gadget",
-    ["summary"] = "Both stealth-related engineering gadgets; compare duration, cooldown, risk, and use restrictions.",
+    ["summary"] = "The non-Favor craft below overlaps in an actionable use; compare the explicit restrictions, armor slot, skill and cooldown before spending Favor.",
     ["matches"] = {
       {
         ["name"] = "Gnomish Cloaking Device",
+        ["outputItemID"] = 4397,
         ["relation"] = "alternative",
-        ["acquisition"] = "recipe_source_unverified",
-        ["source_verified"] = false,
-        ["similarity_and_difference"] = "Both stealth-related engineering gadgets; compare duration, cooldown, risk, and use restrictions.",
-        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/",
+        ["acquisition"] = "vendor",
+        ["source_verified"] = true,
+        ["verification"] = "forever_client_recipe_and_item",
+        ["similarity"] = "Both grant concealment through crafted Engineering gadgets.",
+        ["differences"] = "Stealthman 52 (item level 60, required level 55) lasts up to 1 min while stationary, 6 sec after moving, cannot activate during combat, and has 5-min cooldown. The older Gnomish Cloaking Device (item level 40) gives 10 sec invisibility and has a 1-hour cooldown. This is a functional alternative, not a comparable gear tier.",
+        ["tier_context"] = "Different item levels (60 versus 40); purposeful same-function comparison.",
+        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/gnomish-cloaking-device/",
       },
     },
     ["source_urls"] = {
@@ -414,18 +390,22 @@ Favorcraft.EngineeringComparisons = {
   ["Ultralight Goblin Glider"] = {
     ["merchant_recipe_name"] = "Ultralight Goblin Glider",
     ["classification"] = "alternative",
-    ["verification"] = "documented_forever_comparison",
+    ["verification"] = "researched_non_favor",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "gadget",
-    ["summary"] = "Both slow descent, but glider provides directional travel for 10s on a 3 min cooldown; parachute cloak slows fall only for 10s on 30 min cooldown.",
+    ["summary"] = "The non-Favor craft below overlaps in an actionable use; compare the explicit restrictions, armor slot, skill and cooldown before spending Favor.",
     ["matches"] = {
       {
         ["name"] = "Parachute Cloak",
+        ["outputItemID"] = 10518,
         ["relation"] = "alternative",
-        ["acquisition"] = "recipe_source_unverified",
-        ["source_verified"] = false,
-        ["similarity_and_difference"] = "Both slow descent, but glider provides directional travel for 10s on a 3 min cooldown; parachute cloak slows fall only for 10s on 30 min cooldown.",
-        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/",
+        ["acquisition"] = "recipe_item",
+        ["source_verified"] = true,
+        ["verification"] = "forever_client_recipe_and_item",
+        ["similarity"] = "Both allow controlled survival from high falls through a 10-sec descent effect.",
+        ["differences"] = "Ultralight Goblin Glider permits steering and uses a 3-minute cooldown (requires Engineering 250 to use). Parachute Cloak slows falling without gliding control, has a 30-minute cooldown, is a back-slot garment with +8 Agility and requires Engineering 225 to craft.",
+        ["tier_context"] = "Different item categories; compared for descent utility, not item levels.",
+        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/parachute-cloak/",
       },
     },
     ["source_urls"] = {
@@ -437,12 +417,11 @@ Favorcraft.EngineeringComparisons = {
   ["Ultrasafe Rechargeable Battery"] = {
     ["merchant_recipe_name"] = "Ultrasafe Rechargeable Battery",
     ["classification"] = "distinct",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["verification"] = "no_credible_non_favor_alternative_found",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "gadget",
-    ["summary"] = "Battery role requires further study; no verified comparable conventional craft, and the tentative Goblin Battery label must not display.",
-    ["matches"] = {
-    },
+    ["summary"] = "Restores three charges to non-explosive SAF-T or EZ-Thro devices. No trainer/drop recipe established that performs the same recharge.",
+    ["matches"] = {},
     ["source_urls"] = {
       "https://www.wow-professions.com/forever/npc/fritz-fizzle",
       "https://theforeverera.com/en/recipes/engineering/",
@@ -451,20 +430,11 @@ Favorcraft.EngineeringComparisons = {
   ["SAF-T Tabs"] = {
     ["merchant_recipe_name"] = "SAF-T Tabs",
     ["classification"] = "distinct",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["verification"] = "no_credible_non_favor_alternative_found",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "component",
-    ["summary"] = "Both engineering components, but different materials and purposes. SAF-T Tabs are used by SAF-T Copper Bomb.",
-    ["matches"] = {
-      {
-        ["name"] = "Handful of Copper Bolts",
-        ["relation"] = "related_unverified",
-        ["acquisition"] = "trainer_client_index",
-        ["source_verified"] = false,
-        ["similarity_and_difference"] = "Both engineering components, but different materials and purposes. SAF-T Tabs are used by SAF-T Copper Bomb.",
-        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/",
-      },
-    },
+    ["summary"] = "Purpose-built safety component enabling SAF-T recipe functionality. Handful of Copper Bolts is not an interchangeable component.",
+    ["matches"] = {},
     ["source_urls"] = {
       "https://www.wow-professions.com/forever/npc/fritz-fizzle",
       "https://theforeverera.com/en/recipes/engineering/",
@@ -474,12 +444,11 @@ Favorcraft.EngineeringComparisons = {
   ["EZ-Thro Wrap"] = {
     ["merchant_recipe_name"] = "EZ-Thro Wrap",
     ["classification"] = "distinct",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["verification"] = "no_credible_non_favor_alternative_found",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "component",
-    ["summary"] = "No confirmed trainer/vendor/drop alternative; other branded components are not replacements.",
-    ["matches"] = {
-    },
+    ["summary"] = "A dedicated EZ-Thro recipe component. Other standard Engineering parts are not known substitutes.",
+    ["matches"] = {},
     ["source_urls"] = {
       "https://www.wow-professions.com/forever/npc/fritz-fizzle",
       "https://theforeverera.com/en/recipes/engineering/",
@@ -488,12 +457,11 @@ Favorcraft.EngineeringComparisons = {
   ["No Slip SAF-T Padding"] = {
     ["merchant_recipe_name"] = "No Slip SAF-T Padding",
     ["classification"] = "distinct",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["verification"] = "no_credible_non_favor_alternative_found",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "component",
-    ["summary"] = "No confirmed trainer/vendor/drop alternative; other branded components are not replacements.",
-    ["matches"] = {
-    },
+    ["summary"] = "Specialized SAF-T component without a documented non-Favor substitute.",
+    ["matches"] = {},
     ["source_urls"] = {
       "https://www.wow-professions.com/forever/npc/fritz-fizzle",
       "https://theforeverera.com/en/recipes/engineering/",
@@ -502,12 +470,11 @@ Favorcraft.EngineeringComparisons = {
   ["SAF-T Bell"] = {
     ["merchant_recipe_name"] = "SAF-T Bell",
     ["classification"] = "distinct",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["verification"] = "no_credible_non_favor_alternative_found",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "component",
-    ["summary"] = "No confirmed trainer/vendor/drop alternative; other branded components are not replacements.",
-    ["matches"] = {
-    },
+    ["summary"] = "Specific SAF-T component; no documented non-Favor substitute.",
+    ["matches"] = {},
     ["source_urls"] = {
       "https://www.wow-professions.com/forever/npc/fritz-fizzle",
       "https://theforeverera.com/en/recipes/engineering/",
@@ -516,12 +483,11 @@ Favorcraft.EngineeringComparisons = {
   ["EZ-Thro Fireproof Fuse"] = {
     ["merchant_recipe_name"] = "EZ-Thro Fireproof Fuse",
     ["classification"] = "distinct",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["verification"] = "no_credible_non_favor_alternative_found",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "component",
-    ["summary"] = "No confirmed trainer/vendor/drop alternative; other branded components are not replacements.",
-    ["matches"] = {
-    },
+    ["summary"] = "Specialized EZ-Thro component; no documented non-Favor substitute.",
+    ["matches"] = {},
     ["source_urls"] = {
       "https://www.wow-professions.com/forever/npc/fritz-fizzle",
       "https://theforeverera.com/en/recipes/engineering/",
@@ -530,20 +496,11 @@ Favorcraft.EngineeringComparisons = {
   ["Gnomish Army Knife"] = {
     ["merchant_recipe_name"] = "Gnomish Army Knife",
     ["classification"] = "distinct",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["verification"] = "no_credible_non_favor_alternative_found",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "gadget",
-    ["summary"] = "Combined engineering utility/tool concept; exact Forever function must be confirmed.",
-    ["matches"] = {
-      {
-        ["name"] = "Arclight Spanner",
-        ["relation"] = "related_unverified",
-        ["acquisition"] = "trainer_client_index",
-        ["source_verified"] = false,
-        ["similarity_and_difference"] = "Combined engineering utility/tool concept; exact Forever function must be confirmed.",
-        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/",
-      },
-    },
+    ["summary"] = "Outside the current 26-recipe Merchant Favor catalog. A conventional Arclight Spanner only covers one tool function, so it is not offered as a substitute here.",
+    ["matches"] = {},
     ["source_urls"] = {
       "https://www.wow-professions.com/forever/npc/fritz-fizzle",
       "https://theforeverera.com/en/recipes/engineering/",
@@ -552,20 +509,11 @@ Favorcraft.EngineeringComparisons = {
   ["Loot-A-Rang"] = {
     ["merchant_recipe_name"] = "Loot-A-Rang",
     ["classification"] = "distinct",
-    ["verification"] = "candidate_requires_effect_or_source_validation",
+    ["verification"] = "no_credible_non_favor_alternative_found",
     ["exact_trainer_duplicate_confirmed"] = false,
     ["comparison_scope"] = "gadget",
-    ["summary"] = "Remote interaction/utility theme only; not an equivalent effect. Verify loot collection behavior.",
-    ["matches"] = {
-      {
-        ["name"] = "Gnomish Universal Remote",
-        ["relation"] = "related_unverified",
-        ["acquisition"] = "recipe_source_unverified",
-        ["source_verified"] = false,
-        ["similarity_and_difference"] = "Remote interaction/utility theme only; not an equivalent effect. Verify loot collection behavior.",
-        ["source_url"] = "https://theforeverera.com/en/recipes/engineering/",
-      },
-    },
+    ["summary"] = "Outside the current 26-recipe Merchant Favor catalog. Gnomish Universal Remote controls mechanical units; it does not loot corpses and is not a comparison.",
+    ["matches"] = {},
     ["source_urls"] = {
       "https://www.wow-professions.com/forever/npc/fritz-fizzle",
       "https://theforeverera.com/en/recipes/engineering/",

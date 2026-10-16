@@ -208,17 +208,108 @@ end
 RRP.pendingItems = {}
 RRP.itemNames = {}
 
-function RRP.RequestItem(id)
+function RRP.ReadItemName(id)
     id = tonumber(id)
-    if not id then return end
-    if RRP.itemNames[id] then return end
+    if not id then return nil end
+    if RRP.itemNames[id] then return RRP.itemNames[id] end
+    local name
     if type(GetItemInfo) == "function" then
-        local ok, name = pcall(GetItemInfo, id)
-        if ok and type(name) == "string" and name ~= "" then
-            RRP.itemNames[id] = name
-            return
+        local ok, value = pcall(GetItemInfo, id)
+        if ok and type(value) == "string" and value ~= "" then name = value end
+    end
+    if not name and C_Item and type(C_Item.GetItemNameByID) == "function" then
+        local ok, value = pcall(C_Item.GetItemNameByID, id)
+        if ok and type(value) == "string" and value ~= "" then name = value end
+    end
+    if not name and C_Item and type(C_Item.GetItemInfo) == "function" then
+        local ok, value = pcall(C_Item.GetItemInfo, id)
+        if ok and type(value) == "string" and value ~= "" then
+            name = value
+        elseif ok and type(value) == "table" then
+            local stored = value.itemName or value.name
+            if type(stored) == "string" and stored ~= "" then name = stored end
         end
     end
+    if name then RRP.RememberItemName(id, name) end
+    return name
+end
+
+function RRP.RememberItemName(id, name)
+    id = tonumber(id)
+    if not id or type(name) ~= "string" or name == "" then return end
+    RRP.itemNames[id] = name
+    if type(RRPDB) == "table" then
+        if type(RRPDB.itemNames) ~= "table" then RRPDB.itemNames = {} end
+        RRPDB.itemNames[id] = name
+    end
+end
+
+function RRP.RestoreItemNames()
+    if type(RRPDB) ~= "table" or type(RRPDB.itemNames) ~= "table" then return end
+    for id, name in pairs(RRPDB.itemNames) do
+        id = tonumber(id)
+        if id and type(name) == "string" and name ~= "" then RRP.itemNames[id] = name end
+    end
+end
+
+local itemPreload = {}
+local itemPreloadAt = 0
+local ITEM_ID_KEYS = {
+    itemID = true,
+    outputItemID = true,
+    scrollItemID = true,
+    output_item_id = true,
+    crafted_item_id = true,
+}
+
+local function collectItemIDs(node, seen, ids, depth)
+    if type(node) ~= "table" or seen[node] or depth > 12 then return end
+    seen[node] = true
+    for key, value in pairs(node) do
+        if ITEM_ID_KEYS[key] then
+            local id = tonumber(value)
+            if id and id > 0 then ids[id] = true end
+        elseif type(value) == "table" then
+            collectItemIDs(value, seen, ids, depth + 1)
+        end
+    end
+end
+
+function RRP.QueueItemPreload()
+    RRP.RestoreItemNames()
+    local ids, seen = {}, {}
+    collectItemIDs(RRP.Schematics, seen, ids, 0)
+    collectItemIDs(RRP.Comparisons, seen, ids, 0)
+    for _, field in ipairs({
+        "AlchemyComparisons", "BlacksmithingComparisons", "CookingComparisons",
+        "EnchantingComparisons", "EngineeringComparisons", "LeatherworkingComparisons",
+    }) do
+        collectItemIDs(RRP[field], seen, ids, 0)
+    end
+    if type(RRPDB) == "table" then collectItemIDs(RRPDB.materials, seen, ids, 0) end
+    itemPreload = {}
+    itemPreloadAt = 0
+    for id in pairs(ids) do
+        if not RRP.itemNames[id] then itemPreload[#itemPreload + 1] = id end
+    end
+    RRP.itemPreload = itemPreload
+end
+
+function RRP.PreloadItems()
+    local last = #itemPreload
+    if itemPreloadAt >= last then return end
+    local step = itemPreloadAt + 12
+    if step > last then step = last end
+    while itemPreloadAt < step do
+        itemPreloadAt = itemPreloadAt + 1
+        RRP.RequestItem(itemPreload[itemPreloadAt])
+    end
+end
+
+function RRP.RequestItem(id)
+    id = tonumber(id)
+    if not id or RRP.ReadItemName(id) then return end
+    if type(GetItemInfo) == "function" then pcall(GetItemInfo, id) end
     if C_Item and type(C_Item.RequestLoadItemDataByID) == "function" then
         pcall(C_Item.RequestLoadItemDataByID, id)
     end
@@ -229,18 +320,15 @@ function RRP.PollPendingItems()
     if not next(RRP.pendingItems) then return end
     local ready = false
     for id, tries in pairs(RRP.pendingItems) do
-        local name
-        if type(GetItemInfo) == "function" then
-            local ok, value = pcall(GetItemInfo, id)
-            if ok then name = value end
-        end
-        if type(name) == "string" and name ~= "" then
-            RRP.itemNames[id] = name
+        if RRP.ReadItemName(id) then
             RRP.pendingItems[id] = nil
             ready = true
         else
             local count = (tries or 0) + 1
-            if count > 16 then RRP.pendingItems[id] = nil
+            if count % 4 == 0 and C_Item and type(C_Item.RequestLoadItemDataByID) == "function" then
+                pcall(C_Item.RequestLoadItemDataByID, id)
+            end
+            if count > 40 then RRP.pendingItems[id] = nil
             else RRP.pendingItems[id] = count end
         end
     end
@@ -753,11 +841,22 @@ function RRP.BuildMatch(r)
         end
     end
     -- Utility recipes stay with every build instead of a separate Other filter.
+    -- A recipe tagged only Paladin is a class recipe. Spec tags such as Healer,Paladin still follow the checked specs.
     if not any then return false end
     wanted.Utility = true
+    local matched = false
+    local classOnly = true
+    local saw = false
     for part in r.roles:gmatch("[^,]+") do
-        if wanted[trim(part)] then return true end
+        local token = trim(part)
+        if token ~= "" then
+            saw = true
+            if token ~= "Paladin" then classOnly = false end
+            if wanted[token] then matched = true end
+        end
     end
+    if matched then return true end
+    if saw and classOnly and (p.allClasses ~= false or RRP.ViewClass() == "PALADIN") then return true end
     return false
 end
 
@@ -1574,7 +1673,7 @@ end
 
 local scanning = false
 local refreshQueued, rescanQueued, autoScanQueued = false, false, false
-local refreshWait, rescanWait, autoScanWait, itemWait = 0, 0, 0, 0
+local refreshWait, rescanWait, autoScanWait, itemWait, preloadWait = 0, 0, 0, 0, 0
 
 function RRP.QueueProfessionScan(announce)
     if not RRP.ready or not professionWindowOpen() then return end
@@ -1796,11 +1895,12 @@ function RRP.MigrateSaved()
         if type(db.playerTrainer) ~= "table" then db.playerTrainer = {} end
         if type(db.ui) ~= "table" then db.ui = {} end
         if type(db.outputs) ~= "table" then db.outputs = {} end
+        if type(db.itemNames) ~= "table" then db.itemNames = {} end
         return db
     end
     local function fill(dst, src)
         if type(src) ~= "table" or dst == src then return end
-        for _, key in ipairs({"characters", "materials", "discovered", "scrollItems", "playerTrainer", "ui", "outputs"}) do
+        for _, key in ipairs({"characters", "materials", "discovered", "scrollItems", "playerTrainer", "ui", "outputs", "itemNames"}) do
             if type(src[key]) == "table" then
                 if type(dst[key]) ~= "table" then dst[key] = {} end
                 for id, value in pairs(src[key]) do
@@ -1860,6 +1960,7 @@ register("TRADE_SKILL_SHOW")
 register("TRADE_SKILL_UPDATE")
 register("NEW_RECIPE_LEARNED")
 register("GET_ITEM_INFO_RECEIVED")
+register("ITEM_DATA_LOAD_RESULT")
 register("BAG_UPDATE")
 register("BAG_UPDATE_DELAYED")
 local lastAutoAt = 0
@@ -1872,6 +1973,7 @@ eventFrame:SetScript("OnEvent", function(_, event, arg)
         if p and p.expandIntermediate == nil then p.expandIntermediate = true end
         RRP.SyncProfessions()
         if RRP.SyncKnownSpells then RRP.SyncKnownSpells() end
+        if RRP.QueueItemPreload then RRP.QueueItemPreload() end
         if RRP.UI and RRP.UI.RestoreLayout then RRP.UI.RestoreLayout() end
         say("Ready. /fc opens FavorCraft.")
     elseif event == "SKILL_LINES_CHANGED" then
@@ -1892,20 +1994,21 @@ eventFrame:SetScript("OnEvent", function(_, event, arg)
     elseif event == "BAG_UPDATE" or event == "BAG_UPDATE_DELAYED" then
         if RRP.InvalidateBagCache then RRP.InvalidateBagCache() end
         if RRP.ready then RRP.QueueRefresh() end
-    elseif event == "GET_ITEM_INFO_RECEIVED" then
+    elseif event == "GET_ITEM_INFO_RECEIVED" or event == "ITEM_DATA_LOAD_RESULT" then
         local id = tonumber(arg)
-        if id and type(GetItemInfo) == "function" then
-            local ok, name = pcall(GetItemInfo, id)
-            if ok and type(name) == "string" and name ~= "" then
-                RRP.itemNames[id] = name
-                RRP.pendingItems[id] = nil
-            end
-        end
+        if id and RRP.ReadItemName(id) then RRP.pendingItems[id] = nil end
         if RRP.needRescan and not scanning then rescanQueued = true end
         RRP.QueueRefresh()
     end
 end)
 eventFrame:SetScript("OnUpdate", function(_, elapsed)
+    if RRP.PreloadItems then
+        preloadWait = preloadWait + elapsed
+        if preloadWait > 0.05 then
+            preloadWait = 0
+            RRP.PreloadItems()
+        end
+    end
     if RRP.PollPendingItems and next(RRP.pendingItems) then
         itemWait = itemWait + elapsed
         if itemWait > 0.3 then
