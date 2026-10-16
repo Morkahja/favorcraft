@@ -3,6 +3,8 @@
 FavorCraft has its addon files and `FavorCraft.toc` at the repository root.
 `pkgmeta.yaml` instructs the CurseForge repository packager to put the
 addon into a **FavorCraft/** directory and omit development-only files.
+`manual-changelog` sends the whole `CHANGELOG.md` as the file notes, so
+CurseForge shows those player notes instead of commit messages.
 
 ## Package verification
 

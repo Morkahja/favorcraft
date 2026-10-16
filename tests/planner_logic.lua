@@ -830,17 +830,33 @@ check("tailoring leaves my class selected", profile.allClasses == false)
 RRP.SetProfession("All")
 check("every profession leaves my class selected", profile.allClasses == false)
 profile.allClasses = false
+profile.specMode = "yours"
+profile.roles.Healer = false
 RRP.SetProfession("Alchemy")
 check("alchemy switches to all classes", profile.allClasses == true)
+check("alchemy leaves the spec boxes", profile.specMode == "yours" and not profile.roles.Healer)
 profile.allClasses = false
+profile.specMode = "yours"
+profile.roles.Tank = false
+profile.roles.Healer = false
 RRP.SetProfession("Enchanting")
 check("enchanting switches to all classes", profile.allClasses == true)
+check("enchanting marks all specs", profile.specMode == "all" and profile.roles.Tank and profile.roles.Healer and RRP.BuildOn("DPS"))
 profile.allClasses = false
+profile.specMode = "yours"
+profile.roles.Tank = false
 RRP.SetProfession("Engineering")
 check("engineering switches to all classes", profile.allClasses == true)
+check("engineering marks all specs", profile.specMode == "all" and profile.roles.Tank and profile.roles.Healer and RRP.BuildOn("DPS"))
 profile.allClasses = false
+profile.specMode = "yours"
+profile.roles.Tank = false
+profile.roles.Healer = false
+local savedSpec = profile.yourSpec
 RRP.SetProfession("Cooking")
 check("cooking switches to all classes", profile.allClasses == true)
+check("cooking marks all specs", profile.specMode == "all" and profile.roles.Tank and profile.roles.Healer and RRP.BuildOn("DPS"))
+check("cooking keeps the saved spec", profile.yourSpec == savedSpec)
 local groups = RRP.ProfessionGroups
 check("armor crafts lead the profession list", groups
     and groups[1][1] == "Blacksmithing" and groups[1][2] == "Leatherworking" and groups[1][3] == "Tailoring")

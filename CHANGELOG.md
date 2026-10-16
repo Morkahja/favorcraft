@@ -1,4 +1,10 @@
-## 0.4.7-beta
+# FavorCraft — Changelog
+
+## 0.4.8-beta — 2026-10-16
+
+- Cooking, Enchanting, and Engineering check All specs when you open them. The spec you saved stays underneath.
+
+## 0.4.7-beta — 2026-10-16
 
 - A learned recipe shows a green check. A recipe this character has not learned shows a red x.
 - Tank, DPS, and Healer include utility recipes. All specs checks all three, and My spec keeps the boxes you set. Opening the window returns to All specs.
@@ -9,13 +15,11 @@
 - Comparisons sit at the bottom of the recipe, wrap inside the panel, and list where an item comes from plus the similarities and differences that were found.
 - Elixir of Wisdom is listed first as an almost identical item. The separate trainer note is gone.
 
-## 0.4.2-beta
+## 0.4.2-beta — 2026-10-16
 
-- Prepare FavorCraft for automated CurseForge publishing with a new beta version tag.
-- Attach a verified installable ZIP to the GitHub prerelease.
-- Packaging and distribution update only; gameplay features unchanged from 0.4.1-beta.
+- CurseForge beta packaging. Gameplay is unchanged from 0.4.1-beta.
 
-## 0.4.1-beta
+## 0.4.1-beta — 2026-10-16
 
 - Profession skill numbers turn green when your skill is high enough and red when it is not.
 - Needed counts turn green when your bags cover them and red when they do not. In Bags stays white, and a dash means you are not carrying that material.
@@ -24,3 +28,8 @@
 - Recipe details can show a comparison when another recipe or item is known.
 - Some Leatherworking patterns also list a reported place to learn the same pattern. Those reports stay unverified.
 - Settings credits list Babunigaming and Danoozy.
+
+## 0.3.0-beta — 2026-10-15
+
+- FavorCraft plans Merchant's Favor recipe purchases and the materials those crafts need.
+- Alliance and Horde share one recipe list. Armor follows the class filter, including paladin plate.

@@ -20,6 +20,9 @@ RRP.ProfessionGroups = {
 RRP.BroadProfessions = {
     Alchemy = true, Cooking = true, Enchanting = true, Engineering = true,
 }
+RRP.AllSpecProfessions = {
+    Cooking = true, Enchanting = true, Engineering = true,
+}
 RRP.Roles = {"All", "Tank", "Melee", "Healer", "Caster", "Hunter", "Paladin", "Utility"}
 RRP.ProfessionsSet = {}
 RRP.ProfessionLabel = {

@@ -110,7 +110,7 @@ buildChecks.Healer.tipLine = "Show healing recipes for the selected class, plus 
 local allSpecs = UI.Button(filter, "All specs", 100, 22)
 allSpecs:SetPoint("LEFT", buildChecks.Healer, "RIGHT", 8, 0)
 allSpecs.tip = "Specs"
-allSpecs.tipLine = "Switch between all specs and my spec. Boxes you set while it says My spec are saved."
+allSpecs.tipLine = "Switch between all specs and my spec. Boxes you set while it says My spec are saved. Cooking, Enchanting, and Engineering return to all specs."
 allSpecs:SetScript("OnClick", function() RRP.ShowAllSpecs() end)
 
 local allClasses = UI.Button(filter, "All classes", 108, 22)

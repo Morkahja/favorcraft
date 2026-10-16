@@ -845,6 +845,9 @@ function RRP.SetProfession(prof)
     if RRP.BroadProfessions and RRP.BroadProfessions[prof] then
         p.allClasses = true
     end
+    if RRP.AllSpecProfessions and RRP.AllSpecProfessions[prof] and RRP.EnableAllSpecs then
+        RRP.EnableAllSpecs()
+    end
     RRP.clearArmed = nil
     if RRP.Refresh then RRP.Refresh() end
 end

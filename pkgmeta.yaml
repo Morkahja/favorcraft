@@ -2,6 +2,9 @@
 # The addon files live at the root, so package them under one FavorCraft folder.
 package-as: FavorCraft
 enable-nolib-creation: no
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
 ignore:
   - tests
   - README.md
