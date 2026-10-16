@@ -1,0 +1,10 @@
+# CurseForge's repository packager reads this file from the repository root.
+# The addon files live at the root, so package them under one FavorCraft folder.
+package-as: FavorCraft
+enable-nolib-creation: no
+ignore:
+  - tests
+  - README.md
+  - CHANGELOG.md
+  - PUBLISHING.md
+  - .github
