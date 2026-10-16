@@ -4,123 +4,65 @@
 -- the effect, the source, or the spell ID needs checking.
 local _, RRP = ...
 
-local RANK = {duplicate = 1, equivalent = 2, alternative = 3, possible = 4, none = 5}
+local RANK = {duplicate=1,equivalent=2,alternative=3,related=4,slot=5,reported=6,none=7}
 local LABEL = {
-    duplicate = "Duplicate Recipe",
-    equivalent = "Equivalent",
-    alternative = "Alternative",
-    possible = "Possible Alternative (Unverified)",
-    reported = "Reported Acquisition (Unverified)",
-    none = "No Verified Comparison",
+    duplicate="Same Recipe",
+    equivalent="Same Effect",
+    alternative="Comparable Item",
+    related="Related Item",
+    slot="Same-slot Gear",
+    reported="Additional Recipe Source",
+    none="No Comparison Recorded",
 }
-RRP.ComparisonLabel = LABEL
+RRP.ComparisonLabel=LABEL
 
 local function lower(value)
-    if type(value) ~= "string" then return "" end
-    return value:lower()
+    return type(value) == "string" and value:lower() or ""
 end
-
 local function has(value, needle)
     return lower(value):find(needle, 1, true) ~= nil
 end
-
-local function needsCheck(value)
-    local text = lower(value)
-    if text == "" then return false end
-    if text:find("review_required", 1, true) then return true end
-    if text:find("unverified", 1, true) then return true end
-    if text:find("needs in-game", 1, true) then return true end
-    if text:find("candidate", 1, true) then return true end
-    if text:find("client_confirmation", 1, true) then return true end
-    if text:find("not_in_game", 1, true) then return true end
-    if text:find("unconfirmed", 1, true) then return true end
-    if text:find("beta item", 1, true) then return true end
-    if text:find("confirm ", 1, true) or text:find("confirm.", 1, true) then return true end
-    if text:find("require comparison", 1, true) or text:find("requires comparison", 1, true) then return true end
-    if text:find("before equivalence", 1, true) then return true end
-    return false
-end
-
-local function recordBlocks(value)
-    local text = lower(value)
-    if text:find("not_in_game", 1, true) then return true end
-    if text:find("comparison_candidate", 1, true) then return true end
-    if text:find("candidate_requires", 1, true) then return true end
-    if text:find("candidate_needs", 1, true) then return true end
-    return false
-end
-
 local function sameSlot(record, match)
-    local scope = record and record.comparison_scope or ""
-    if scope == "same_slot_only" or scope == "same_slot_or_weapon_category" then return true end
-    return match and match.similarity == "equipment_slot"
+    local scope=record and record.comparison_scope or ""
+    return scope=="same_slot_only" or scope=="same_slot_or_weapon_category"
+        or (match and match.similarity=="equipment_slot")
 end
 
+-- Beta policy: source-backed comparisons are shown without a separate
+-- in-game confirmation step. Labels describe relationships, not certainty
+-- that any individual boss/vendor stocks the item in the current build.
 local function classify(record, match, catalogBacked)
+    if not match then return "none" end
     if record.exact_trainer_duplicate_confirmed == true or record.exact_duplicate_confirmed == true then
         return "duplicate"
     end
-    if sameSlot(record, match) then return "possible" end
-    if catalogBacked then return "alternative" end
-    local relation = match and match.relation or record.classification or ""
-    if relation == "related_unverified" or relation == "related_not_interchangeable" or relation == "possible_duplicate" then
-        return "possible"
-    end
-    if needsCheck(record.verification) and has(record.verification, "needs in-game") then
-        return "possible"
-    end
-    local effectText = table.concat({
-        match and match.verification or "",
-        match and match.similarity or "",
-        match and match.difference or "",
-        match and match.differences or "",
-        match and match.similarity_and_difference or "",
-        match and match.similarities_and_differences or "",
-    }, " ")
-    if needsCheck(match and match.verification) or needsCheck(effectText) then return "possible" end
-    local documented = record.verification == "documented_forever_comparison"
-    if documented and relation == "alternative" then return "alternative" end
-    if recordBlocks(record.verification) then return "possible" end
-    if match and match.source_verified == true and relation == "alternative"
-        and type(match.similarity) == "string" and match.similarity ~= ""
-        and match.similarity ~= "equipment_slot"
-        and (type(match.difference) == "string" or type(match.differences) == "string") then
-        return "alternative"
-    end
-    if relation == "equivalent" and match and match.source_verified == true and not needsCheck(record.verification) then
-        return "equivalent"
-    end
-    if match then return "possible" end
-    return "none"
+    if sameSlot(record,match) then return "slot" end
+    local relation=match.relation or record.classification or ""
+    if relation=="possible_duplicate" or relation=="related_unverified"
+        or relation=="related_not_interchangeable" then return "related" end
+    if relation=="equivalent" and match.same_effect==true then return "equivalent" end
+    if catalogBacked or relation=="alternative" or relation=="equivalent" then return "alternative" end
+    return "related"
 end
 
-local function acquisition(match, slotOnly)
-    local raw = match and match.acquisition or ""
-    local verified = match and match.source_verified == true and not slotOnly
-    local place = match and (match.source_note or match.source_name)
-    if type(place) ~= "string" or place == "" then place = nil end
-    if raw == "world_drop" or raw == "drop" then
-        local line = verified and "World drop" or "Reported drop"
-        if place then line = line .. ": " .. place end
-        if not verified then line = line .. ". Not confirmed in the client." end
-        return line, verified
+local function acquisition(match)
+    local raw=match and match.acquisition or ""
+    local indexed=match and match.source_verified==true or false
+    local place=match and (match.source_note or match.source_name)
+    if type(place)~="string" or place=="" then place=nil end
+    if raw=="world_drop" or raw=="drop" then
+        return place and ("World drop. "..place) or "World drop (database listing)",indexed
+    elseif raw=="trainer" or raw=="trainer_client_index" then
+        return "Profession trainer (database listing)",indexed
+    elseif raw=="merchants_favor" then return "Merchant's Favor vendor",true
+    elseif raw=="recipe_item" then return "Learned from a recipe item; exact source may vary.",indexed
+    elseif raw=="vendor" or raw=="vendor_sale" then
+        return place and ("Vendor: "..place) or "Vendor (database listing)",indexed
+    elseif raw=="" or raw=="unverified" or raw=="source_unverified"
+        or raw=="recipe_item_source_unresolved" or raw=="recipe_source_unverified" then
+        return "Acquisition source not recorded.",false
     end
-    if raw == "trainer" or raw == "trainer_client_index" then
-        if verified then return "Profession trainer", true end
-        return "Listed as a profession trainer. Not confirmed for this comparison.", false
-    end
-    if raw == "merchants_favor" then
-        return "Merchant's Favor vendor", true
-    end
-    if raw == "recipe_item" then
-        if verified then return "Recipe item. This is a recipe source, not a finished-item drop.", true end
-        return "Recipe item. Its drop source is not confirmed.", false
-    end
-    if raw == "recipe_item_source_unresolved" or raw == "recipe_source_unverified" or raw == "unverified" or raw == "" then
-        return "Source not verified.", false
-    end
-    if verified then return raw, true end
-    return raw .. " Not confirmed in the client.", false
+    return raw..(place and (": "..place) or ""),indexed
 end
 
 local function points(match)
@@ -173,25 +115,17 @@ local function idState(researchId, currentId)
 end
 
 local function sourceLine(src)
-    local kind = src.type or "dungeon_drop"
-    local line
-    if kind == "vendor_sale" then
-        line = "Reported sale: " .. (src.npc or "seller not named") .. "."
-        if src.location then line = line .. " Location: " .. src.location .. "." end
-        line = line .. " Listed as sold, not as a mob drop."
-    elseif kind == "world_drop" then
-        line = "Conflicting report: described as a world drop, not a named boss."
-    elseif kind == "zone_report" then
-        line = "Reported locations: " .. (src.location or "zone not named") .. ". Specific bosses are not confirmed."
-    else
-        line = "Reported drop: " .. (src.npc or "boss not named") .. "."
-        if src.location then line = line .. " Location: " .. src.location .. "." end
+    local kind=src.type or "dungeon_drop"
+    if kind=="vendor_sale" then
+        return "Listed sale: "..(src.npc or "unspecified vendor")
+            ..(src.location and (" ("..src.location..")") or "").."."
+    elseif kind=="world_drop" then
+        return "Also listed as a general world drop (source databases differ)."
+    elseif kind=="zone_report" then
+        return "Listed zones: "..(src.location or "unspecified")..". "..(src.note or "")
     end
-    if type(src.note) == "string" and src.note ~= "" and kind ~= "vendor_sale" then
-        line = line .. " " .. src.note
-    end
-    line = line .. " Status: unverified."
-    return line
+    return "Listed drop: "..(src.npc or "unspecified creature")
+        ..(src.location and (" ("..src.location..")") or "")..". "..(src.note or "")
 end
 
 local function genericSources(raw)
@@ -228,7 +162,12 @@ local function buildAcquisition(key, name, raw, catalog, merchant)
     end
     for i = 1, #reported do lines[#lines + 1] = sourceLine(reported[i]) end
     if audit and type(audit.conflicts) == "table" then
-        for i = 1, #audit.conflicts do lines[#lines + 1] = audit.conflicts[i] end
+        for i = 1, #audit.conflicts do
+            local note = audit.conflicts[i]
+            if type(note) == "string" and not note:find("Trainer listings disagree", 1, true) then
+                lines[#lines + 1] = note
+            end
+        end
     end
     local idCheck = nil
     if audit then
@@ -245,9 +184,16 @@ local function buildAcquisition(key, name, raw, catalog, merchant)
         kind = "source",
         sameRecipe = true,
         acquisitionVerified = false,
-        verification = "reported",
+        verification = "database_listed",
         scrollItemID = merchant and tonumber(merchant.scrollItemID) or nil,
         lines = lines,
+        references = (function()
+            local urls={}
+            for i=1,#reported do
+                if type(reported[i].evidence)=="string" then urls[#urls+1]=reported[i].evidence end
+            end
+            return urls
+        end)(),
         idCheck = idCheck,
         conflicts = audit and audit.conflicts or nil,
     }}
@@ -276,7 +222,7 @@ local function buildView(profession, name, raw)
         local slotOnly = sameSlot(raw, match)
         local catalogBacked = catalog and type(catalog.alternative) == "string" and catalog.alternative:find(matchName, 1, true)
         local tier = classify(raw, match, catalogBacked)
-        local where, verified = acquisition(match, slotOnly)
+        local where, verified = acquisition(match)
         if catalogBacked and has(catalog.alternative, "trainer") then
             where = "Profession trainer"
             verified = true
@@ -286,17 +232,23 @@ local function buildView(profession, name, raw)
             diffs[#diffs + 1] = catalog.alternative
         end
         local sch = schematic(matchName)
-        local itemID, spellID, kind, recipeSpellID
+        -- Explicit IDs from research can supply tooltips for non-merchant
+        -- alternatives. Never reinterpret a recipe scroll as an output.
+        local itemID=tonumber(match.outputItemID or match.output_item_id or match.crafted_item_id)
+        local recipeSpellID=tonumber(match.recipeSpellID or match.recipe_spell_id)
+        local spellID=tonumber(match.effect_spell_id)
+        local kind
         if type(sch) == "table" then
-            recipeSpellID = tonumber(sch.spellID)
+            recipeSpellID=tonumber(sch.spellID) or recipeSpellID
             if sch.kind == "enchant" then
-                spellID = recipeSpellID
-                kind = "enchant"
+                spellID=recipeSpellID
+                kind="enchant"
             else
-                itemID = tonumber(sch.outputItemID)
-                kind = sch.kind or "item"
+                itemID=tonumber(sch.outputItemID) or itemID
+                kind=sch.kind or "item"
             end
-        end
+        elseif spellID then kind="enchant"
+        elseif itemID then kind="item" end
         local refs = {}
         if type(match.source_url) == "string" then refs[#refs + 1] = match.source_url end
         if type(match.evidence_urls) == "table" then
@@ -316,6 +268,7 @@ local function buildView(profession, name, raw)
             kind = kind,
             references = refs,
             verification = match.verification or raw.verification,
+            sourceType = match.acquisition,
             sameRecipe = match.relation == "possible_duplicate",
         }
     end
@@ -330,17 +283,12 @@ local function buildView(profession, name, raw)
     end
     local note = nil
     if #entries == 0 then
-        note = "No Verified Comparison. This does not mean the recipe is unique."
-        local extra = raw.note or raw.comparison_summary or raw.summary
-        if type(extra) == "string" and extra ~= "" then note = extra end
-        if not has(note, "unique") and not has(note, "does not") then
-            note = note .. " This does not mean the recipe is unique."
-        end
+        note = "No comparison has been recorded for this recipe yet."
     end
     local sources = buildAcquisition(key, name, raw, catalog, merchant)
     local header = headerFor(raw)
     if sources and sources[1] and sources[1].idCheck then
-        header = "Same pattern. The client schematic already has the spell, the pattern scroll, and the crafted item. The extra source below is not confirmed."
+        header = "Same recipe pattern; additional source listings from Forever databases appear below."
     end
     if #entries == 0 and sources then best = "reported" end
     return {
@@ -457,16 +405,16 @@ function RRP.ComparisonReport()
     local lines = {
         "# FavorCraft comparison coverage",
         "",
-        "Research records are not treated as client-verified unless the record itself supports the effect and the source. Same-slot gear stays unverified. No item IDs were invented.",
+        "Beta research listings are displayed for comparison. Similarity does not mean identical effects or guaranteed drop availability. No item IDs are invented.",
         "",
-        "Alchemy research names Elixir of the Sages. The catalog name is Elixir of Sages, so those records are joined. Leatherworking dungeon-drop rows reuse the merchant item only when the pattern name is the same, and they stay unverified because the spell IDs were not confirmed.",
+        "Alchemy research names Elixir of the Sages; the catalog name is Elixir of Sages. Leatherworking source listings refer to the merchant recipe pattern, not its crafted armor.",
         "",
     }
     local unresolved = {}
     for p = 1, #order do
         local profession = order[p]
         local catalog, records = 0, 0
-        local buckets = {duplicate = 0, equivalent = 0, alternative = 0, possible = 0, reported = 0, none = 0, missing = 0}
+        local buckets = {duplicate = 0, equivalent = 0, alternative = 0, related = 0, slot = 0, reported = 0, none = 0, missing = 0}
         local itemIDs, recipeIDs, tooltips, sources = 0, 0, 0, 0
         local seen = {}
         if type(RRP.Catalog) == "table" then
@@ -511,8 +459,9 @@ function RRP.ComparisonReport()
         lines[#lines + 1] = "- Verified duplicate recipes: " .. buckets.duplicate
         lines[#lines + 1] = "- Verified equivalent items: " .. buckets.equivalent
         lines[#lines + 1] = "- Verified alternatives: " .. buckets.alternative
-        lines[#lines + 1] = "- Unverified candidates: " .. buckets.possible
-        lines[#lines + 1] = "- Reported extra sources for the same recipe: " .. buckets.reported
+        lines[#lines + 1] = "- Related item comparisons: " .. buckets.related
+        lines[#lines + 1] = "- Same-slot gear comparisons: " .. buckets.slot
+        lines[#lines + 1] = "- Additional database-listed sources: " .. buckets.reported
         lines[#lines + 1] = "- Records without comparisons: " .. buckets.none
         lines[#lines + 1] = "- Catalog recipes with no research record: " .. buckets.missing
         lines[#lines + 1] = "- Alternative item IDs resolved: " .. itemIDs
