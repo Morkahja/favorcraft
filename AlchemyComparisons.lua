@@ -1,3 +1,8 @@
+-- Output item IDs below identify crafted consumables, not recipe scrolls.
+-- Forever-specific name corrections: Ogre's Strength -> Ogre Strength;
+-- the merchant "Elixir of Sages" (250338) is NOT Classic "Elixir
+-- of the Sages" (13447); Elixir of Defense is 8951, Troll's Blood
+-- Elixir is 3826. References are per-match source records.
 -- Favorcraft Alchemy comparison candidates. Review status is NOT game-verified.
 -- Data-only module. Load after main addon initialization as appropriate.
 -- Keys use English merchant names pending stable recipe spell ID resolution.
@@ -13,12 +18,16 @@ Favorcraft.AlchemyComparisons = {
     ["matches"] = {
       {
         ["name"] = "Elixir of Minor Spirit",
+        ["outputItemID"] = 250344,
+        ["source_url"] = "https://foreverchanges.pro/item/250344",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Elixir of Spirit",
+        ["outputItemID"] = 250346,
+        ["source_url"] = "https://thewowdb.com/wow-forever/item/elixir-of-spirit-250346/",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -37,12 +46,16 @@ Favorcraft.AlchemyComparisons = {
     ["matches"] = {
       {
         ["name"] = "Minor Mageblood Elixir",
+        ["outputItemID"] = 250339,
+        ["source_url"] = "https://forevercompass.com/items/250339",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Mageblood Elixir",
+        ["outputItemID"] = 20007,
+        ["source_url"] = "https://hyjal.cc/updates/1.60.1.70170",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -61,12 +74,16 @@ Favorcraft.AlchemyComparisons = {
     ["matches"] = {
       {
         ["name"] = "Minor Mender's Potion",
+        ["outputItemID"] = 250944,
+        ["source_url"] = "https://foreverdb.net/es/item/250944",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Greater Mender's Potion",
+        ["outputItemID"] = 250947,
+        ["source_url"] = "https://foreverdb.net/item/250947",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -85,12 +102,16 @@ Favorcraft.AlchemyComparisons = {
     ["matches"] = {
       {
         ["name"] = "Minor Spellblasting Potion",
+        ["outputItemID"] = 250932,
+        ["source_url"] = "https://www.60.tools/items/250932-minor-spellblasting-potion",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Greater Spellblasting Potion",
+        ["outputItemID"] = 250935,
+        ["source_url"] = "https://foreverdb.net/item/250935",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -109,12 +130,16 @@ Favorcraft.AlchemyComparisons = {
     ["matches"] = {
       {
         ["name"] = "Minor Frenzy Potion",
+        ["outputItemID"] = 250938,
+        ["source_url"] = "https://foreverdb.net/es/item/250938",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Greater Frenzy Potion",
+        ["outputItemID"] = 250941,
+        ["source_url"] = "https://forever.rexas.tools/item/250941/use-greater-frenzy-potion",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -181,12 +206,16 @@ Favorcraft.AlchemyComparisons = {
     ["matches"] = {
       {
         ["name"] = "Greater Mender's Potion",
+        ["outputItemID"] = 250947,
+        ["source_url"] = "https://foreverdb.net/item/250947",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Mender's Potion",
+        ["outputItemID"] = 250946,
+        ["source_url"] = "https://github.com/Morkahja/favorcraft/blob/main/Schematics.lua",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -205,12 +234,16 @@ Favorcraft.AlchemyComparisons = {
     ["matches"] = {
       {
         ["name"] = "Arcane Elixir",
+        ["outputItemID"] = 9155,
+        ["source_url"] = "https://ahledger.com/items/9155-arcane-elixir",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Greater Arcane Elixir",
+        ["outputItemID"] = 13454,
+        ["source_url"] = "https://foreverdb.net/item/13454",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -229,12 +262,16 @@ Favorcraft.AlchemyComparisons = {
     ["matches"] = {
       {
         ["name"] = "Greater Spellblasting Potion",
+        ["outputItemID"] = 250935,
+        ["source_url"] = "https://foreverdb.net/item/250935",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Spellblasting Potion",
+        ["outputItemID"] = 250934,
+        ["source_url"] = "https://github.com/Morkahja/favorcraft/blob/main/Schematics.lua",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -253,12 +290,16 @@ Favorcraft.AlchemyComparisons = {
     ["matches"] = {
       {
         ["name"] = "Greater Frenzy Potion",
+        ["outputItemID"] = 250941,
+        ["source_url"] = "https://forever.rexas.tools/item/250941/use-greater-frenzy-potion",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Frenzy Potion",
+        ["outputItemID"] = 250940,
+        ["source_url"] = "https://github.com/Morkahja/favorcraft/blob/main/Schematics.lua",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -277,12 +318,16 @@ Favorcraft.AlchemyComparisons = {
     ["matches"] = {
       {
         ["name"] = "Elixir of Wisdom",
+        ["outputItemID"] = 3383,
+        ["source_url"] = "https://thewowdb.com/wow-forever/item/elixir-of-wisdom-3383/",
         ["relation"] = "equivalent",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Elixir of Intellect",
+        ["outputItemID"] = 250354,
+        ["source_url"] = "https://www.60.tools/items/250354-elixir-of-intellect",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -301,12 +346,16 @@ Favorcraft.AlchemyComparisons = {
     ["matches"] = {
       {
         ["name"] = "Minor Cleric's Elixir",
+        ["outputItemID"] = 250330,
+        ["source_url"] = "https://www.60.tools/items/250330-minor-clerics-elixir",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Cleric's Elixir",
+        ["outputItemID"] = 250332,
+        ["source_url"] = "https://foreverdb.net/item/250332",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -325,12 +374,16 @@ Favorcraft.AlchemyComparisons = {
     ["matches"] = {
       {
         ["name"] = "Arcane Elixir",
+        ["outputItemID"] = 9155,
+        ["source_url"] = "https://ahledger.com/items/9155-arcane-elixir",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Greater Arcane Elixir",
+        ["outputItemID"] = 13454,
+        ["source_url"] = "https://foreverdb.net/item/13454",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -349,12 +402,16 @@ Favorcraft.AlchemyComparisons = {
     ["matches"] = {
       {
         ["name"] = "Elixir of Spirit",
+        ["outputItemID"] = 250346,
+        ["source_url"] = "https://thewowdb.com/wow-forever/item/elixir-of-spirit-250346/",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Elixir of Lesser Spirit",
+        ["outputItemID"] = 250345,
+        ["source_url"] = "https://github.com/Morkahja/favorcraft/blob/main/Schematics.lua",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -373,12 +430,16 @@ Favorcraft.AlchemyComparisons = {
     ["matches"] = {
       {
         ["name"] = "Mageblood Elixir",
+        ["outputItemID"] = 20007,
+        ["source_url"] = "https://hyjal.cc/updates/1.60.1.70170",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Lesser Mageblood Elixir",
+        ["outputItemID"] = 250340,
+        ["source_url"] = "https://github.com/Morkahja/favorcraft/blob/main/Schematics.lua",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -397,12 +458,16 @@ Favorcraft.AlchemyComparisons = {
     ["matches"] = {
       {
         ["name"] = "Cleric's Elixir",
+        ["outputItemID"] = 250332,
+        ["source_url"] = "https://foreverdb.net/item/250332",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Lesser Cleric's Elixir",
+        ["outputItemID"] = 250331,
+        ["source_url"] = "https://github.com/Morkahja/favorcraft/blob/main/Schematics.lua",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -421,12 +486,16 @@ Favorcraft.AlchemyComparisons = {
     ["matches"] = {
       {
         ["name"] = "Elixir of Minor Fortitude",
+        ["outputItemID"] = 2458,
+        ["source_url"] = "https://foreverdb.net/item/2458",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Elixir of Lesser Fortitude",
+        ["outputItemID"] = 3825,
+        ["source_url"] = "https://forevercompass.com/items/3825",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -445,18 +514,24 @@ Favorcraft.AlchemyComparisons = {
     ["matches"] = {
       {
         ["name"] = "Elixir of Greater Fortitude",
+        ["outputItemID"] = 250335,
+        ["source_url"] = "https://github.com/Morkahja/favorcraft/blob/main/Schematics.lua",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Elixir of Defense",
+        ["outputItemID"] = 8951,
+        ["source_url"] = "https://foreverdb.net/item/8951",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Greater Stoneshield Potion",
+        ["outputItemID"] = 13455,
+        ["source_url"] = "https://wowclassicdatabase.com/item/greater-stoneshield-potion",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -475,12 +550,16 @@ Favorcraft.AlchemyComparisons = {
     ["matches"] = {
       {
         ["name"] = "Elixir of Greater Agility",
+        ["outputItemID"] = 9187,
+        ["source_url"] = "https://foreverdb.net/item/9187",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Elixir of Greater Intellect",
+        ["outputItemID"] = 9179,
+        ["source_url"] = "https://foreverdb.net/item/9179",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -498,13 +577,18 @@ Favorcraft.AlchemyComparisons = {
     ["summary"] = "Favor combines +18 Strength and +18 Agility; alternatives target single attributes.",
     ["matches"] = {
       {
-        ["name"] = "Elixir of Ogre's Strength",
+        ["name"] = "Elixir of Ogre Strength",
+        ["research_name"] = "Elixir of Ogre's Strength",
+        ["outputItemID"] = 3391,
+        ["source_url"] = "https://wow-forever.gg/db/items/3391-elixir-of-ogre-strength/",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Elixir of Greater Agility",
+        ["outputItemID"] = 9187,
+        ["source_url"] = "https://foreverdb.net/item/9187",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -516,19 +600,23 @@ Favorcraft.AlchemyComparisons = {
     ["acquisition_note"] = "Do not display acquisition method as confirmed until independently verified.",
   },
   ["Elixir of the Sages"] = {
-    ["merchant_recipe_name"] = "Elixir of the Sages",
+    ["merchant_recipe_name"] = "Elixir of Sages",
     ["classification"] = "equivalent",
     ["effect_reported"] = "+25 Spirit, +2% critical chance, 30 min",
     ["summary"] = "Whale has the same listed +25 Spirit and +2% crit for 30 minutes; Spirit elixir only overlaps in Spirit.",
     ["matches"] = {
       {
         ["name"] = "Elixir of the Whale",
+        ["outputItemID"] = 250348,
+        ["source_url"] = "https://github.com/Morkahja/favorcraft/blob/main/Schematics.lua",
         ["relation"] = "equivalent",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Elixir of Spirit",
+        ["outputItemID"] = 250346,
+        ["source_url"] = "https://thewowdb.com/wow-forever/item/elixir-of-spirit-250346/",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -546,13 +634,18 @@ Favorcraft.AlchemyComparisons = {
     ["summary"] = "Sages has the same listed +25 Spirit and +2% crit for 30 minutes; Spirit elixir only overlaps in Spirit.",
     ["matches"] = {
       {
-        ["name"] = "Elixir of the Sages",
+        ["name"] = "Elixir of Sages",
+        ["research_name"] = "Elixir of the Sages",
+        ["outputItemID"] = 250338,
+        ["source_url"] = "https://github.com/Morkahja/favorcraft/blob/main/Schematics.lua",
         ["relation"] = "equivalent",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Elixir of Spirit",
+        ["outputItemID"] = 250346,
+        ["source_url"] = "https://thewowdb.com/wow-forever/item/elixir-of-spirit-250346/",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -571,12 +664,16 @@ Favorcraft.AlchemyComparisons = {
     ["matches"] = {
       {
         ["name"] = "Elixir of Greater Intellect",
+        ["outputItemID"] = 9179,
+        ["source_url"] = "https://foreverdb.net/item/9179",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Elixir of Cunning",
+        ["outputItemID"] = 250328,
+        ["source_url"] = "https://github.com/Morkahja/favorcraft/blob/main/Schematics.lua",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -595,12 +692,16 @@ Favorcraft.AlchemyComparisons = {
     ["matches"] = {
       {
         ["name"] = "Arcane Elixir",
+        ["outputItemID"] = 9155,
+        ["source_url"] = "https://ahledger.com/items/9155-arcane-elixir",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Greater Arcane Elixir",
+        ["outputItemID"] = 13454,
+        ["source_url"] = "https://foreverdb.net/item/13454",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -619,12 +720,16 @@ Favorcraft.AlchemyComparisons = {
     ["matches"] = {
       {
         ["name"] = "Troll's Blood Elixir",
+        ["outputItemID"] = 3826,
+        ["source_url"] = "https://forevercompass.com/items/3826",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Mageblood Elixir",
+        ["outputItemID"] = 20007,
+        ["source_url"] = "https://hyjal.cc/updates/1.60.1.70170",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
@@ -642,13 +747,18 @@ Favorcraft.AlchemyComparisons = {
     ["summary"] = "Favor +25 Strength and +2% crit; conventional Strength elixirs differ.",
     ["matches"] = {
       {
-        ["name"] = "Elixir of Ogre's Strength",
+        ["name"] = "Elixir of Ogre Strength",
+        ["research_name"] = "Elixir of Ogre's Strength",
+        ["outputItemID"] = 3391,
+        ["source_url"] = "https://wow-forever.gg/db/items/3391-elixir-of-ogre-strength/",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
       },
       {
         ["name"] = "Elixir of Greater Strength",
+        ["outputItemID"] = 9206,
+        ["source_url"] = "https://forevercompass.com/items/9206",
         ["relation"] = "alternative",
         ["acquisition"] = "unverified",
         ["source_verified"] = false,
