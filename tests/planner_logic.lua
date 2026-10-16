@@ -383,6 +383,74 @@ check("wisdom is an alternative from the catalog note", wisdom and wisdom.tier =
 check("wisdom acquisition is the profession trainer", wisdom and wisdom.acquisition == "Profession trainer")
 check("a researched intellect alternative is visible", entryNamed(intellect, "Elixir of Intellect").tier == "alternative")
 check("merchant spell id comes from the schematic", intellect.merchantSpellID == RRP.Schematics["Alchemy|Elixir of Lesser Intellect"].spellID)
+-- Alchemy's externally researched crafted items must resolve their native
+-- consumable tooltips, not just the original merchant's output.
+local expectedAlchemyIds = {
+    ["Elixir of Minor Spirit"] = 250344,
+    ["Elixir of Spirit"] = 250346,
+    ["Minor Mageblood Elixir"] = 250339,
+    ["Mageblood Elixir"] = 20007,
+    ["Minor Mender's Potion"] = 250944,
+    ["Greater Mender's Potion"] = 250947,
+    ["Minor Spellblasting Potion"] = 250932,
+    ["Greater Spellblasting Potion"] = 250935,
+    ["Minor Frenzy Potion"] = 250938,
+    ["Greater Frenzy Potion"] = 250941,
+    ["Arcane Elixir"] = 9155,
+    ["Greater Arcane Elixir"] = 13454,
+    ["Elixir of Wisdom"] = 3383,
+    ["Elixir of Intellect"] = 250354,
+    ["Minor Cleric's Elixir"] = 250330,
+    ["Cleric's Elixir"] = 250332,
+    ["Elixir of Lesser Spirit"] = 250345,
+    ["Lesser Mageblood Elixir"] = 250340,
+    ["Lesser Cleric's Elixir"] = 250331,
+    ["Elixir of Minor Fortitude"] = 2458,
+    ["Elixir of Lesser Fortitude"] = 3825,
+    ["Elixir of Greater Fortitude"] = 250335,
+    ["Elixir of Defense"] = 8951,
+    ["Greater Stoneshield Potion"] = 13455,
+    ["Elixir of Greater Agility"] = 9187,
+    ["Elixir of Greater Intellect"] = 9179,
+    ["Elixir of Ogre Strength"] = 3391,
+    ["Elixir of Sages"] = 250338,
+    ["Elixir of the Whale"] = 250348,
+    ["Elixir of Cunning"] = 250328,
+    ["Elixir of Greater Strength"] = 9206,
+    ["Frenzy Potion"] = 250940,
+    ["Mender's Potion"] = 250946,
+    ["Spellblasting Potion"] = 250934,
+    ["Troll's Blood Elixir"] = 3826,
+}
+local alchemyMatches = 0
+local mismatch = {}
+local seenAlternatives = {}
+for _, recipe in ipairs(RRP.Catalog) do
+    if recipe.profession == "Alchemy" then
+        local view = RRP.ComparisonsFor(recipe)
+        for _, alternative in ipairs(view.entries or {}) do
+            alchemyMatches = alchemyMatches + 1
+            seenAlternatives[alternative.name] = true
+            if alternative.itemID ~= expectedAlchemyIds[alternative.name] then
+                mismatch[#mismatch + 1] = recipe.name .. ": " .. alternative.name
+            end
+        end
+    end
+end
+local uniqueAlternatives = 0
+for name in pairs(seenAlternatives) do
+    uniqueAlternatives = uniqueAlternatives + 1
+end
+check("all Alchemy comparison links resolve researched output IDs",
+    alchemyMatches == 51 and uniqueAlternatives == 35 and #mismatch == 0,
+    table.concat(mismatch, ", "))
+check("Forever elixir name changes use their current item IDs",
+    entryNamed(RRP.ComparisonsFor(RRP.GetByKey("Alchemy|Elixir of the Phalanx")), "Elixir of Defense").itemID == 8951
+    and entryNamed(RRP.ComparisonsFor(RRP.GetByKey("Alchemy|Elixir of Wicked Regeneration")), "Troll's Blood Elixir").itemID == 3826
+    and entryNamed(RRP.ComparisonsFor(RRP.GetByKey("Alchemy|Elixir of the Whale")), "Elixir of Sages").itemID == 250338)
+check("Alchemy item links are independent of recipe-scroll IDs",
+    entryNamed(RRP.ComparisonsFor(RRP.GetByKey("Alchemy|Elixir of Lesser Spirit")), "Elixir of Minor Spirit").itemID == 250344)
+
 local belt = RRP.ComparisonsFor(RRP.GetByKey("Blacksmithing|Guard's Chain Belt"))
 check("same-slot gear is labeled by slot rather than promised equivalent",
     belt.status == "slot" and entryNamed(belt, "Runed Copper Belt").tier == "slot")
