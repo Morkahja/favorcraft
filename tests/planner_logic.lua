@@ -381,15 +381,17 @@ check("all seven comparison modules are indexed", RRP.ComparisonByKey["Cooking|V
     and RRP.ComparisonByKey["Tailoring|Flame Boots"])
 check("wisdom is an alternative from the catalog note", wisdom and wisdom.tier == "alternative", wisdom and wisdom.tier)
 check("wisdom acquisition is the profession trainer", wisdom and wisdom.acquisition == "Profession trainer")
-check("a weaker intellect elixir stays unverified", entryNamed(intellect, "Elixir of Intellect").tier == "possible")
+check("a researched intellect alternative is visible", entryNamed(intellect, "Elixir of Intellect").tier == "alternative")
 check("merchant spell id comes from the schematic", intellect.merchantSpellID == RRP.Schematics["Alchemy|Elixir of Lesser Intellect"].spellID)
 local belt = RRP.ComparisonsFor(RRP.GetByKey("Blacksmithing|Guard's Chain Belt"))
-check("same-slot armor stays unverified", belt.status == "possible" and entryNamed(belt, "Runed Copper Belt").tier == "possible")
+check("same-slot gear is labeled by slot rather than promised equivalent",
+    belt.status == "slot" and entryNamed(belt, "Runed Copper Belt").tier == "slot")
 local venom = RRP.ComparisonsFor(RRP.GetByKey("Cooking|Venomous Smoothie"))
 local peace = entryNamed(venom, "Peace Tea")
 local slimy = entryNamed(venom, "Slimy Smoothie")
 check("a cooking recipe has several alternatives", #venom.entries >= 2)
-check("peace tea is a verified alternative", peace and peace.tier == "alternative" and peace.acquisitionVerified)
+check("peace tea's documented alternative and source are visible",
+    peace and peace.tier == "alternative" and peace.acquisition:find("World drop", 1, true))
 check("another favor smoothie uses its real item id", slimy and slimy.itemID == RRP.Schematics["Cooking|Slimy Smoothie"].outputItemID)
 check("peace tea has no invented item id", peace and peace.itemID == nil)
 local calcified = RRP.ComparisonsFor(RRP.GetByKey("Cooking|Calcified Smoothie"))
@@ -397,18 +399,21 @@ local triage = nil
 for i = 1, #calcified.entries do
     if calcified.entries[i].name == "Triage Tea" then triage = calcified.entries[i] end
 end
-check("an unverified tea stays unverified", triage and triage.tier == "possible", triage and triage.tier)
+check("all researched tea alternatives are shown", triage and triage.tier == "alternative", triage and triage.tier)
 local hood = RRP.ComparisonsFor(RRP.GetByKey("Leatherworking|Brawler's Leather Hood"))
 local hoodSource = hood.sources and hood.sources[1]
 local hoodSchematic = RRP.Schematics["Leatherworking|Brawler's Leather Hood"]
-check("a same-name pattern is not a confirmed duplicate", hood.status == "reported" and hood.status ~= "duplicate")
+check("a same-name pattern has a separate additional-source listing",
+    hood.status == "reported" and hood.status ~= "duplicate")
 check("the hood keeps the schematic spell", hoodSchematic.spellID == 1255109 and hood.merchantSpellID == 1255109)
 check("the hood scroll is not the crafted item", hood.merchantScrollID == 252798 and hood.merchantItemID == 252504 and hood.merchantScrollID ~= hood.merchantItemID)
-check("the hood drop is reported, not verified", hoodSource and hoodSource.kind == "source" and hoodSource.scrollItemID == 252798 and not hoodSource.acquisitionVerified)
+check("the hood second source references its actual recipe scroll",
+    hoodSource and hoodSource.kind == "source" and hoodSource.scrollItemID == 252798)
 check("the hood names Lady Sarevess", hoodSource.lines[2] and hoodSource.lines[2]:find("Lady Sarevess", 1, true) and hoodSource.lines[2]:find("Blackfathom Deeps", 1, true))
 local gloves = RRP.ComparisonsFor(RRP.GetByKey("Leatherworking|Brawler's Leather Gloves"))
 local gloveText = table.concat(gloves.sources[1].lines, " ")
-check("Gilnid is a reported sale, not a drop", gloveText:find("Reported sale: Gilnid", 1, true) and not gloveText:find("Reported drop: Gilnid", 1, true))
+check("Gilnid is listed as selling rather than dropping the scroll",
+    gloveText:find("Listed sale: Gilnid", 1, true) and not gloveText:find("Listed drop: Gilnid", 1, true))
 check("the glove scroll stays 252777", gloves.merchantScrollID == 252777 and gloves.merchantSpellID == 1255130)
 local leggings = RRP.ComparisonsFor(RRP.GetByKey("Leatherworking|Totemic Leather Leggings"))
 local leggingText = table.concat(leggings.sources[1].lines, " ")
@@ -432,17 +437,37 @@ for key, audit in pairs(RRP.SourceAudits) do
 end
 check("researched leatherworking ids match the schematic", not spellClash)
 check("wisdom is still an alchemy alternative", wisdom and wisdom.tier == "alternative")
-check("flame boots has no verified comparison", RRP.ComparisonsFor(RRP.GetByKey("Tailoring|Flame Boots")).status == "none")
+check("flame boots has no comparison recorded", RRP.ComparisonsFor(RRP.GetByKey("Tailoring|Flame Boots")).status == "none")
 local goggles = RRP.ComparisonsFor(RRP.GetByKey("Engineering|Dented Goggles"))
 check("dented goggles compare with the spyglass", entryNamed(goggles, "Ornate Spyglass").tier == "alternative")
 local parachute = entryNamed(RRP.ComparisonsFor(RRP.GetByKey("Engineering|SAF-T Disposable Parachute")), "Parachute Cloak")
 check("parachute cloak has no invented item id", parachute and parachute.itemID == nil and parachute.tier == "alternative")
-check("enchant absorption stays unverified", RRP.ComparisonsFor(RRP.GetByKey("Enchanting|Enchant Chest - Absorption")).status == "possible")
+check("enchant absorption is visible as a research comparison",
+    RRP.ComparisonsFor(RRP.GetByKey("Enchanting|Enchant Chest - Absorption")).status ~= "none")
 check("elixir of sages uses the catalog name", RRP.ComparisonByKey["Alchemy|Elixir of Sages"] ~= nil)
 local gown = RRP.ComparisonsFor(RRP.GetByKey("Tailoring|Pristine Gown"))
-check("pristine gown keeps several unverified alternatives", #gown.entries >= 3 and gown.status == "possible")
+check("pristine gown keeps its researched alternatives", #gown.entries >= 3 and gown.status == "related")
 local missing = RRP.ComparisonsFor({key = "Alchemy|Not A Recipe", name = "Not A Recipe", profession = "Alchemy"})
 check("a missing comparison does not error", missing.status == "none" and missing.missingRecord)
+-- Integration coverage: each of the 309 merchant recipes must have a
+-- corresponding research view, even if no candidate is currently recorded.
+local coverage = {}
+local selected = 0
+for _, recipe in ipairs(RRP.Catalog) do
+    local view = RRP.ComparisonsFor(recipe)
+    check("comparison lookup " .. recipe.key, view and not view.missingRecord)
+    coverage[recipe.profession] = (coverage[recipe.profession] or 0) + 1
+    if #view.entries > 0 or #view.sources > 0 then selected = selected + 1 end
+end
+check("all seven professions are represented in the lookup", coverage.Alchemy == 29
+    and coverage.Blacksmithing == 61 and coverage.Cooking == 6
+    and coverage.Enchanting == 39 and coverage.Engineering == 26
+    and coverage.Leatherworking == 81 and coverage.Tailoring == 67)
+check("beta comparison records are shown for the researched recipes", selected >= 150, selected)
+check("published research does not imply source IDs",
+    peace and peace.itemID == nil and parachute and parachute.itemID == nil)
+check("no blanket unverified label on ordinary comparisons",
+    belt.entries[1].label == "Same-slot Gear" and hoodSource.label == "Additional Recipe Source")
 local before = profile.plan["Alchemy|Elixir of Lesser Intellect"]
 RRP.ComparisonsFor(RRP.GetByKey("Alchemy|Elixir of Lesser Intellect"))
 check("reading a comparison leaves the plan alone", profile.plan["Alchemy|Elixir of Lesser Intellect"] == before)
