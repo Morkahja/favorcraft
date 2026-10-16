@@ -1,3 +1,9 @@
+## 0.4.2-beta
+
+- Prepare FavorCraft for automated CurseForge publishing with a new beta version tag.
+- Attach a verified installable ZIP to the GitHub prerelease.
+- Packaging and distribution update only; gameplay features unchanged from 0.4.1-beta.
+
 ## 0.4.1-beta
 
 - Profession skill numbers turn green when your skill is high enough and red when it is not.

@@ -9,6 +9,11 @@ addon into a **FavorCraft/** directory and omit development-only files.
 GitHub Actions creates a downloadable ZIP artifact on pushes to main and on
 new version tags. The ZIP has `FavorCraft/FavorCraft.toc` at its root.
 
+A validated main-branch commit with subject beginning `Release FavorCraft `
+triggers a workflow that attempts to create the matching `v<version>` tag
+and GitHub prerelease, attaching the installable ZIP. Existing tags are
+never overwritten. GitHub Actions must have repository contents write access.
+
 The ZIP can also be uploaded manually to the CurseForge project dashboard.
 An ordinary GitHub source archive is **not** the same as a packaged addon.
 
@@ -24,10 +29,10 @@ An ordinary GitHub source archive is **not** the same as a packaged addon.
    Use Content type `application/json` and push events. **Never commit the
    token to this repository, an issue, or a screenshot.**
 3. Check the GitHub webhook deliveries for a successful HTTP result.
-4. Once the release files and game flavor are verified, **push a new version
-   tag**, for example `v0.4.2-beta` (after updating the TOC versions and
-   CHANGELOG to match). A tag containing `beta` is classified as a Beta
-   build by the CurseForge repository packager.
+4. Update the TOC versions and changelog and push a release commit on
+   `main` with a subject beginning `Release FavorCraft `. The workflow then
+   creates a matching tag such as `v0.4.2-beta` and a GitHub prerelease ZIP.
+   The CurseForge webhook must be configured to receive the tag push.
 5. Check the CurseForge project **Files** page for the packaged ZIP and
    the correct WoW Forever game version. A new project/file may require
    CurseForge moderation before it becomes publicly installable.

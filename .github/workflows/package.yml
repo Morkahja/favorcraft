@@ -63,3 +63,42 @@ jobs:
           name: FavorCraft-installable-zip
           path: dist/FavorCraft-*.zip
           if-no-files-found: error
+
+  release:
+    name: Publish beta tag and GitHub prerelease
+    needs: package
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'Release FavorCraft ')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Retrieve validated installable ZIP
+        uses: actions/download-artifact@v4
+        with:
+          name: FavorCraft-installable-zip
+          path: dist
+
+      - name: Create version tag and GitHub prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          VERSION="$(sed -n 's/^## Version: //p' FavorCraft.toc | head -n 1)"
+          TAG="v${VERSION}"
+          [[ "${VERSION}" == *-beta ]] || { echo "Expected beta version"; exit 1; }
+          [[ "$(git rev-parse HEAD)" == "$GITHUB_SHA" ]] || { echo "Unexpected HEAD"; exit 1; }
+          if git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null; then
+            echo "Refusing to overwrite existing version tag ${TAG}"
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${TAG}" -m "FavorCraft ${VERSION}"
+          git push origin "refs/tags/${TAG}"
+          gh release create "${TAG}" "dist/FavorCraft-${VERSION}.zip" \
+            --target "${GITHUB_SHA}" \
+            --title "FavorCraft ${VERSION}" \
+            --notes "Beta packaging release of FavorCraft ${VERSION}. Includes the latest addon files and CurseForge pkgmeta. See CHANGELOG.md for details." \
+            --prerelease
