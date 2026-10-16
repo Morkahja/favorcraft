@@ -140,6 +140,13 @@ function UI.BuildDetails(panel)
     child:SetScript("OnMouseWheel", onWheel)
     local COMPARE_ROWS = 16
     local ROW_H = 76
+    -- All research summaries are scrollable, not clipped into fixed 76px rows.
+    local intro = UI.Label(child, "GameFontDisableSmall")
+    intro:SetPoint("TOPLEFT", 24, 0)
+    intro:SetWidth(316)
+    intro:SetJustifyV("TOP")
+    intro:SetTextColor(0.76, 0.74, 0.66)
+    intro:Hide()
     local compareRows = {}
     local function showCompareTip(owner, entry)
         if not entry then return end
@@ -147,7 +154,7 @@ function UI.BuildDetails(panel)
             if entry.scrollItemID and UI.ShowItemTip then
                 UI.ShowItemTip(owner, entry.scrollItemID)
             else
-                UI.ShowTip(owner, entry.name or "", "No verified pattern item ID, so the native tooltip is not available.")
+                UI.ShowTip(owner, entry.name or "", "Pattern item ID is not available in this database.")
             end
             return
         end
@@ -159,9 +166,9 @@ function UI.BuildDetails(panel)
             UI.ShowSpellTip(owner, entry.spellID, entry.name)
             return
         end
-        local line = "No verified item ID, so the native item tooltip is not available."
+        local line = "An item ID is not recorded for this comparison yet."
         if entry.kind == "enchant" then
-            line = "No verified spell ID, so the native spell tooltip is not available."
+            line = "A spell ID is not recorded for this comparison yet."
         end
         UI.ShowTip(owner, entry.name or "", line)
     end
@@ -214,9 +221,24 @@ function UI.BuildDetails(panel)
     scroll:Hide()
     local compareKey = nil
     local function tone(tier)
-        if tier == "duplicate" or tier == "equivalent" or tier == "alternative" then return 0.35, 0.9, 0.4 end
-        if tier == "possible" or tier == "reported" then return 0.95, 0.72, 0.28 end
+        if tier == "duplicate" or tier == "equivalent" then return 0.35, 0.9, 0.4 end
+        if tier == "alternative" then return 0.78, 0.88, 0.5 end
+        if tier == "related" or tier == "slot" or tier == "reported" then return 0.95, 0.72, 0.28 end
         return 0.7, 0.66, 0.58
+    end
+    local function fitHeight(label, minimum)
+        label:SetHeight(900)
+        local h = type(label.GetStringHeight) == "function" and label:GetStringHeight() or 0
+        h = tonumber(h) or 0
+        h = math.max(minimum, math.ceil(h + 2))
+        label:SetHeight(h)
+        return h
+    end
+    local function sourceDomain(entry)
+        local refs = entry and entry.references
+        local url = refs and refs[1]
+        if type(url) ~= "string" then return nil end
+        return url:match("^https?://([^/]+)")
     end
     local function showComparisons(recipe)
         if not recipe or not RRP.ComparisonsFor then
@@ -228,43 +250,54 @@ function UI.BuildDetails(panel)
         end
         local view = RRP.ComparisonsFor(recipe)
         comparisonTitle:Show()
+        comparisonNote:Hide()
         scroll:Show()
-        if view.header and view.header ~= "" then
-            comparisonNote:SetText(view.header)
-            comparisonNote:Show()
-            scroll:ClearAllPoints()
-            scroll:SetPoint("TOPLEFT", 8, -284)
-            scroll:SetPoint("BOTTOMRIGHT", -8, alert:IsShown() and 78 or 36)
-        else
-            comparisonNote:Hide()
-            scroll:ClearAllPoints()
-            scroll:SetPoint("TOPLEFT", 8, -254)
-            scroll:SetPoint("BOTTOMRIGHT", -8, alert:IsShown() and 78 or 36)
-        end
+        scroll:ClearAllPoints()
+        scroll:SetPoint("TOPLEFT", 8, -254)
+        scroll:SetPoint("BOTTOMRIGHT", -8, alert:IsShown() and 78 or 36)
         if compareKey ~= recipe.key then
             scroll:SetVerticalScroll(0)
             compareKey = recipe.key
         end
+
+        local offset = 0
+        if type(view.header) == "string" and view.header ~= "" then
+            intro:SetText(view.header)
+            intro:Show()
+            intro:ClearAllPoints()
+            intro:SetPoint("TOPLEFT", 24, 0)
+            offset = fitHeight(intro, 20) + 12
+        else
+            intro:Hide()
+        end
+
         local entries = {}
         local sources = view.sources or {}
         for i = 1, #sources do entries[#entries + 1] = sources[i] end
         local itemEntries = view.entries or {}
         for i = 1, #itemEntries do entries[#entries + 1] = itemEntries[i] end
         if #entries == 0 then
-            compareRows[1]:Show()
-            compareRows[1].entry = nil
-            compareRows[1].icon:SetTexture(nil)
-            compareRows[1].title:SetText(RRP.ComparisonLabel and RRP.ComparisonLabel.none or "No Verified Comparison")
-            compareRows[1].title:SetTextColor(0.7, 0.66, 0.58)
-            compareRows[1].status:SetText("")
-            compareRows[1].acq:SetText("")
-            compareRows[1].body:SetText(view.note or "This does not mean the recipe is unique.")
+            local row = compareRows[1]
+            row:Show()
+            row.entry = nil
+            row.icon:SetTexture(nil)
+            row.title:SetText(RRP.ComparisonLabel and RRP.ComparisonLabel.none or "No Comparison Recorded")
+            row.title:SetTextColor(0.7, 0.66, 0.58)
+            row.status:SetText("")
+            row.acq:SetText("")
+            row.body:SetText(view.note or "No comparison has been recorded for this recipe yet.")
+            row.body:ClearAllPoints()
+            row.body:SetPoint("TOPLEFT", 24, -26)
+            local rowH = 28 + fitHeight(row.body, 24) + 8
+            row:ClearAllPoints()
+            row:SetPoint("TOPLEFT", 0, -offset)
+            row:SetHeight(rowH)
             for i = 2, #compareRows do compareRows[i]:Hide() end
-            child:SetHeight(ROW_H)
+            child:SetHeight(offset + rowH)
             return
         end
-        local shown = #entries
-        if shown > #compareRows then shown = #compareRows end
+
+        local shown = math.min(#entries, #compareRows)
         for i = 1, #compareRows do
             local row = compareRows[i]
             local entry = entries[i]
@@ -285,21 +318,24 @@ function UI.BuildDetails(panel)
                 end
                 if not texture then texture = RRP.ProfessionTexture[recipe.profession] end
                 UI.SetIcon(row.icon, texture)
-                if entry.itemID and RRP.RequestItem then RRP.RequestItem(entry.itemID) end
-                local prefix = entry.label or "Alternative"
-                row.title:SetText(prefix .. ": " .. (entry.name or ""))
-                local r, g, b = tone(entry.tier)
-                row.title:SetTextColor(r, g, b)
+
+                row.title:SetText((entry.label or "Related Item") .. ": " .. (entry.name or ""))
+                row.title:SetTextColor(tone(entry.tier))
+                row.status:SetText("")
+                local sourceText
                 if entry.kind == "source" then
-                    row.status:SetText("Status: unverified extra source")
-                    row.acq:SetText("Same pattern. Not a different item.")
+                    sourceText = "Other sources listed for this same recipe pattern"
                 else
-                    row.status:SetText(entry.verification and ("Status: " .. tostring(entry.verification)) or "")
-                    row.acq:SetText("Acquisition: " .. (entry.acquisition or "Source not verified."))
+                    sourceText = "Acquisition: " .. (entry.acquisition or "Source not recorded.")
                 end
+                row.acq:SetText(sourceText)
+                row.acq:ClearAllPoints()
+                row.acq:SetPoint("TOPLEFT", 24, -18)
+                local acqH = fitHeight(row.acq, 15)
+
                 local body = {}
                 if entry.kind == "source" and entry.lines then
-                    body[#body + 1] = table.concat(entry.lines, " ")
+                    for j = 1, #entry.lines do body[#body + 1] = entry.lines[j] end
                 end
                 if entry.similarities and #entry.similarities > 0 then
                     body[#body + 1] = "Similarities: " .. table.concat(entry.similarities, " ")
@@ -307,16 +343,25 @@ function UI.BuildDetails(panel)
                 if entry.differences and #entry.differences > 0 then
                     body[#body + 1] = "Differences: " .. table.concat(entry.differences, " ")
                 end
+                local domain = sourceDomain(entry)
+                if domain then body[#body + 1] = "Reference: " .. domain end
                 if shown < #entries and i == shown then
                     body[#body + 1] = "+" .. (#entries - shown) .. " more comparisons."
                 end
-                row.body:SetText(table.concat(body, " "))
+                row.body:SetText(table.concat(body, "\n"))
+                row.body:ClearAllPoints()
+                row.body:SetPoint("TOPLEFT", 24, -(22 + acqH + 4))
+                local rowH = 22 + acqH + 4 + fitHeight(row.body, 25) + 10
+                row:SetHeight(math.max(ROW_H, rowH))
+                row:ClearAllPoints()
+                row:SetPoint("TOPLEFT", 0, -offset)
+                offset = offset + row:GetHeight()
             else
                 row.entry = nil
                 row:Hide()
             end
         end
-        child:SetHeight(shown * ROW_H)
+        child:SetHeight(math.max(ROW_H, offset))
     end
 
     local function showMaterials(recipe)
