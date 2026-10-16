@@ -30,6 +30,25 @@ Spell IDs, crafted item IDs, and reagent quantities are World of Warcraft: Forev
 
 Tank, DPS, Healer, and Other limit the list to recipes for the checked builds and your class. Paladin-only plate stays off other classes. Show All Recipes removes those limits.
 
+## Profession comparisons (beta)
+
+FavorCraft includes comparison research for **all seven professions**, in the
+right-hand pane below each recipe's materials. Hover a recipe to view its
+comparable items, related equipment, and database-listed alternative sources.
+The addon presents the researched data so players can evaluate it during the
+WoW Forever beta, without requiring a separate player observation for every
+entry. This does not imply identical effects or guaranteed current drop rates.
+
+Blacksmithing same-slot gear is labeled as such rather than treated as an
+equivalent upgrade. The 11 Leatherworking additional-source reports refer to
+the **same recipe pattern**, not to other crafted items. Item/spell IDs are
+never guessed; external alternatives without usable IDs show the documented
+comparison instead of a native tooltip.
+
+Research data can be corrected as the beta changes. See
+[Comparison Beta Guide](COMPARISON_BETA_GUIDE.md) for the category rules,
+profession coverage, and testing notes.
+
 ## Credits
 
 - Author: [Babunigaming](https://www.curseforge.com/members/babunigaming)
